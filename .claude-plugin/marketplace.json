@@ -1,0 +1,12 @@
+{
+  "name": "assistant",
+  "description": "The assistant plugin.",
+  "owner": { "name": "Assistant plugin" },
+  "plugins": [
+    {
+      "name": "assistant",
+      "source": "./",
+      "description": "A personal assistant on your own Windows computer, with live roadmap pages for your projects."
+    }
+  ]
+}

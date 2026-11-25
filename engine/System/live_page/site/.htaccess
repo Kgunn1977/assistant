@@ -1,0 +1,30 @@
+# The live page. Every address under this folder goes to index.php, so no file here
+# (data, scripts, styles) can be fetched directly. index.php decides what a visitor sees.
+Options -Indexes
+DirectoryIndex index.php
+<IfModule mod_expires.c>
+	ExpiresActive Off
+</IfModule>
+<IfModule mod_headers.c>
+	Header always set Cache-Control "no-store, private, max-age=0"
+	Header always set X-Robots-Tag "noindex, nofollow, noarchive, nosnippet"
+	Header always set X-Content-Type-Options "nosniff"
+	Header always set X-Frame-Options "DENY"
+	Header always set Referrer-Policy "same-origin"
+	Header always unset X-Endurance-Cache-Level
+	Header always unset X-nginx-cache
+	Header unset X-Endurance-Cache-Level
+	Header unset X-nginx-cache
+</IfModule>
+<IfModule mod_rewrite.c>
+	RewriteEngine On
+	RewriteBase {PAGE_FOLDER}
+	RewriteCond %{HTTPS} !=on
+	RewriteCond %{HTTP:X-Forwarded-Proto} !=https
+	RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+	RewriteRule ^index\.php$ - [L]
+	RewriteRule ^ index.php [L]
+</IfModule>
+<IfModule !mod_rewrite.c>
+	Require all denied
+</IfModule>

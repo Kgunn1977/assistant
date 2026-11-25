@@ -1,0 +1,9 @@
+{
+  "name": "assistant",
+  "version": "0.1.19",
+  "description": "A personal assistant that reads your mail, messages and calendar on your own Windows computer and keeps one private page of what needs you, together with live roadmap pages for your projects that it reads and shows.",
+  "author": {
+    "name": "Assistant plugin"
+  },
+  "repository": "https://github.com/Kgunn1977/assistant"
+}

@@ -1,0 +1,1830 @@
+<title>Project Roadmap</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: a title-block header with counts, a strip with one cell per step, what's next, then one ordered list of steps; phases indented; rows open in place. */
+:root {
+  --bg: #f5f6f4;
+  --panel: #ffffff;
+  --ink: #1d2422;
+  --muted: #5d6764;
+  --rule: #d5dad6;
+  --accent: #c8281e;
+  --fresh: #0f6f8f;      --fresh-bg: #dcf0f6;
+  --s-done: #2f7d4f;      --s-done-bg: #e3f1e8;
+  --s-look: #a86a00;      --s-look-bg: #fbefd6;
+  --s-first: #2f5f8a;     --s-first-bg: #e2ecf5;
+  --s-now: #c8281e;       --s-now-bg: #fbe3e0;
+  --s-plan: #6b5a9a;      --s-plan-bg: #ece8f6;
+  --s-none: #7a8380;      --s-none-bg: #eceeed;
+  --s-fault: #9c2f6b;     --s-fault-bg: #f6e1ec;
+  --s-built: #1f7a78;     --s-built-bg: #dcf0ee;
+  --f-text: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "IBM Plex Mono", Consolas, "Courier New", monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #141917; --panel: #1c2220; --ink: #e6ebe8; --muted: #9aa6a2; --rule: #2f3835; --accent: #ff6b5c;
+  --fresh: #6fd0ee; --fresh-bg: #143340;
+  --s-done: #6fcf95; --s-done-bg: #1d3427;
+  --s-look: #f0b24a; --s-look-bg: #3a2d14;
+  --s-first: #7fb2e3; --s-first-bg: #1c2c3c;
+  --s-now: #ff7b6e; --s-now-bg: #3e1f1b;
+  --s-plan: #b3a3e6; --s-plan-bg: #2a2540;
+  --s-none: #8e9895; --s-none-bg: #252c2a;
+  --s-fault: #e58bbd; --s-fault-bg: #3b1d2e;
+  --s-built: #5fd3cf; --s-built-bg: #16363a;
+  color-scheme: dark;
+} }
+:root[data-theme="dark"] {
+  --bg: #141917; --panel: #1c2220; --ink: #e6ebe8; --muted: #9aa6a2; --rule: #2f3835; --accent: #ff6b5c;
+  --fresh: #6fd0ee; --fresh-bg: #143340;
+  --s-done: #6fcf95; --s-done-bg: #1d3427;
+  --s-look: #f0b24a; --s-look-bg: #3a2d14;
+  --s-first: #7fb2e3; --s-first-bg: #1c2c3c;
+  --s-now: #ff7b6e; --s-now-bg: #3e1f1b;
+  --s-plan: #b3a3e6; --s-plan-bg: #2a2540;
+  --s-none: #8e9895; --s-none-bg: #252c2a;
+  --s-fault: #e58bbd; --s-fault-bg: #3b1d2e;
+  --s-built: #5fd3cf; --s-built-bg: #16363a;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-text); font-size: 15px; line-height: 1.45; }
+.wrap { max-width: 860px; margin: 0 auto; padding-block: 20px 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; flex-direction: column; gap: 18px; }
+
+/* title block */
+.tb { border: 2px solid var(--ink); background: var(--panel); display: grid; grid-template-columns: 1fr auto; }
+.tb h1 { margin: 0; padding: 14px 16px; font-size: 1.5rem; line-height: 1.15; font-weight: 700; text-wrap: balance; border-right: 1px solid var(--ink); }
+.tb h1 small { display: block; font-size: .8rem; font-weight: 500; color: var(--muted); margin-top: 4px; letter-spacing: .02em; }
+.tb .date { padding: 10px 14px; display: flex; flex-direction: column; justify-content: center; gap: 6px; font-family: var(--f-mono); }
+.tb .date span { font-size: .68rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); display: block; }
+.tb .date b { font-size: 1.05rem; display: block; }
+.tb .counts { grid-column: 1 / -1; border-top: 1px solid var(--ink); display: flex; flex-wrap: wrap; }
+.tb .counts button { appearance: none; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer;
+  flex: 1 1 120px; padding: 8px 12px; border-right: 1px solid var(--rule); min-width: 0; }
+.tb .counts button:last-child { border-right: 0; }
+.tb .counts button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.tb .counts b { font-family: var(--f-mono); font-size: 1.3rem; display: block; font-variant-numeric: tabular-nums; }
+.tb .counts span { font-size: .75rem; color: var(--muted); }
+@media (max-width: 520px) {
+  .tb { grid-template-columns: 1fr; }
+  .tb h1 { border-right: 0; border-bottom: 1px solid var(--ink); }
+  .tb .date { flex-direction: row; gap: 24px; }
+}
+
+/* strip: one cell per step */
+.strip { display: grid; grid-template-columns: repeat(auto-fit, minmax(22px, 1fr)); gap: 3px; }
+.strip button { appearance: none; border: 0; padding: 0; height: 28px; cursor: pointer; font-family: var(--f-mono); font-size: .62rem; color: var(--bg); font-weight: 600; }
+.strip button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.strip-legend { display: flex; justify-content: space-between; font-size: .72rem; color: var(--muted); margin-top: 4px; font-family: var(--f-mono); }
+
+/* what's next */
+.next { background: var(--panel); border: 1px solid var(--rule); border-top: 3px solid var(--accent); margin: 0; padding: 4px 14px; display: grid; grid-template-columns: 10em minmax(0, 1fr); }
+.next dt, .next dd { padding: 9px 0; border-bottom: 1px solid var(--rule); margin: 0; min-width: 0; }
+.next dt:nth-last-of-type(1), .next dd:last-child { border-bottom: 0; }
+.next dt { font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 600; padding-top: 11px; padding-right: 12px; }
+.next dt:first-of-type { color: var(--accent); }
+.next dd { font-weight: 500; overflow-wrap: anywhere; }
+@media (max-width: 560px) { .next { grid-template-columns: 1fr; } .next dt { border-bottom: 0; padding-bottom: 0; } }
+
+/* filters */
+.filters { display: flex; flex-wrap: wrap; gap: 6px; }
+.filters button { appearance: none; font: inherit; font-size: .8rem; padding: 6px 11px; border-radius: 999px; border: 1px solid var(--rule); background: var(--panel); color: var(--ink); cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+.filters button[aria-pressed="true"] { border-color: var(--ink); background: var(--ink); color: var(--bg); }
+.filters button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; flex: none; }
+
+/* list */
+h2 { font-size: .78rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin: 10px 0 6px; font-weight: 600; border-bottom: 1px solid var(--rule); padding-bottom: 6px; }
+.list { display: flex; flex-direction: column; gap: 6px; }
+/* the row list is three folding sections: Planning, Working, Done */
+.folds { display: flex; flex-direction: column; gap: 6px; }
+details.sfold { min-width: 0; }
+details.sfold > summary { display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 6px 4px; font-size: .95rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; border-bottom: 1px solid var(--rule); }
+details.sfold > summary::before { content: "+"; font-family: var(--f-mono); color: var(--muted); display: inline-block; width: 1em; }
+details.sfold[open] > summary::before { content: "\2212"; }
+details.sfold > summary .n { color: var(--muted); font-weight: 500; font-variant-numeric: tabular-nums; }
+details.sfold > .list { margin: 8px 0 10px; }
+h3.sub { font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); font-weight: 600; margin: 10px 0 0; }
+.pof { grid-column: 2 / -1; font-size: .78rem; color: var(--muted); min-width: 0; overflow-wrap: anywhere; }
+details.row { background: var(--panel); border: 1px solid var(--rule); border-left: 4px solid var(--c); min-width: 0; }
+details.row.phase { margin-left: 28px; }
+.runline { font-size: .9rem; color: var(--muted); padding: 2px 4px; }
+details.hgroup { margin: 4px 0 4px 14px; }
+details.hgroup > summary { cursor: pointer; font-weight: 600; padding: 6px 0; }
+details.hgroup > summary .n { font-weight: 400; opacity: .7; }
+details.row.context { opacity: .5; }
+/* a done step folds its done sub-rows: they show, indented under it, only while the step is open */
+.fmark { grid-column: 2 / -1; font-size: .78rem; color: var(--s-done); font-weight: 600; }
+summary { list-style: none; cursor: pointer; display: grid; grid-template-columns: 3.2em minmax(0, 1fr) auto auto; align-items: center; gap: 10px; padding: 10px 12px; }
+summary::-webkit-details-marker { display: none; }
+summary:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.num { font-family: var(--f-mono); font-weight: 600; font-size: .95rem; color: var(--muted); }
+.name { font-weight: 600; min-width: 0; overflow-wrap: anywhere; }
+.name::after { content: "+"; font-family: var(--f-mono); color: var(--muted); margin-left: 8px; font-weight: 500; }
+details.row[open] > summary .name::after { content: "\2212"; }
+.tag { font-size: .72rem; font-weight: 600; padding: 3px 8px; border-radius: 4px; color: var(--c); background: var(--cb); white-space: nowrap; }
+.when { font-family: var(--f-mono); font-size: .72rem; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.when.fresh { color: var(--fresh); background: var(--fresh-bg); padding: 3px 6px; border-radius: 4px; font-weight: 600; }
+@media (max-width: 560px) {
+  summary { grid-template-columns: 2.6em minmax(0, 1fr) auto; }
+  .name { grid-column: 2 / -1; }
+  .tag { grid-column: 2; justify-self: start; white-space: normal; }
+  .when { grid-column: 3; justify-self: end; }
+  details.row.phase { margin-left: 14px; }
+}
+.facts { margin: 0; padding: 12px 14px 14px; display: grid; grid-template-columns: 9.5em minmax(0, 1fr); gap: 8px 14px; border-top: 1px dashed var(--rule); }
+.facts dt { font-size: .74rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 600; padding-top: 2px; }
+.facts dd { margin: 0; min-width: 0; overflow-wrap: anywhere; max-width: 68ch; }
+.facts dd.empty { color: var(--muted); font-style: italic; }
+.facts dd.waits { color: var(--accent); font-weight: 500; }
+@media (max-width: 560px) { .facts { grid-template-columns: 1fr; gap: 2px; } .facts dd { margin-bottom: 8px; } }
+.empty-note { color: var(--muted); font-style: italic; padding: 8px 0; }
+.notice { background: var(--panel); border: 1px dashed var(--rule); padding: 14px 16px; color: var(--muted); }
+.notice.bad { border-color: var(--accent); color: var(--accent); }
+footer { font-size: .78rem; color: var(--muted); }
+/* Settings: this project's settings, each as the main session last recorded it in board/settings */
+#setlist { display: flex; flex-direction: column; gap: 10px; margin: 8px 0 10px; }
+.setrow { background: var(--panel); border: 1px solid var(--rule); padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.setrow .means { font-size: .85rem; color: var(--muted); }
+.setrow .cur { font-size: .9rem; }
+.setbtns { display: flex; flex-wrap: wrap; gap: 8px; }
+.setbtns button { appearance: none; font: inherit; font-size: .9rem; min-height: 44px; padding: 6px 14px; border-radius: 6px; border: 1px solid var(--rule); background: var(--panel); color: var(--ink); cursor: pointer; }
+.setbtns button[aria-pressed="true"] { border: 2px solid var(--ink); background: var(--ink); color: var(--bg); font-weight: 600; cursor: default; }
+.setbtns button.asked { border-style: dashed; border-color: var(--s-look); }
+.setbtns button:focus-visible, .setcopy button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.setsess { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; border-top: 1px dashed var(--rule); padding-top: 6px; }
+.setcopy { display: flex; gap: 8px; align-items: stretch; min-width: 0; }
+.setcopy input { flex: 1; min-width: 0; font-family: var(--f-mono); font-size: .8rem; padding: 6px 8px; border: 1px solid var(--rule); border-radius: 6px; background: var(--bg); color: var(--ink); }
+.setcopy button { appearance: none; font: inherit; font-weight: 600; min-height: 44px; padding: 6px 16px; border: 2px solid var(--ink); background: var(--ink); color: var(--bg); border-radius: 6px; cursor: pointer; }
+
+/* checks the owner marks Works / Doesn't work */
+.checkbar { background: var(--panel); border: 1px solid var(--rule); border-left: 4px solid var(--s-look); padding: 12px 14px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; }
+.checkbar b { font-family: var(--f-mono); font-size: 1.6rem; font-variant-numeric: tabular-nums; color: var(--s-look); }
+.checkbar span { font-weight: 600; }
+.checkbar small { color: var(--muted); font-size: .85rem; flex-basis: 100%; }
+.checkbar small.bad { color: var(--s-fault); font-weight: 600; }
+/* Checks still to try: the bar and the filter button pulse slowly amber (red is kept for questions); reduced motion gets a steady amber outline */
+.cpulse .checkbar, .cpulse .filters button[data-key="totry"]:not([aria-pressed="true"]) { box-shadow: 0 0 0 0 transparent; animation: cpulse 2.6s ease-in-out infinite; }
+@keyframes cpulse { 0%, 100% { box-shadow: 0 0 0 0 transparent; background-color: var(--panel); } 50% { box-shadow: 0 0 12px 3px var(--s-look); background-color: var(--s-look-bg); } }
+@media (prefers-reduced-motion: reduce) { .cpulse .checkbar, .cpulse .filters button[data-key="totry"]:not([aria-pressed="true"]) { animation: none; outline: 2px solid var(--s-look); outline-offset: -2px; } }
+.ccount { grid-column: 2 / -1; font-size: .78rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.ccount .bad { color: var(--s-fault); font-weight: 600; }
+.ccount .all { color: var(--s-done); font-weight: 600; }
+.checks { border-top: 1px dashed var(--rule); padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 10px; }
+.checks h3 { margin: 0; font-size: .8rem; letter-spacing: .06em; text-transform: uppercase; color: var(--s-look); font-weight: 700; }
+details.more { border-top: 1px dashed var(--rule); }
+details.more > summary { display: block; padding: 12px 14px; min-height: 44px; font-size: .9rem; font-weight: 600; color: var(--muted); }
+details.more > summary::before { content: "+"; font-family: var(--f-mono); display: inline-block; width: 1.2em; }
+details.more[open] > summary::before { content: "\2212"; }
+details.more > summary:hover { color: var(--ink); }
+details.more > .facts { border-top: 0; padding-top: 0; }
+.check { border: 1px solid var(--rule); border-radius: 6px; padding: 10px 12px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.check.works { border-color: var(--s-done); background: var(--s-done-bg); }
+.check.fails { border-color: var(--s-fault); background: var(--s-fault-bg); }
+.check p { margin: 0; font-size: 1rem; font-weight: 500; overflow-wrap: anywhere; max-width: 68ch; }
+/* The answer buttons on a check look like three rounded buttons drawn as a Venn diagram: Works and Doesn't work side
+   by side, and Comment below them, raised so it lies over the inner lower part of both. Five places to press, each its
+   own button, stacked so each one's rounded edge is exactly the edge of its place: Comment (z 1) under Works and
+   Doesn't work (z 2), and the two overlaps (z 3) on top. The three outlines are drawn whole above everything (z 4) and
+   take no clicks. An overlap is the two colours mixed; pointing at, focusing or pressing a place thickens the outline
+   of every button it belongs to, so an overlap shows both. */
+.choices { --o: clamp(66px, 15%, 120px); --r: 14px; position: relative; display: grid; gap: 0;
+  grid-template-columns: minmax(0, 1fr) var(--o) 6px var(--o) minmax(0, 1fr); grid-template-rows: 18px 46px 46px; }
+.notebox button, .clear { appearance: none; font: inherit; cursor: pointer; border-radius: 6px; }
+.choices button { appearance: none; font: inherit; cursor: pointer; margin: 0; min-width: 0; border: 0; padding: 4px 6px; position: relative;
+  display: flex; align-items: center; justify-content: center; text-align: center;
+  font-size: 1.02rem; font-weight: 600; line-height: 1.15; color: var(--ink); overflow-wrap: normal; }
+.choices .yes:not(.c) { grid-area: 1 / 1 / 3 / 3; z-index: 2; border-radius: var(--r); background: var(--s-done-bg); padding-right: calc(var(--o) + 6px); }
+.choices .no:not(.c) { grid-area: 1 / 4 / 3 / 6; z-index: 2; border-radius: var(--r); background: var(--s-fault-bg); padding-left: calc(var(--o) + 6px); }
+.choices .only { grid-area: 2 / 2 / 4 / 5; z-index: 1; border-radius: var(--r); background: var(--fresh-bg); padding-top: 46px; }
+.choices .yes.c { grid-area: 2 / 2 / 3 / 3; z-index: 3; border-radius: var(--r) 0 var(--r) 0;
+  background: var(--fresh-bg); background: color-mix(in srgb, color-mix(in srgb, var(--s-done) 50%, var(--fresh)) 34%, var(--panel)); }
+.choices .no.c { grid-area: 2 / 4 / 3 / 5; z-index: 3; border-radius: 0 var(--r) 0 var(--r);
+  background: var(--fresh-bg); background: color-mix(in srgb, color-mix(in srgb, var(--s-fault) 50%, var(--fresh)) 34%, var(--panel)); }
+.choices .ring { z-index: 4; pointer-events: none; border: 2px solid; border-radius: var(--r); }
+.choices .ring.w { grid-area: 1 / 1 / 3 / 3; border-color: var(--s-done); }
+.choices .ring.k { grid-area: 2 / 2 / 4 / 5; border-color: var(--fresh); }
+.choices .ring.d { grid-area: 1 / 4 / 3 / 6; border-color: var(--s-fault); }
+.choices .hint { grid-area: 3 / 1 / 4 / 2; align-self: center; justify-self: end; padding-right: 10px; font-size: .8rem; color: var(--muted); text-align: right; }
+/* the answer in force: its button filled; its overlap with Comment a deeper mix */
+.choices .yes[aria-pressed="true"]:not(.c) { background: var(--s-done); color: var(--panel); }
+.choices .no[aria-pressed="true"]:not(.c) { background: var(--s-fault); color: var(--panel); }
+.choices:has(.yes:not(.c)[aria-pressed="true"]) .yes.c { background: color-mix(in srgb, color-mix(in srgb, var(--s-done) 60%, var(--fresh)) 70%, var(--panel)); }
+.choices:has(.no:not(.c)[aria-pressed="true"]) .no.c { background: color-mix(in srgb, color-mix(in srgb, var(--s-fault) 60%, var(--fresh)) 70%, var(--panel)); }
+/* the comment box open for a place: the outline of every button that place belongs to stays heavy */
+.choices:has(.yes.c[aria-pressed="true"]) :is(.ring.w, .ring.k), .choices:has(.no.c[aria-pressed="true"]) :is(.ring.d, .ring.k),
+.choices:has(.only[aria-pressed="true"]) .ring.k { border-width: 4px; }
+/* pointing at or focusing a place: the same, lighter; pressing it: heavier, and every button it belongs to darkens */
+@media (hover: hover) {
+  .choices:has(.yes:not(.c):hover) .ring.w, .choices:has(.yes.c:hover) :is(.ring.w, .ring.k), .choices:has(.only:hover) .ring.k,
+  .choices:has(.no.c:hover) :is(.ring.d, .ring.k), .choices:has(.no:not(.c):hover) .ring.d { border-width: 4px; border-color: var(--ink); }
+  .choices button:hover { filter: brightness(.96); }
+}
+.choices:has(.yes:not(.c):focus-visible) .ring.w, .choices:has(.yes.c:focus-visible) :is(.ring.w, .ring.k), .choices:has(.only:focus-visible) .ring.k,
+.choices:has(.no.c:focus-visible) :is(.ring.d, .ring.k), .choices:has(.no:not(.c):focus-visible) .ring.d { border-width: 4px; border-color: var(--ink); }
+.choices:has(.yes:not(.c):active) .ring.w, .choices:has(.yes.c:active) :is(.ring.w, .ring.k), .choices:has(.only:active) .ring.k,
+.choices:has(.no.c:active) :is(.ring.d, .ring.k), .choices:has(.no:not(.c):active) .ring.d { border-width: 5px; border-color: var(--ink); }
+.choices button:active, .choices:has(.yes.c:active) :is(.yes, .only), .choices:has(.no.c:active) :is(.no, .only) { filter: brightness(.88); }
+@media (max-width: 560px) { .choices button { font-size: .85rem; padding: 2px 3px; } .choices .hint { display: none; } }
+.choices button:focus-visible, .notebox button:focus-visible, .clear:focus-visible, .notebox textarea:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.notebox { display: flex; flex-direction: column; gap: 8px; }
+.notebox label { font-size: .85rem; font-weight: 600; }
+.notebox small { font-size: .85rem; color: var(--muted); }
+.said .clear, .clear.say { align-self: flex-start; padding-left: 0; }
+.notebox textarea { width: 100%; min-height: 84px; font: inherit; font-size: 1rem; padding: 8px 10px; border: 1px solid var(--rule); border-radius: 6px; background: var(--panel); color: var(--ink); resize: vertical; }
+.notebox button { align-self: flex-start; min-height: 48px; min-width: 120px; padding: 8px 18px; font-weight: 600; border: 2px solid var(--ink); background: var(--ink); color: var(--bg); }
+.cfoot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; min-height: 28px; }
+.state { font-size: .85rem; color: var(--muted); }
+.state.ok { color: var(--s-done); font-weight: 600; }
+.state.err { color: var(--accent); font-weight: 600; }
+.clear { border: 0; background: none; color: var(--muted); text-decoration: underline; padding: 8px 4px; min-height: 40px; font-size: .9rem; }
+/* a table on a row (field "table") */
+.scores { border-top: 1px dashed var(--rule); padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.scores h3 { margin: 0; font-size: .85rem; font-weight: 600; color: var(--ink); text-wrap: balance; max-width: 68ch; }
+.scores .scroll { overflow-x: auto; max-width: 100%; }
+.scores table { border-collapse: collapse; font-size: .85rem; width: 100%; min-width: 30em; }
+.scores th, .scores td { padding: 5px 8px; border-bottom: 1px solid var(--rule); text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.scores th { font-size: .7rem; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); font-weight: 600; vertical-align: bottom; white-space: normal; }
+.scores th:first-child, .scores td:first-child { text-align: left; white-space: normal; }
+.scores td { font-family: var(--f-mono); }
+.scores td:first-child { font-family: var(--f-text); font-weight: 500; }
+.scores td .note { color: var(--muted); font-weight: 400; font-size: .8rem; }
+.scores td.nil { color: var(--muted); }
+.scores tfoot td { border-bottom: 0; border-top: 2px solid var(--ink); font-weight: 600; }
+/* what the person writes on a row (collection "notes") */
+.ncount { grid-column: 2 / -1; font-size: .78rem; color: var(--fresh); font-weight: 600; }
+.notes { border-top: 1px dashed var(--rule); padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.notes h3 { margin: 0; font-size: .8rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+.ncard .v { white-space: pre-wrap; }
+.ncard .v.md { white-space: normal; }
+.ncard .quiet-line, .checks .quiet-line { font-size: .85rem; color: var(--muted); }
+.ncard .clear { padding-left: 0; }
+.notes details.more { border: 1px dashed var(--rule); border-radius: 6px; }
+.notes details.more > .nlist { padding: 0 12px 12px; }
+.nlist { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.sline { grid-column: 2 / -1; font-size: .78rem; color: var(--muted); font-variant-numeric: tabular-nums; min-width: 0; overflow-wrap: anywhere; }
+/* questions for the owner (collection "questions"), shown in their row's open view */
+.qbar { appearance: none; font: inherit; color: inherit; text-align: left; cursor: pointer; width: 100%; background: var(--panel); border: 1px solid var(--rule); border-left: 4px solid var(--accent); padding: 12px 14px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; }
+.qbar:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+/* Open questions: the bar and the filter button pulse slowly red; reduced motion gets a steady red outline instead */
+.qpulse .qbar, .qpulse .filters button[data-key="questions"]:not([aria-pressed="true"]) { --pulse: rgba(200, 40, 30, .30); box-shadow: 0 0 0 0 transparent; animation: qpulse 2.6s ease-in-out infinite; }
+@keyframes qpulse { 0%, 100% { box-shadow: 0 0 0 0 transparent; background-color: var(--panel); } 50% { box-shadow: 0 0 12px 3px var(--pulse); background-color: var(--s-now-bg); } }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .qpulse .qbar, :root:not([data-theme="light"]) .qpulse .filters button[data-key="questions"]:not([aria-pressed="true"]) { --pulse: rgba(255, 107, 92, .45); } }
+:root[data-theme="dark"] .qpulse .qbar, :root[data-theme="dark"] .qpulse .filters button[data-key="questions"]:not([aria-pressed="true"]) { --pulse: rgba(255, 107, 92, .45); }
+@media (prefers-reduced-motion: reduce) { .qpulse .qbar, .qpulse .filters button[data-key="questions"]:not([aria-pressed="true"]) { animation: none; outline: 2px solid var(--accent); outline-offset: -2px; } }
+.qbar b { font-family: var(--f-mono); font-size: 1.6rem; font-variant-numeric: tabular-nums; color: var(--accent); }
+.qbar span { font-weight: 600; }
+.qbar small { color: var(--muted); font-size: .85rem; flex-basis: 100%; }
+.qcount { grid-column: 2 / -1; font-size: .78rem; color: var(--accent); font-weight: 600; }
+.questions { border-top: 1px dashed var(--rule); padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.questions h3 { margin: 0; font-size: .8rem; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); font-weight: 700; }
+.questions h3.quiet { color: var(--muted); }
+.qorphan { background: var(--panel); border: 1px solid var(--rule); border-left: 4px solid var(--accent); }
+.qcard { border: 1px solid var(--accent); border-radius: 6px; padding: 10px 12px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.qcard.answered { border-color: var(--rule); }
+.qhead { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; }
+.qtopic { font-weight: 600; }
+.qwhen { margin-left: auto; font-family: var(--f-mono); font-size: .72rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.qtext { font-size: 1rem; max-width: 68ch; overflow-wrap: anywhere; }
+.md p { margin: 0 0 .5em; } .md > :last-child { margin-bottom: 0; }
+.md ul, .md ol { margin: 0 0 .5em; padding-left: 1.4em; }
+.md h3, .md h4, .md h5, .md h6 { margin: .6em 0 .3em; font-size: .95rem; }
+.md code { font-family: var(--f-mono); background: var(--bg); padding: 0 4px; border-radius: 2px; }
+.md a { color: var(--accent); }
+.md .tscroll { overflow-x: auto; max-width: 100%; margin: 0 0 .5em; }
+.md table { border-collapse: collapse; font-size: .85rem; }
+.md th, .md td { padding: 4px 8px; border-bottom: 1px solid var(--rule); text-align: left; vertical-align: top; }
+.md th { font-size: .72rem; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+/* Questions in chat: each session's questions file as written (board/questions-file--<session>), read only */
+#qfiles { display: flex; flex-direction: column; gap: 10px; }
+#qfiles h2 { margin: 0; font-size: .95rem; letter-spacing: .06em; text-transform: uppercase; }
+.qfile { background: var(--panel); border: 1px solid var(--rule); border-left: 4px solid var(--accent); padding: 12px 14px; min-width: 0; }
+.qfile-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; margin-bottom: 8px; }
+.qfile-head b { font-weight: 600; }
+.qfile-head span { margin-left: auto; font-family: var(--f-mono); font-size: .72rem; color: var(--muted); }
+.qfile-text { max-width: 76ch; overflow-wrap: anywhere; }
+.qfile-text h3 { display: none; }
+.qfile .means { margin-top: 8px; font-size: .85rem; color: var(--muted); }
+/* a row's written plan (field "plan"), folded in its open view */
+.pmark { grid-column: 2 / -1; font-size: .78rem; color: var(--muted); font-weight: 600; }
+.plantext { padding: 0 14px 14px; max-width: 76ch; min-width: 0; overflow-wrap: anywhere; }
+.pics { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1px; background: var(--rule); border: 1px solid var(--rule); }
+.pic { background: var(--panel); margin: 0; display: flex; flex-direction: column; min-width: 0; }
+.pic button { appearance: none; border: 0; padding: 0; cursor: zoom-in; display: block; background: #fff; }
+.pic button:focus-visible { outline: 3px solid var(--accent); outline-offset: -3px; }
+.pic img { display: block; width: 100%; height: auto; max-height: 520px; object-fit: contain; }
+.pic figcaption { font-size: .85rem; color: var(--muted); padding: 6px 10px 8px; }
+.qchoices { display: flex; flex-direction: column; gap: 8px; }
+.qchoice { appearance: none; font: inherit; cursor: pointer; display: flex; gap: 10px; align-items: flex-start; text-align: left; width: 100%; min-height: 48px; padding: 10px 12px; border: 2px solid var(--rule); border-radius: 6px; background: var(--panel); color: var(--ink); }
+.qchoice .cl { font-family: var(--f-mono); font-weight: 600; min-width: 1.2em; }
+.qchoice[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--panel); }
+.qform { display: flex; flex-direction: column; gap: 8px; }
+.qform label { font-size: .85rem; font-weight: 600; }
+.qform textarea { width: 100%; min-height: 84px; font: inherit; font-size: 1rem; padding: 8px 10px; border: 1px solid var(--rule); border-radius: 6px; background: var(--panel); color: var(--ink); resize: vertical; }
+.qrow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.qbtn { appearance: none; font: inherit; font-weight: 600; cursor: pointer; border-radius: 6px; min-height: 48px; min-width: 120px; padding: 8px 18px; border: 2px solid var(--accent); background: var(--accent); color: var(--panel); }
+.qbtn:disabled { opacity: .5; cursor: default; }
+.qbtn.quiet { border-color: var(--rule); background: var(--panel); color: var(--ink); min-width: 0; }
+.qchoice:focus-visible, .qbtn:focus-visible, .qform textarea:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.qans { background: var(--bg); padding: 10px 12px; border-radius: 6px; display: flex; flex-direction: column; gap: 4px; overflow-wrap: anywhere; }
+.qans .k { font-size: .72rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.qans .v { white-space: pre-wrap; }
+/* what was asked and answered before on the same question (field "history") */
+details.more.qhist { border: 1px dashed var(--rule); border-radius: 6px; min-width: 0; }
+details.more.qhist > summary { padding: 10px 12px; }
+.qhist-list { display: flex; flex-direction: column; gap: 10px; padding: 0 12px 12px; min-width: 0; }
+.qhist-item { display: flex; flex-direction: column; gap: 4px; min-width: 0; padding-left: 10px; border-left: 3px solid var(--rule); overflow-wrap: anywhere; }
+.qhist-item.you { border-left-color: var(--accent); }
+.qhist-item .k { font-size: .72rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.qhist-item .t { font-weight: 600; }
+.qhist-item .v { max-width: 68ch; min-width: 0; overflow-wrap: anywhere; }
+.qhist-item.you .v { white-space: pre-wrap; }
+.lb { position: fixed; inset: 0; z-index: 20; background: rgba(10,14,18,.92); display: flex; flex-direction: column; padding: 12px; }
+.lb-bar { display: flex; justify-content: space-between; align-items: center; color: #e3e9ef; gap: 12px; padding-bottom: 8px; flex-wrap: wrap; }
+.lb-bar button { font: inherit; font-weight: 600; background: #e3e9ef; color: #12171d; border: 0; border-radius: 4px; padding: 8px 14px; min-height: 40px; cursor: pointer; }
+.lb-scroll { flex: 1; overflow: auto; background: #fff; }
+.lb-scroll img { max-width: none; display: block; }
+.lb-scroll.fit img { max-width: 100%; max-height: 100%; margin: auto; }
+@media (prefers-reduced-motion: no-preference) { details.row { transition: border-color .15s; } }
+</style>
+
+<div class="wrap">
+  <header class="tb">
+    <h1>Project Roadmap<small id="psub">Every step, in order. Tap a row to see where it stands.</small></h1>
+    <div class="date">
+      <div><span>Facts as of</span><b id="asof">loading</b></div>
+      <div><span>Roadmap last changed</span><b id="lastchange">loading</b></div>
+    </div>
+    <div class="counts" id="counts"></div>
+  </header>
+
+  <div class="notice" id="notice">Loading the roadmap's facts…</div>
+
+  <button type="button" class="qbar" id="qbar" hidden><b id="qb-left">0</b><span id="qb-label">questions for you</span><small id="qb-sub">Tap to show the rows that ask them.</small></button>
+
+  <div class="checkbar" id="checkbar" hidden><b id="cb-left">0</b><span id="cb-label">checks still to try</span><small id="cb-sub"></small></div>
+
+  <section aria-label="All steps at a glance" id="stripbox" hidden>
+    <div class="strip" id="strip"></div>
+    <div class="strip-legend"><span id="strip-first"></span><span id="strip-last"></span></div>
+  </section>
+
+  <dl class="next" id="next" aria-label="What's next" hidden></dl>
+
+  <section id="qfiles" aria-label="Questions in chat" hidden></section>
+
+  <nav class="filters" id="filters" aria-label="Show by status" hidden></nav>
+
+  <main id="list"></main>
+
+  <section id="setbox" aria-label="Settings" hidden>
+    <details class="sfold" id="setfold"><summary>Settings</summary><div id="setlist"></div></details>
+  </section>
+
+  <footer>The facts update live as the work moves. Rows marked in blue changed within 2 hours of the newest change. Rows waiting for your look carry checks: open the row, try each one and tap Works or Doesn't work, and Claude is told at once; to say something with your answer, tap where Comment overlaps it, type, and tap Done; the part of Comment that overlaps neither says something about a check without answering it. Questions for you sit on the row they are about: pick a choice or type, then tap Answer, and Claude is told. Questions in chat shows each chat session's own questions file as it stands; answer those in that chat. You can write on any row: open it, type under "Say something about this" and tap Done, and Claude is told. Settings, at the bottom, shows this project's settings; a press there asks the project's main session to change one, and the page shows the new choice only once it has.</footer>
+</div>
+
+<div class="lb" id="lb" hidden role="dialog" aria-modal="true" aria-label="Picture full size">
+  <div class="lb-bar"><span id="lb-cap"></span><span><button id="lb-fit" type="button">Actual size</button> <button id="lb-close" type="button">Close</button></span></div>
+  <div class="lb-scroll fit" id="lb-scroll"><img id="lb-img" alt=""></div>
+</div>
+
+<script>
+(function () {
+  var STATUS = [
+    { key: "Being worked on now", short: "Being worked on now", c: "--s-now" },
+    { key: "Ready, waiting for your look", short: "Waiting for your look", c: "--s-look" },
+    { key: "Ready, known fault", short: "Known fault", c: "--s-fault" },
+    { key: "Built, waiting to be merged", short: "Built, waiting to be merged", c: "--s-built" },
+    { key: "Done, confirmed", short: "Done, confirmed", c: "--s-done" },
+    { key: "First pass, to be redone", short: "First pass, to be redone", c: "--s-first" },
+    { key: "Planned, not started", short: "Planned", c: "--s-plan" },
+    { key: "Not started", short: "Not started", c: "--s-none" }
+  ];
+  function statusOf(s) {
+    for (var i = 0; i < STATUS.length; i++) if (STATUS[i].key === s) return STATUS[i];
+    return { key: s || "not recorded", short: s || "not recorded", c: "--s-none" };
+  }
+  var FIELDS = [["does", "Does"], ["not_yet", "Does not do yet"], ["uses", "Uses"], ["shown_working", "Shown working on"], ["waits_on_you", "Waits on you"]];
+  var RECENT = "recent", NOTWORK = "notworking", TOTRY = "totry", QFOR = "questions", NOTES = "notes", NOCHK = "nochecks";
+  var NOCHK_SHORT = "No checks to try: tell Claude";
+  // Rows in these two states carry checks the owner marks. The checks' wording lives on the row (written by the
+  // Roadmap writer); each mark is its own document in "marks", id "<row id>--<check id>", written only here.
+  var CHECK_STATES = ["Ready, waiting for your look", "Ready, known fault"];
+  // Wording a project may change: document "board/settings" (subtitle, steps_heading, extras_heading, checks_heading,
+  // planning_heading, working_heading, done_heading).
+  var settings = {};
+  function setting(k, dflt) { var v = settings && settings[k]; return typeof v === "string" && v.trim() ? v : dflt; }
+
+  var $ = function (id) { return document.getElementById(id); };
+  var notice = $("notice");
+  var items = null, board = null, boardStamp = null, current = "all", rows = [], emptyNote = null;
+  // The row list is three folding sections, by the status each row is shown with. `foldPref` is what the person
+  // folded or opened, by section, kept in this browser; Done starts folded, the other two open. `foldTemp` is a
+  // section opened to show a row that was scrolled to: it stays open until the person folds it or the page reloads.
+  var DONE = "Done, confirmed";
+  var BUCKETS = [
+    { key: "planning", name: "Planning", set: "planning_heading", has: ["Planned, not started", "Not started"] },
+    { key: "working", name: "Working", set: "working_heading" },
+    { key: "done", name: "Done", set: "done_heading", has: [DONE] }
+  ];
+  // A running roadmap (board/settings kind "running") shows only live work, in these groups, and folds finished rows
+  // into a History section grouped by release or date. Display only: stored rows and ids are not changed.
+  var RUN_BUCKETS = [
+    { key: "now", name: "Now (being built)", set: "now_heading" },
+    { key: "fault", name: "Being fixed", set: "fault_heading" },
+    { key: "wait", name: "Waiting on you", set: "wait_heading" },
+    { key: "next", name: "Next batch", set: "next_heading" },
+    { key: "ideas", name: "Ideas", set: "ideas_heading" },
+    { key: "done", name: "History", set: "history_heading" }
+  ];
+  function isRunning() { return settings && settings.kind === "running"; }
+  function runBucket(it) {
+    var s = shownStatus(it);
+    if (s === DONE) return "done";
+    if (s === "Being worked on now" || s === "Built, waiting to be merged") return "now";
+    if (s === "Ready, known fault") return "fault";
+    if (s === "Ready, waiting for your look" || noChecks(it) || qOpenOn(it._id) > 0) return "wait";
+    return it.idea === true || it.idea === "true" || it.idea === "yes" ? "ideas" : "next";
+  }
+  function bucketOf(it) {
+    if (isRunning()) return runBucket(it);
+    var s = shownStatus(it);
+    return BUCKETS[0].has.indexOf(s) >= 0 ? "planning" : s === DONE ? "done" : "working";
+  }
+  var folds = [], foldPref = {}, foldTemp = {};
+  try { foldPref = JSON.parse(localStorage.getItem("roadmap-folds") || "{}") || {}; } catch (e) { foldPref = {}; }
+  function foldOpen(key) { return !!foldTemp[key] || (typeof foldPref[key] === "boolean" ? foldPref[key] : key !== "done"); }
+  // A done step folds its done sub-rows into itself: one row that opens to show them. Which done steps this viewer
+  // left open is kept in this browser only. `planOpen` is which rows' plans are open, in page memory.
+  var openDone = {}, planOpen = {}, foldQuiet = false;
+  try { (JSON.parse(localStorage.getItem("roadmap-open-done") || "[]") || []).forEach(function (id) { openDone[id] = true; }); } catch (e) {}
+  function saveOpenDone() { try { localStorage.setItem("roadmap-open-done", JSON.stringify(Object.keys(openDone))); } catch (e) {} }
+  // a row inside a folded section, or folded inside its done step, is shown before it is scrolled to
+  function reveal(node) {
+    var row = node && node.closest ? node.closest("details.row") : null;
+    if (row) rows.forEach(function (r) { if (r.el === row && r.under) { r.under.el.open = true; row.hidden = false; } });
+    var hg = node && node.closest ? node.closest("details.hgroup") : null;
+    if (hg) hg.open = true;
+    var f = node && node.closest ? node.closest("details.sfold") : null;
+    if (f) { foldTemp[f.dataset.key] = true; f.open = true; }
+  }
+  var db = null, marks = {}, marksLoaded = false, saveState = {}, drafts = {}, queues = {}, showNote = {};
+  // Questions for the owner: one document each in "questions" (row, topic, question, pictures, choices, status,
+  // answer, choice, asked, answered). The writer posts them; only this page writes an answer.
+  // A question may carry `history`: what was asked and answered before on the same question, oldest first.
+  // What the person writes on a row: one document each in "notes" (row, text, written, status "open"), written
+  // only here. The writer marks one done with a done_note. `nDrafts` is what is typed for a new one, by row;
+  // `nEdit` what is typed to change one, by note; both live in page memory only and survive redraws.
+  var notes = {}, nDrafts = {}, nEdit = {}, nState = {}, nSaving = {}, nFold = {};
+  function notesOn(rowId) {
+    return Object.keys(notes).filter(function (k) { return notes[k].row === rowId; })
+      .sort(function (a, b) { return String(notes[a].written || "") < String(notes[b].written || "") ? 1 : -1; });
+  }
+  function nOpenOn(rowId) { return notesOn(rowId).filter(function (k) { return notes[k].status !== "done"; }).length; }
+  var questions = {}, qDrafts = {}, qEditing = {}, qState = {}, qSaving = {}, qFoldOpen = {}, qHistOpen = {};
+  // Telling Claude about marks: what was last sent for each mark.
+  var markTold = {};
+
+  function checksOf(it) {
+    if (CHECK_STATES.indexOf(it.status) < 0 || !Array.isArray(it.checks)) return [];
+    return it.checks.filter(function (c) { return c && c.id && c.text; });
+  }
+  // A row in a Ready state that carries no check has nothing for the person to try. It is shown as a fault in how
+  // the row is kept, not as waiting on the person: the main session set a status it had no checks for.
+  function noChecks(it) { return CHECK_STATES.indexOf(it.status) >= 0 && !checksOf(it).length; }
+  function tagOf(it) {
+    var st = statusOf(shownStatus(it));
+    return noChecks(it) ? { key: st.key + ". " + NOCHK_SHORT + ".", short: NOCHK_SHORT, c: "--s-fault" } : st;
+  }
+  function markKey(it, c) { return it._id + "--" + c.id; }
+  function markOf(it, c) { var m = marks[markKey(it, c)]; return m && (m.result === "works" || m.result === "fails") ? m : null; }
+  function tally(it) {
+    var cs = checksOf(it), t = { all: cs.length, marked: 0, fails: 0 };
+    cs.forEach(function (c) { var m = markOf(it, c); if (m) { t.marked++; if (m.result === "fails") t.fails++; } });
+    return t;
+  }
+  // The status a row is shown with. A row whose checks are all marked shows at once what its marks give, without
+  // waiting for the writer: all Works is "Done, confirmed", any Doesn't work is "Ready, known fault". Display only:
+  // the page never writes the row.
+  function shownStatus(it) {
+    var cs = checksOf(it);
+    if (!cs.length) return it.status;
+    var t = tally(it);
+    return t.marked < t.all ? it.status : t.fails ? "Ready, known fault" : "Done, confirmed";
+  }
+  // When the writer records such a row it deletes the row's marks and changes its status, and the two can arrive a
+  // moment apart. Marks taken away by someone else from a row shown ahead of the database are kept on screen for a
+  // few seconds (`held`, by row id), so nothing flicks back in between. `realMarks` is what the database holds.
+  var realMarks = {}, held = {}, ownClears = {}, HOLD_MS = 4000;
+  function mergeMarks() {
+    var m = Object.assign({}, realMarks);
+    Object.keys(held).forEach(function (r) {
+      var h = held[r];
+      if (Date.now() >= h.until) { delete held[r]; return; }
+      Object.keys(h.marks).forEach(function (k) { if (!m[k]) m[k] = h.marks[k]; });
+    });
+    marks = m;
+  }
+  function fmtStamp(iso) {
+    var d = new Date(iso); if (isNaN(d)) return "";
+    var h = d.getHours(), ap = h < 12 ? "AM" : "PM"; h = h % 12 || 12;
+    return (d.getMonth() + 1) + "/" + d.getDate() + "/" + String(d.getFullYear()).slice(2) + " at " + h + ":" + String(d.getMinutes()).padStart(2, "0") + " " + ap;
+  }
+  try { current = localStorage.getItem("roadmap-filter") || "all"; } catch (e) {}
+
+  function fmtDate(iso) {
+    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || "");
+    if (!m) return iso || "not recorded";
+    return (+m[2]) + "/" + (+m[3]) + "/" + m[1].slice(2);
+  }
+
+  // When each row and "What's next" last changed: the database's own record of when the document was
+  // last written; where the database gives none, the row's `changed` field (a date, or a date and time).
+  var FRESH_WINDOW_MS = 2 * 60 * 60 * 1000; // rows changed within 2 hours of the newest change are marked blue
+  function toMs(v) {
+    if (v == null || v === "") return NaN;
+    if (typeof v === "number") return v;
+    if (v instanceof Date) return v.getTime();
+    if (typeof v.toDate === "function") { try { return v.toDate().getTime(); } catch (e) { return NaN; } }
+    if (typeof v.seconds === "number") return v.seconds * 1000;
+    if (typeof v === "string") return Date.parse(v);
+    return NaN;
+  }
+  function docTime(d) {
+    var m = (d && d.metadata) || {};
+    var c = [d && d.updatedAt, d && d.updateTime, d && d.updated_at, m.updatedAt, m.updateTime];
+    for (var i = 0; i < c.length; i++) { var t = toMs(c[i]); if (isFinite(t)) return t; }
+    return NaN;
+  }
+  function stampOf(dbMs, changed) {
+    if (isFinite(dbMs)) return { ms: dbMs, timed: true };
+    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(changed || "");
+    if (m) return { ms: new Date(+m[1], +m[2] - 1, +m[3]).getTime(), timed: false };
+    var t = Date.parse(changed || "");
+    return isFinite(t) ? { ms: t, timed: true } : null;
+  }
+  function fmtWhen(s) {
+    if (!s) return "";
+    var d = new Date(s.ms), out = (d.getMonth() + 1) + "/" + d.getDate() + "/" + String(d.getFullYear()).slice(2);
+    if (!s.timed) return out;
+    var h = d.getHours(), ap = h < 12 ? "AM" : "PM"; h = h % 12 || 12;
+    return out + " " + h + ":" + String(d.getMinutes()).padStart(2, "0") + " " + ap;
+  }
+  function fmtWhenDate(s) { if (!s) return ""; var d = new Date(s.ms); return (d.getMonth() + 1) + "/" + d.getDate(); }
+  function newestOf(list) {
+    return list.reduce(function (m, s) { return s && (!m || s.ms > m.ms) ? s : m; }, null);
+  }
+  function sameDay(a, b) { var x = new Date(a), y = new Date(b); return x.toDateString() === y.toDateString(); }
+  function isFresh(it, newest) {
+    var s = it._stamp; if (!s || !newest) return false;
+    // a row with a date only could have changed any time that day
+    return s.timed ? newest.ms - s.ms <= FRESH_WINDOW_MS : sameDay(s.ms, newest.ms);
+  }
+  function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+  function rowId(id) { return "row-" + id; }
+
+  function fail(msg) {
+    notice.hidden = false;
+    notice.className = "notice bad";
+    notice.textContent = msg;
+  }
+
+  function render() {
+    if (!items) return;
+    notice.hidden = true;
+    var all = items.slice().sort(function (a, b) { return (a.order || 0) - (b.order || 0); });
+    $("psub").textContent = setting("subtitle", isRunning() ? "What is live right now. Tap a row to see where it stands." : "Every step, in order. Tap a row to see where it stands.");
+    if (!all.length) {
+      notice.hidden = false; notice.className = "notice";
+      notice.textContent = "Nothing is on the roadmap yet. Tell Claude the plan in your main session and the rows appear here.";
+    }
+    var newest = newestOf(all.map(function (it) { return it._stamp; }));
+    var latest = newestOf([newest, boardStamp]);
+    $("lastchange").textContent = latest ? fmtWhen(latest) : "not recorded";
+    $("asof").textContent = board && board.facts_as_of ? fmtDate(board.facts_as_of) : "not recorded";
+
+    // counts by status (tap to filter); a running roadmap shows one short line instead
+    var running = isRunning();
+    var counts = $("counts"); counts.textContent = "";
+    if (running) {
+      var live = all.filter(function (it) { return runBucket(it) !== "done"; }).length;
+      var wn = all.filter(function (it) { return runBucket(it) === "wait"; }).length;
+      var hn = all.length - live;
+      counts.appendChild(el("span", "runline", live + " live" + (wn ? ", " + wn + " waiting on you" : "") + ", " + hn + " in history"));
+    }
+    if (!running) STATUS.forEach(function (s) {
+      var n = all.filter(function (it) { return shownStatus(it) === s.key && !noChecks(it); }).length;
+      if (!n) return;
+      var b = el("button"); b.type = "button";
+      var nb = el("b", null, String(n)); nb.style.color = "var(" + s.c + ")";
+      b.appendChild(nb); b.appendChild(el("span", null, s.short));
+      b.addEventListener("click", function () { setFilter(s.key); });
+      counts.appendChild(b);
+    });
+    var nc = running ? 0 : all.filter(noChecks).length;
+    if (nc) {
+      var cb = el("button"); cb.type = "button";
+      var cn = el("b", null, String(nc)); cn.style.color = "var(--s-fault)";
+      cb.appendChild(cn); cb.appendChild(el("span", null, NOCHK_SHORT));
+      cb.addEventListener("click", function () { setFilter(NOCHK); });
+      counts.appendChild(cb);
+    }
+
+    // what's next
+    var nx = $("next"); nx.textContent = "";
+    var lines = (board && board.lines) || [];
+    lines.forEach(function (l) { nx.appendChild(el("dt", null, l.label)); nx.appendChild(el("dd", null, l.text)); });
+    if (lines.length && boardStamp) { nx.appendChild(el("dt", null, "Last written")); nx.appendChild(el("dd", "written", fmtWhen(boardStamp))); }
+    nx.hidden = !lines.length;
+
+    // strip
+    var strip = $("strip"); strip.textContent = "";
+    var stepRows = all.filter(function (it) { return it.kind === "step"; });
+    stepRows.forEach(function (it) {
+      var st = tagOf(it);
+      var b = el("button", null, it.number); b.type = "button";
+      b.style.background = "var(" + st.c + ")";
+      b.title = it.name + " (" + it.number + "): " + st.key;
+      b.setAttribute("aria-label", it.name + ", step " + it.number + ", " + st.key);
+      b.addEventListener("click", function () {
+        setFilter("all");
+        var r = $(rowId(it._id)); if (!r) return;
+        reveal(r); r.open = true;
+        r.scrollIntoView({ behavior: "smooth", block: "center" });
+        r.querySelector("summary").focus({ preventScroll: true });
+      });
+      strip.appendChild(b);
+    });
+    $("stripbox").hidden = running || stepRows.length < 2;
+    if (stepRows.length && !running) {
+      $("strip-first").textContent = "Step " + stepRows[0].number;
+      $("strip-last").textContent = "Step " + stepRows[stepRows.length - 1].number;
+    }
+
+    // list, keeping rows the viewer opened and any note box being typed in
+    var ae = document.activeElement, focusKey = null, selA = 0, selB = 0;
+    if (ae && ae.tagName === "TEXTAREA" && ae.dataset.key) { focusKey = ae.dataset.key; selA = ae.selectionStart; selB = ae.selectionEnd; }
+    var openIds = {}, moreIds = {};
+    if (!rows.length) Object.keys(openDone).forEach(function (id) { openIds[id] = true; });
+    rows.forEach(function (r) { if (r.el.open) openIds[r.it._id] = true; if (r.more && r.more.open) moreIds[r.it._id] = true; });
+    rows = []; folds = [];
+    var listEl = $("list"); listEl.textContent = "";
+    // questions whose row is not on the roadmap still show, at the top, so none is lost
+    var known = {}; all.forEach(function (it) { known[it._id] = true; });
+    var orphans = Object.keys(questions).filter(function (k) { return !known[questions[k].row || ""]; });
+    var ob = makeQuestions(orphans, "");
+    if (ob) {
+      var osec = el("section"); osec.appendChild(el("h2", null, "Questions not tied to a row"));
+      ob.classList.add("qorphan"); osec.appendChild(ob); listEl.appendChild(osec);
+    }
+    var isStep = function (it) { return it.kind === "step" || it.kind === "phase"; };
+    var byId = {}, where = {};
+    all.forEach(function (it) { byId[it._id] = it; where[it._id] = bucketOf(it); });
+    var wrap = el("div", "folds");
+    // a running roadmap numbers its live rows 1, 2, 3 in page order (display only; stored ids and numbers stay)
+    if (running) {
+      var dn = 0;
+      RUN_BUCKETS.forEach(function (b) {
+        all.filter(function (it) { return where[it._id] === b.key; }).forEach(function (it) { it._dn = b.key === "done" ? "" : String(++dn); });
+      });
+    } else all.forEach(function (it) { delete it._dn; });
+    (running ? RUN_BUCKETS : BUCKETS).forEach(function (b) {
+      var mine = all.filter(function (it) { return where[it._id] === b.key; });
+      if (!mine.length) return;                                  // an empty section is not shown
+      var fold = el("details", "sfold"), sum = el("summary");
+      fold.id = "sec-" + b.key; fold.dataset.key = b.key;
+      sum.appendChild(el("span", null, setting(b.set, b.name))); sum.appendChild(document.createTextNode(" "));
+      sum.appendChild(el("span", "n", "(" + mine.length + ")"));
+      // a tap or a key press on the heading is the person's choice; it is remembered when no filter is on
+      sum.addEventListener("click", function () {
+        if (current !== "all") return;
+        foldPref[b.key] = !fold.open; delete foldTemp[b.key];
+        try { localStorage.setItem("roadmap-folds", JSON.stringify(foldPref)); } catch (e) {}
+      });
+      fold.appendChild(sum);
+      if (running) {
+        var groups = [], gby = {};
+        if (b.key === "done") {
+          mine.slice().sort(function (x, y) { return (y._stamp ? y._stamp.ms : 0) - (x._stamp ? x._stamp.ms : 0); }).forEach(function (it) {
+            var gk = it.release ? String(it.release) : fmtWhenDate(it._stamp);
+            if (!gby[gk]) { gby[gk] = { key: gk, label: gk, list: [], stamp: it._stamp }; groups.push(gby[gk]); }
+            gby[gk].list.push(it);
+          });
+          groups.forEach(function (g) { var dt = fmtWhenDate(g.stamp); if (g.key !== dt && dt) g.label = g.key + ", " + dt; });
+        } else groups = [{ key: "", label: "", list: mine }];
+        groups.forEach(function (g) {
+          var host = fold;
+          if (g.label) {
+            host = el("details", "hgroup"); host.dataset.key = "h-" + g.key;
+            var hs = el("summary"); hs.appendChild(el("span", null, g.label)); hs.appendChild(document.createTextNode(" "));
+            hs.appendChild(el("span", "n", "(" + g.list.length + ")")); host.appendChild(hs);
+            fold.appendChild(host);
+          }
+          var rbox = el("div", "list");
+          g.list.forEach(function (it) { rbox.appendChild(makeRow(it, newest, openIds[it._id], moreIds[it._id], b.key, null, 0)); });
+          host.appendChild(rbox);
+        });
+        wrap.appendChild(fold);
+        folds.push({ el: fold, key: b.key });
+        return;
+      }
+      // steps and their phases first, then the other work; each kind under its own small heading when both are here
+      var parts = [{ title: setting("steps_heading", "Steps"), list: mine.filter(isStep) },
+                   { title: setting("extras_heading", "Other work"), list: mine.filter(function (it) { return !isStep(it); }) }];
+      var both = parts[0].list.length && parts[1].list.length;
+      parts.forEach(function (part) {
+        if (!part.list.length) return;
+        if (both) fold.appendChild(el("h3", "sub", part.title));
+        var box = el("div", "list");
+        // each sub-row sits right under its step, whatever its order number, when the step is in this section
+        var here = {}, list = [];
+        part.list.forEach(function (it) { here[it._id] = true; });
+        part.list.forEach(function (it) {
+          if (it.kind === "phase" && it.parent && here[it.parent] && byId[it.parent].kind === "step") return;
+          list.push(it);
+          if (it.kind === "step") part.list.forEach(function (c) { if (c.kind === "phase" && c.parent === it._id) list.push(c); });
+        });
+        list.forEach(function (it) {
+          // a phase sits under its step when the step is in this section; elsewhere it names its step
+          var parent = it.kind === "phase" ? byId[it.parent] : null;
+          var away = parent && where[parent._id] !== b.key ? parent : null;
+          // a done step counts the done sub-rows folded inside it
+          var nk = b.key === "done" && it.kind === "step" ? list.filter(function (c) { return c.kind === "phase" && c.parent === it._id; }).length : 0;
+          box.appendChild(makeRow(it, newest, openIds[it._id], moreIds[it._id], b.key, away, nk));
+        });
+        fold.appendChild(box);
+      });
+      wrap.appendChild(fold);
+      folds.push({ el: fold, key: b.key });
+    });
+    listEl.appendChild(wrap);
+    var recs = {}; rows.forEach(function (r) { recs[r.it._id] = r; });
+    rows.forEach(function (r) { var up = r.it.kind === "phase" ? recs[r.it.parent] : null; r.under = up && up.nk && up.bucket === r.bucket ? up : null; });
+    emptyNote = el("div", "empty-note", "Nothing here with this choice."); emptyNote.hidden = true;
+    listEl.appendChild(emptyNote);
+
+    // filters
+    var filtersEl = $("filters"); filtersEl.textContent = "";
+    addFilter("all", "All", null);
+    addFilter(QFOR, "Questions for you", "--accent");
+    addFilter(NOTES, "Your notes (" + Object.keys(notes).filter(function (k) { return notes[k].status !== "done" && known[notes[k].row]; }).length + ")", "--fresh");
+    addFilter(RECENT, "Latest changes", "--fresh");
+    addFilter(TOTRY, "Still to check", "--s-look");
+    addFilter(NOTWORK, "Not working", "--s-fault");
+    STATUS.forEach(function (s) { if (all.some(function (it) { return shownStatus(it) === s.key && !noChecks(it); })) addFilter(s.key, s.short, s.c); });
+    if (all.some(noChecks)) addFilter(NOCHK, NOCHK_SHORT, "--s-fault");
+    filtersEl.hidden = !all.length;
+    var keys = Array.prototype.map.call(filtersEl.children, function (b) { return b.dataset.key; });
+    if (keys.indexOf(current) < 0) current = "all";
+    if (focusKey) {
+      var ta = document.querySelector('textarea[data-key="' + focusKey.replace(/"/g, "") + '"]');
+      if (ta) { var r0 = ta.closest("details"); if (r0) r0.open = true; ta.focus({ preventScroll: true }); try { ta.setSelectionRange(selA, selB); } catch (e) {} }
+    }
+    updateQuestionCount();
+    updateChecks(newest);
+  }
+
+  // ---- questions for the owner ----
+  var LETTERS = "abcdefghijklmnopqrstuvwxyz";
+  function qStatus(q) { return q.status === "answered" || q.status === "done" ? q.status : "open"; }
+  function qOpenOn(rowId) { return Object.keys(questions).filter(function (k) { return questions[k].row === rowId && qStatus(questions[k]) === "open"; }).length; }
+  function qChoices(q) { return Array.isArray(q.choices) ? q.choices.filter(function (c) { return c != null && String(c).trim(); }) : []; }
+  function cleanChoice(t) { return String(t == null ? "" : t).replace(/^\s*([a-z]|\d+)\s*[.):-]\s*/i, ""); }
+  function qPics(q) {
+    return (Array.isArray(q.pictures) ? q.pictures : []).map(function (p) { return typeof p === "string" ? { url: p } : p; })
+      .filter(function (p) { return p && typeof p.url === "string" && /^(https:\/\/|\/)/.test(p.url); });
+  }
+  function qHistory(q) {
+    return (Array.isArray(q.history) ? q.history : []).filter(function (e) { return e && typeof e === "object" && e.text != null && String(e.text).trim(); });
+  }
+  function esc(s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
+  function mdInline(s) {
+    s = esc(s);
+    s = s.replace(/`([^`]+)`/g, "<code>$1</code>");
+    s = s.replace(/\[([^\]]+)\]\((https:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+    s = s.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+    s = s.replace(/(^|[^*])\*([^*\s][^*]*)\*/g, "$1<em>$2</em>");
+    return s;
+  }
+  function mdBlock(t) {
+    var lines = String(t == null ? "" : t).replace(/\r/g, "").split("\n"), out = [], list = null, para = [], tbl = null;
+    function fp() { if (para.length) { out.push("<p>" + para.map(mdInline).join("<br>") + "</p>"); para = []; } }
+    function fl() { if (list) { out.push("</" + list + ">"); list = null; } }
+    function cells(l) { return l.trim().replace(/^\|/, "").replace(/\|$/, "").split("|").map(function (c) { return mdInline(c.trim()); }); }
+    function ft() {
+      if (!tbl) return;
+      var h = "<div class=\"tscroll\"><table>";
+      tbl.forEach(function (r, i) { var tag = i === 0 && tbl.head ? "th" : "td"; h += "<tr>" + r.map(function (c) { return "<" + tag + ">" + c + "</" + tag + ">"; }).join("") + "</tr>"; });
+      out.push(h + "</table></div>"); tbl = null;
+    }
+    lines.forEach(function (l) {
+      var m;
+      if (/^\s*\|.*\|\s*$/.test(l)) {
+        fp(); fl();
+        if (/^\s*\|[\s:|-]+\|\s*$/.test(l)) { if (tbl && tbl.length === 1) tbl.head = true; return; }
+        if (!tbl) tbl = [];
+        tbl.push(cells(l)); return;
+      }
+      ft();
+      if ((m = /^(#{1,4})\s+(.*)$/.exec(l))) { fp(); fl(); var n = m[1].length + 2; out.push("<h" + n + ">" + mdInline(m[2]) + "</h" + n + ">"); }
+      else if ((m = /^\s*[-*]\s+(.*)$/.exec(l))) { fp(); if (list !== "ul") { fl(); out.push("<ul>"); list = "ul"; } out.push("<li>" + mdInline(m[1]) + "</li>"); }
+      else if ((m = /^\s*(\d+)[.)]\s+(.*)$/.exec(l))) { fp(); if (list !== "ol") { fl(); out.push("<ol start=\"" + m[1] + "\">"); list = "ol"; } out.push("<li>" + mdInline(m[2]) + "</li>"); }
+      else if (!l.trim()) { fp(); fl(); }
+      else { fl(); para.push(l); }
+    });
+    fp(); fl(); ft();
+    return out.join("");
+  }
+  function mdEl(cls, text) { var e = el("div", cls); e.innerHTML = mdBlock(text); return e; }
+
+  // the questions box for a row (or, with rowId "", for the given ids not tied to a row)
+  function makeQuestions(ids, rowId) {
+    if (rowId) ids = Object.keys(questions).filter(function (k) { return questions[k].row === rowId; });
+    if (!ids.length) return null;
+    function t(k) { var q = questions[k]; return String(q.answered || q.asked || ""); }
+    var open = ids.filter(function (k) { return qStatus(questions[k]) === "open"; })
+      .sort(function (a, b) { return String(questions[a].asked || "") < String(questions[b].asked || "") ? -1 : 1; });
+    var answered = ids.filter(function (k) { return qStatus(questions[k]) === "answered"; }).sort(function (a, b) { return t(a) < t(b) ? 1 : -1; });
+    var done = ids.filter(function (k) { return qStatus(questions[k]) === "done"; }).sort(function (a, b) { return t(a) < t(b) ? 1 : -1; });
+    var box = el("div", "questions");
+    if (open.length) box.appendChild(el("h3", null, open.length === 1 ? "A question for you" : open.length + " questions for you"));
+    else if (answered.length) box.appendChild(el("h3", "quiet", "Your answers"));
+    open.concat(answered).forEach(function (k) { box.appendChild(qCard(k, questions[k])); });
+    if (done.length) {
+      var key = rowId || "-orphans-";
+      var fold = el("details", "more"); if (qFoldOpen[key]) fold.open = true;
+      fold.addEventListener("toggle", function () { qFoldOpen[key] = fold.open; });
+      fold.appendChild(el("summary", null, "Earlier questions, already acted on (" + done.length + ")"));
+      var inner = el("div", "questions"); inner.style.borderTop = "0";
+      done.forEach(function (k) { inner.appendChild(qCard(k, questions[k])); });
+      fold.appendChild(inner);
+      if (open.length || answered.length) box.appendChild(fold);
+      else { var wrap = el("div"); wrap.appendChild(fold); return wrap; }
+    }
+    return box;
+  }
+
+  function qCard(id, q) {
+    var st = qStatus(q);
+    var c = el("article", "qcard" + (st === "open" ? "" : " answered")); c.id = "q-" + id;
+    var h = el("div", "qhead");
+    h.appendChild(el("span", "qtopic", q.topic || "Question"));
+    var w = st === "open" ? q.asked : (q.answered || q.asked);
+    if (w) h.appendChild(el("span", "qwhen", (st === "open" ? "Asked " : "Answered ") + fmtStamp(w)));
+    c.appendChild(h);
+    c.appendChild(mdEl("qtext md", q.question || ""));
+    var hist = qHistory(q);
+    if (hist.length) {
+      var hf = el("details", "more qhist"); hf.id = "qh-" + id; if (qHistOpen[id]) hf.open = true;
+      hf.addEventListener("toggle", function () { qHistOpen[id] = hf.open; });
+      hf.appendChild(el("summary", null, "Earlier on this question (" + hist.length + ")"));
+      var hl = el("div", "qhist-list");
+      hist.forEach(function (e) {
+        var mine = e.who === "you", stamp = e.at ? fmtStamp(e.at) : "";
+        var item = el("div", "qhist-item" + (mine ? " you" : ""));
+        item.appendChild(el("span", "k", (mine ? "You wrote" : e.who === "asked again" ? "Asked again" : "Asked") + (stamp ? " " + stamp : "")));
+        if (!mine && e.topic && String(e.topic).trim()) item.appendChild(el("span", "t", String(e.topic)));
+        // the person's own words are shown as plain text; question wording is drawn like the question itself
+        item.appendChild(mine ? el("div", "v", String(e.text)) : mdEl("v md", String(e.text)));
+        hl.appendChild(item);
+      });
+      hf.appendChild(hl); c.appendChild(hf);
+    }
+    var pics = qPics(q);
+    if (pics.length) {
+      var pb = el("div", "pics");
+      pics.forEach(function (p, i) {
+        var fig = el("figure", "pic"), b = el("button"); b.type = "button";
+        b.setAttribute("aria-label", "Show full size: " + (p.caption || "picture " + (i + 1)));
+        var img = el("img"); img.src = p.url; img.alt = p.caption || "Picture " + (i + 1); img.loading = "lazy";
+        b.appendChild(img); b.addEventListener("click", function () { openLb(p); });
+        fig.appendChild(b); if (p.caption) fig.appendChild(el("figcaption", null, p.caption));
+        pb.appendChild(fig);
+      });
+      c.appendChild(pb);
+    }
+    if (st === "open" || (st === "answered" && qEditing[id])) c.appendChild(qForm(id, q));
+    else {
+      var a = el("div", "qans");
+      a.appendChild(el("span", "k", "Your answer"));
+      a.appendChild(el("span", "v", q.answer || "(none)"));
+      if (q.done_note) { a.appendChild(el("span", "k", "What changed")); a.appendChild(mdEl("v md", q.done_note)); }
+      c.appendChild(a);
+      if (st === "answered") {
+        var row = el("div", "qrow");
+        var ch = el("button", "qbtn quiet", "Change answer"); ch.type = "button"; ch.id = "qe-" + id;
+        ch.addEventListener("click", function () { qEditing[id] = true; delete qDrafts[id]; delete qState[id]; render(); });
+        row.appendChild(ch); qMsg(row, id); c.appendChild(row);
+      }
+    }
+    return c;
+  }
+
+  function qDraft(id, q) {
+    if (!qDrafts[id]) {
+      var choice = null, text = "", ch = qChoices(q);
+      if (qStatus(q) === "answered") {
+        var i = q.choice ? LETTERS.indexOf(String(q.choice).toLowerCase()) : -1;
+        if (i >= 0 && i < ch.length) { choice = i; text = q.note || ""; } else text = q.answer || "";
+      }
+      qDrafts[id] = { choice: choice, text: text };
+    }
+    return qDrafts[id];
+  }
+
+  function qMsg(row, id) {
+    var m = qState[id]; if (!m) return;
+    var s = el("span", "state" + (m.err ? " err" : m.ok ? " ok" : ""), m.text);
+    s.setAttribute("role", "status"); row.appendChild(s);
+  }
+
+  function qForm(id, q) {
+    var f = el("div", "qform"), dr = qDraft(id, q), ch = qChoices(q), btn;
+    function ready() { btn.disabled = !!qSaving[id] || (dr.choice == null && !dr.text.trim()); }
+    if (ch.length) {
+      var box = el("div", "qchoices"); box.setAttribute("role", "group"); box.setAttribute("aria-label", "Choices");
+      ch.forEach(function (c, i) {
+        var b = el("button", "qchoice"); b.type = "button"; b.id = "qc-" + id + "-" + i;
+        b.setAttribute("aria-pressed", dr.choice === i ? "true" : "false");
+        b.appendChild(el("span", "cl", LETTERS[i])); b.appendChild(el("span", null, cleanChoice(c)));
+        b.addEventListener("click", function () {
+          dr.choice = dr.choice === i ? null : i;
+          Array.prototype.forEach.call(box.children, function (x, j) { x.setAttribute("aria-pressed", dr.choice === j ? "true" : "false"); });
+          ready();
+        });
+        box.appendChild(b);
+      });
+      f.appendChild(box);
+    }
+    var taId = "qt-" + id;
+    var lab = el("label", null, ch.length ? "Anything to add, or your own answer" : "Your answer"); lab.htmlFor = taId;
+    var ta = el("textarea"); ta.id = taId; ta.dataset.key = "q-" + id; ta.rows = 3; ta.value = dr.text;
+    ta.addEventListener("input", function () { dr.text = ta.value; ready(); });
+    f.appendChild(lab); f.appendChild(ta);
+    var row = el("div", "qrow");
+    btn = el("button", "qbtn", qSaving[id] ? "Saving…" : "Answer"); btn.type = "button"; btn.id = "qa-" + id;
+    btn.addEventListener("click", function () { qSave(id); });
+    ready(); row.appendChild(btn);
+    if (qEditing[id]) {
+      var keep = el("button", "qbtn quiet", "Keep my old answer"); keep.type = "button";
+      keep.addEventListener("click", function () { delete qEditing[id]; delete qDrafts[id]; delete qState[id]; render(); });
+      row.appendChild(keep);
+    }
+    qMsg(row, id); f.appendChild(row);
+    return f;
+  }
+
+  function qSave(id) {
+    var q = questions[id];
+    if (!q || qSaving[id]) return;
+    if (!db) { qState[id] = { err: true, text: "Not saved: the page is not connected. Open it signed in to Claude." }; render(); return; }
+    if (qStatus(q) === "done") { qState[id] = { err: true, text: "Claude already acted on this one, so it can't be changed." }; render(); return; }
+    var dr = qDraft(id, q), text = dr.text.trim(), ch = qChoices(q);
+    var letter = dr.choice != null ? LETTERS[dr.choice] : "";
+    var answer = letter ? letter + ". " + cleanChoice(ch[dr.choice]) + (text ? "\n" + text : "") : text;
+    if (!answer) return;
+    qSaving[id] = true; qState[id] = { text: "Saving…" }; render();
+    db.doc("questions/" + id).update({ status: "answered", answer: answer, choice: letter, note: letter ? text : "", answered: new Date().toISOString() }).then(function () {
+      qSaving[id] = false; delete qEditing[id]; delete qDrafts[id];
+      qState[id] = { ok: true, text: "✓ Saved. Telling Claude…" }; render();
+      tellClaude(id, q, answer);
+    }, function (e) {
+      qSaving[id] = false;
+      var code = e && e.code;
+      qState[id] = { err: true, text: code === "invalid_argument" || code === "not_granted" ? "Not saved: only the page's owner and editors can answer."
+        : code === "not_found" ? "Not saved: this question was taken down." : "Not saved: no connection right now. Tap Answer again." };
+      render();
+    });
+  }
+
+  // One comment sent to Claude, so a watching Claude session is told at once; where none is listening the comment is
+  // left on the page. `lead` opens the line shown to the person ("✓ Saved."), `what` names the thing ("answer", "mark"),
+  // `target` gives the element the comment is anchored at, `done(text, notTold)` receives the line to show.
+  function sendToClaude(line, target, lead, what, done) {
+    if (line.length > 3500) line = line.slice(0, 3500) + "…";
+    claude.use("comments").then(function (cm) {
+      if (!cm) { done(lead + " Claude could not be told from here; it will see the " + what + " when it next checks.", true); return; }
+      return cm.anchorFor(target() || document.querySelector("header.tb")).then(function (anchor) {
+        // Where Claude was not told, the comment is left and the person is told the real reason; the same reason is written into the comment's text for Claude.
+        function plain(reason, short) {
+          return cm.create({ anchor: anchor, text: line + "\n[Not sent to Claude: " + short + "]" }).then(function () {
+            done(lead + " " + reason + " A comment was left for Claude to read at your next message.");
+          });
+        }
+        return cm.canSendToClaude().then(function (can) { return { can: can }; }, function (e) { return { err: e }; }).then(function (r) {
+          if (r.err) { var c = (r.err && r.err.code) || "unknown"; return plain("claude.ai could not say whether Claude can be told (" + c + ").", "check_failed:" + c); }
+          var can = r.can;
+          if (can === "no_session") return plain("No Claude session is watching this roadmap right now.", "no_session");
+          if (can === "writers_only") return plain("claude.ai does not see you as an editor of this roadmap.", "writers_only");
+          if (can === "off") return plain("Sending to Claude is off in this view.", "off");
+          if (can !== "available") return plain("claude.ai gave an unknown answer (" + can + ").", "unknown:" + can);
+          return cm.sendToClaude({ anchor: anchor, text: line }).then(function () { done(lead + " Claude has been told."); },
+            function (e) { if (e && e.code === "claude_unavailable") return plain("claude.ai did not count this as your own click, so Claude was not told.", "not_own_click"); throw e; });
+        });
+      });
+    }).catch(function (e) {
+      var code = e && e.code;
+      done(code === "consent_required" || code === "forbidden" || code === "not_granted"
+        ? lead + " Claude was not told because commenting from this page is not allowed here."
+        : lead + " Claude could not be told just now; it will see the " + what + " when it next checks.", true);
+    });
+  }
+  function whereOf(rowId) {
+    var it = (items || []).filter(function (x) { return x._id === rowId; })[0];
+    return it ? (it.kind === "step" ? it.name + " (" + it.number + ")" : it.name) : "no row";
+  }
+
+  // After an answer saves, Claude is told.
+  function tellClaude(id, q, answer) {
+    var line = "Answered on the roadmap: the question \"" + (q.topic || id) + "\" on " + whereOf(q.row) + " (questions/" + id + "): " + answer;
+    sendToClaude(line, function () { return $("q-" + id); }, "✓ Saved.", "answer",
+      function (t, err) { qState[id] = { ok: !err, err: !!err, text: t }; render(); });
+  }
+
+  // After a mark saves or is cleared, Claude is told the same way. `data` is what was written; null means cleared.
+  // The same mark is not sent twice in a row.
+  function tellMark(it, c, data) {
+    var key = markKey(it, c), note = data ? String(data.note || "").trim() : "";
+    var sig = data ? data.result + "|" + note : "cleared", last = markTold[key];
+    if (last && last.sig === sig) { if (last.st) { saveState[key] = last.st; showState(key); } return; }
+    var mine = markTold[key] = { sig: sig, st: null };
+    var said = !data ? "cleared" : data.result === "works" ? "Works" + (note ? ". Note: " + note : "") : "Doesn't work" + (note ? ". Note: " + note : ", no note");
+    var line = "Marked on the roadmap: the check \"" + c.text + "\" on " + whereOf(it._id) + " (marks/" + key + "): " + said;
+    sendToClaude(line, function () { var e = findEl(key); return e ? e.item : $(rowId(it._id)); }, data ? "✓ Saved." : "✓ Cleared.", "mark",
+      function (t, err) {
+        mine.st = { s: "ok", msg: t, bad: !!err };
+        if (markTold[key] === mine && saveState[key] && saveState[key].s === "ok") { saveState[key] = mine.st; showState(key); }
+      });
+  }
+
+  var pulseOpen = 0;
+  // Pulse while a row question or any session's questions file has an open question
+  function applyPulse() {
+    var chat = Object.keys(qfiles).some(function (k) { return Number(qfiles[k] && qfiles[k].open) > 0; });
+    $("qbar").parentNode.classList.toggle("qpulse", pulseOpen > 0 || chat);
+  }
+  function updateQuestionCount() {
+    var left = Object.keys(questions).filter(function (k) { return qStatus(questions[k]) === "open"; }).length;
+    $("qbar").hidden = !left;
+    pulseOpen = left;
+    applyPulse();
+    $("qb-left").textContent = String(left);
+    $("qb-label").textContent = left === 1 ? "question for you" : "questions for you";
+    Array.prototype.forEach.call($("filters").children, function (b) {
+      if (b.dataset.key === QFOR) b.querySelector(".lbl").textContent = "Questions for you (" + left + ")";
+    });
+  }
+  $("qbar").addEventListener("click", function () { setFilter(QFOR); var f = document.querySelector(".qcard"); if (f) { reveal(f); f.scrollIntoView({ behavior: "smooth", block: "center" }); } });
+
+  function openLb(p) {
+    $("lb-img").src = p.url; $("lb-img").alt = p.caption || "";
+    $("lb-cap").textContent = p.caption || "";
+    $("lb-scroll").classList.add("fit"); $("lb-fit").textContent = "Actual size";
+    $("lb").hidden = false; $("lb-close").focus();
+  }
+  $("lb-close").addEventListener("click", function () { $("lb").hidden = true; });
+  $("lb-fit").addEventListener("click", function () {
+    var s = $("lb-scroll"); s.classList.toggle("fit");
+    $("lb-fit").textContent = s.classList.contains("fit") ? "Actual size" : "Fit";
+  });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") $("lb").hidden = true; });
+
+  // ---- checks: the owner's Works / Doesn't work marks ----
+  function makeChecks(it) {
+    var cs = checksOf(it);
+    if (!cs.length) return null;
+    var box = el("div", "checks");
+    box.appendChild(el("h3", null, setting("checks_heading", "Try these")));
+    var els = [];
+    cs.forEach(function (c, i) {
+      var key = markKey(it, c);
+      var item = el("div", "check");
+      item.appendChild(el("p", null, c.text));
+      if (c.needs_person) item.appendChild(el("span", "quiet-line", "Why only you can check this: " + c.needs_person));
+      var ch = el("div", "choices"); ch.setAttribute("role", "group"); ch.setAttribute("aria-label", "Answer this check");
+      // Five places to press, in reading order, drawn as three overlapping buttons. The two plain answers send at once.
+      // The two places where Comment overlaps an answer open the box for that answer; they show no words of their own
+      // and are named for the ear. The part of Comment that overlaps neither opens the box for a comment that answers
+      // nothing.
+      var yes = el("button", "yes", "Works"); yes.type = "button";
+      var yesC = el("button", "yes c"); yesC.type = "button"; yesC.setAttribute("aria-label", "Works, with a comment");
+      var noC = el("button", "no c"); noC.type = "button"; noC.setAttribute("aria-label", "Doesn't work, with a comment");
+      var no = el("button", "no", "Doesn't work"); no.type = "button";
+      var only = el("button", "only", "Comment"); only.type = "button"; only.setAttribute("aria-label", "Comment only, without marking this check");
+      yes.title = "Works"; yesC.title = "Works, with a comment"; noC.title = "Doesn't work, with a comment"; no.title = "Doesn't work"; only.title = "Comment only: marks nothing";
+      yes.id = "yes-" + key; no.id = "no-" + key; yesC.id = "yesc-" + key; noC.id = "noc-" + key; only.id = "cmt-" + key;
+      ch.appendChild(yes); ch.appendChild(yesC); ch.appendChild(noC); ch.appendChild(no); ch.appendChild(only);
+      ["w", "k", "d"].forEach(function (s) { var r = el("span", "ring " + s); r.setAttribute("aria-hidden", "true"); ch.appendChild(r); });
+      // where the pointer or focus is, in words, in the free space beside Comment (wide screens only)
+      var hint = el("span", "hint"); hint.setAttribute("aria-hidden", "true"); ch.appendChild(hint);
+      [yes, yesC, noC, no, only].forEach(function (b) {
+        function on() { hint.textContent = b.title; }
+        function off() { if (hint.textContent === b.title) hint.textContent = ""; }
+        b.addEventListener("mouseenter", on); b.addEventListener("focus", on);
+        b.addEventListener("mouseleave", off); b.addEventListener("blur", off);
+      });
+      item.appendChild(ch);
+      // The three comment places open this box. Nothing is written or sent until Done is tapped: `showNote[key]`
+      // holds what is waiting ("works", "fails", or "note" for a comment that answers nothing) while the box is open,
+      // `drafts[key]` what is typed. Both live in page memory only, so they survive redraws.
+      var nb = el("div", "notebox"); nb.hidden = true;
+      var taId = "note-" + key;
+      var lab = el("label", null, "Do you want to say something about it?"); lab.htmlFor = taId;
+      var ta = el("textarea"); ta.id = taId; ta.dataset.key = key; ta.rows = 3;
+      ta.value = noteFor(key, markOf(it, c));
+      ta.placeholder = "Say what you saw, or leave this empty.";
+      var done = el("button", null, "Done"); done.type = "button"; done.id = "done-" + key;
+      nb.appendChild(lab); nb.appendChild(ta); nb.appendChild(done);
+      nb.appendChild(el("small", null, "Nothing is sent until you tap Done.")); item.appendChild(nb);
+      // an answer already sent: what was said, and a way to change it
+      var said = el("div", "qans said"); said.hidden = true;
+      said.appendChild(el("span", "k", "What you said"));
+      var saidText = el("span", "v"); said.appendChild(saidText);
+      var change = el("button", "clear", "Change what I said"); change.type = "button"; change.id = "change-" + key;
+      said.appendChild(change); item.appendChild(said);
+      // an answer sent with no words: a way to add some
+      var say = el("button", "clear say", "Say something"); say.type = "button"; say.id = "say-" + key; say.hidden = true;
+      item.appendChild(say);
+      var foot = el("div", "cfoot");
+      var state = el("span", "state"); state.setAttribute("role", "status"); state.setAttribute("aria-live", "polite");
+      var clear = el("button", "clear", "Clear my mark"); clear.type = "button";
+      foot.appendChild(state); foot.appendChild(clear); item.appendChild(foot);
+
+      // open the box for an answer, or switch the answer waiting in an open box; typed words are kept
+      function openBox(answer) {
+        showNote[key] = answer;
+        if (saveState[key] && saveState[key].s === "err") delete saveState[key];
+        ta.value = noteFor(key, markOf(it, c));
+        updateChecks(); ta.focus();
+      }
+      function sentAnswer() { var m = markOf(it, c); return m ? m.result : "works"; }
+      // a plain answer: any open box and its words are dropped, the mark is written with no note and Claude is told
+      function plain(answer) {
+        showNote[key] = false; delete drafts[key];
+        writeMark(it, c, { result: answer, note: "" }, true);
+      }
+      yes.addEventListener("click", function () { plain("works"); });
+      no.addEventListener("click", function () { plain("fails"); });
+      yesC.addEventListener("click", function () { openBox("works"); });
+      noC.addEventListener("click", function () { openBox("fails"); });
+      only.addEventListener("click", function () { openBox("note"); });
+      change.addEventListener("click", function () { openBox(sentAnswer()); });
+      say.addEventListener("click", function () { openBox(sentAnswer()); });
+      ta.addEventListener("input", function () { drafts[key] = ta.value; });
+      done.addEventListener("click", function () {
+        var note = drafts[key] != null ? drafts[key] : ta.value;
+        if (showNote[key] === "note") {                  // a comment only: a note on the row that names the check; no mark
+          if (!String(note).trim()) { saveState[key] = { s: "err", msg: "Nothing to send: type your comment first." }; showState(key); ta.focus(); return; }
+          showNote[key] = false; delete drafts[key];
+          updateChecks(); checkNote(it, c, String(note).trim());
+          return;
+        }
+        var answer = showNote[key] === "works" ? "works" : "fails";
+        drafts[key] = note; showNote[key] = false;
+        writeMark(it, c, { result: answer, note: note }, true);
+      });
+      clear.addEventListener("click", function () {
+        var m = markOf(it, c), unsent = showNote[key] && !(m && m.result === showNote[key]);
+        showNote[key] = false; delete drafts[key];
+        if (unsent) { updateChecks(); return; }   // an answer never sent: close the box, write and send nothing
+        writeMark(it, c, null, true);
+      });
+      box.appendChild(item);
+      els.push({ key: key, it: it, c: c, item: item, yes: yes, no: no, nb: nb, ta: ta, state: state, clear: clear, said: said, saidText: saidText, say: say, yesC: yesC, noC: noC, only: only, lab: lab });
+    });
+    return { box: box, els: els };
+  }
+
+  // A comment on a check that answers nothing: one note on the check's row, naming the check, and Claude is told
+  // once. The check's own line reports it. No mark is written.
+  function checkNote(it, c, text) {
+    var key = markKey(it, c), id = it._id;
+    function back(msg) { saveState[key] = { s: "err", msg: msg }; drafts[key] = text; showNote[key] = "note"; updateChecks(); }
+    if (!db) { back("Not saved: the page is not connected. Open it signed in to Claude."); return; }
+    var k = id + "--" + Date.now().toString(36) + Math.floor(Math.random() * 36).toString(36);
+    saveState[key] = { s: "saving" }; showState(key);
+    db.doc("notes/" + k).set({ row: id, text: text, written: new Date().toISOString(), status: "open", check: c.id, check_text: c.text }).then(function () {
+      saveState[key] = { s: "ok", msg: "✓ Comment saved. Telling Claude…" }; showState(key);
+      sendToClaude("Written on the roadmap: a comment on the check \"" + c.text + "\" on " + whereOf(id) + " (notes/" + k + "), not an answer to it: " + text,
+        function () { return $("note-" + k) || $(rowId(id)); }, "✓ Comment saved.", "note",
+        function (t, err) { saveState[key] = { s: "ok", msg: t, bad: !!err }; showState(key); });
+    }, function (e) { back(noteErr(e, "Not saved: this row was taken down.")); });
+  }
+
+  function noteFor(key, m) {
+    if (drafts[key] != null) return drafts[key];
+    return m && (!showNote[key] || m.result === showNote[key]) ? m.note || "" : "";
+  }
+
+  function writeMark(it, c, data, tell) {
+    var key = markKey(it, c);
+    if (!data) ownClears[key] = Date.now();
+    if (held[it._id]) { delete held[it._id]; mergeMarks(); }
+    if (!db) { saveState[key] = { s: "err", msg: "Not saved: the page is not connected. Open it signed in to Claude." }; showState(key); return; }
+    saveState[key] = { s: "saving" }; showState(key);
+    var sentNote = data ? data.note : null;
+    queues[key] = (queues[key] || Promise.resolve()).then(function () {
+      var ref = db.doc("marks/" + key);
+      function once() {
+        return data ? ref.set({ row: it._id, check: c.id, text: c.text, result: data.result, note: data.note || "", marked: new Date().toISOString() }) : ref.delete();
+      }
+      return once().catch(function (e) {
+        if (e && e.code === "unavailable") return new Promise(function (res) { setTimeout(res, 600 + Math.random() * 800); }).then(once);
+        throw e;
+      });
+    }).then(function () {
+      if (drafts[key] != null && drafts[key] === sentNote) delete drafts[key];
+      saveState[key] = tell ? { s: "ok", msg: (data ? "✓ Saved." : "✓ Cleared.") + " Telling Claude…" } : { s: "ok" }; showState(key);
+      if (tell) tellMark(it, c, data);
+    }, function (e) {
+      var code = e && e.code, msg;
+      if (code === "invalid_argument" || code === "not_granted") msg = "Not saved: only the page's owner and editors can mark checks.";
+      else if (code === "quota_exceeded") msg = "Not saved: the roadmap's storage is full.";
+      else if (code === "revoked") msg = "Not saved: this page lost its connection. Open it again.";
+      else msg = "Not saved: no connection right now. Tap again to retry.";
+      saveState[key] = { s: "err", msg: msg };
+      if (data && data.note) { showNote[key] = data.result; updateChecks(); } else showState(key);   // a failed save puts the box and its words back
+    });
+  }
+
+  function findEl(key) {
+    for (var i = 0; i < rows.length; i++) {
+      var cx = rows[i].cx; if (!cx) continue;
+      for (var j = 0; j < cx.els.length; j++) if (cx.els[j].key === key) return cx.els[j];
+    }
+    return null;
+  }
+
+  function showState(key) {
+    var e = findEl(key); if (!e) return;
+    var st = saveState[key], m = markOf(e.it, e.c);
+    e.state.className = "state";
+    var pend = showNote[key];
+    if (pend && !(st && (st.s === "saving" || st.s === "err"))) e.state.textContent = m && m.result === pend ? "Your change is not sent yet" : (pend === "note" ? "Comment" : pend === "works" ? "Works" : "Doesn't work") + ", not sent yet";
+    else if (st && st.s === "saving") e.state.textContent = "Saving…";
+    else if (st && st.s === "err") { e.state.className = "state err"; e.state.textContent = st.msg; }
+    else if (st && st.s === "ok") { e.state.className = "state " + (st.bad ? "err" : "ok"); e.state.textContent = st.msg || (m ? "✓ Saved" : "✓ Cleared"); }
+    else e.state.textContent = m && m.marked ? "Marked " + fmtStamp(m.marked) : "Not checked yet";
+  }
+
+  function updateChecks(newest) {
+    var total = 0, left = 0, bad = 0;
+    rows.forEach(function (r) {
+      var t = tally(r.it);
+      total += t.all; left += t.all - t.marked; bad += t.fails;
+      if (r.cc) {
+        r.cc.textContent = "";
+        if (t.marked === t.all && !t.fails) r.cc.appendChild(el("span", "all", "All " + t.all + " checks work"));
+        else {
+          r.cc.appendChild(document.createTextNode(t.marked + " of " + t.all + " checked"));
+          if (t.fails) { r.cc.appendChild(document.createTextNode(", ")); r.cc.appendChild(el("span", "bad", t.fails + " not working")); }
+        }
+        // the tag is ahead of the database: say so until the writer has recorded it
+        if (t.marked === t.all && shownStatus(r.it) !== r.it.status) r.cc.appendChild(document.createTextNode(". Claude is recording it."));
+      }
+      if (!r.cx) return;
+      r.cx.els.forEach(function (e) {
+        var m = markOf(e.it, e.c), res = m ? m.result : "";
+        var pend = showNote[e.key] || "", open = !!pend;
+        var note = m ? String(m.note || "").trim() : "";
+        // the plain places show the answer in force; a comment place shows what is waiting in the open box
+        e.item.className = "check" + (res ? " " + res : "");
+        e.yes.setAttribute("aria-pressed", res === "works" ? "true" : "false");
+        e.no.setAttribute("aria-pressed", res === "fails" ? "true" : "false");
+        e.yesC.setAttribute("aria-pressed", pend === "works" ? "true" : "false");
+        e.noC.setAttribute("aria-pressed", pend === "fails" ? "true" : "false");
+        e.only.setAttribute("aria-pressed", pend === "note" ? "true" : "false");
+        e.lab.textContent = pend === "note" ? "Comment only. This check is not marked either way."
+          : pend === "fails" ? "Doesn't work, with a comment. What did you see?" : "Works, with a comment. What do you want to say?";
+        e.nb.hidden = !open;
+        e.said.hidden = open || !note;
+        e.saidText.textContent = note;
+        e.say.hidden = open || !(m && !note);
+        if (document.activeElement !== e.ta) e.ta.value = noteFor(e.key, m);
+        e.clear.hidden = !(m || open);
+        showState(e.key);
+      });
+    });
+    var bar = $("checkbar");
+    bar.hidden = !total || isRunning();
+    $("cb-left").textContent = String(left);
+    $("cb-label").textContent = left === 1 ? "check still to try" : "checks still to try";
+    var sub = $("cb-sub");
+    sub.textContent = "of " + total + " in all" + (bad ? ", " + bad + " marked not working" : "") + (marksLoaded ? "" : " (loading your marks)");
+    sub.className = bad ? "bad" : "";
+    $("qbar").parentNode.classList.toggle("cpulse", left > 0 && !bar.hidden);
+    Array.prototype.forEach.call($("filters").children, function (b) {
+      var lbl = b.querySelector(".lbl"); if (!lbl) return;
+      if (b.dataset.key === TOTRY) lbl.textContent = "Still to check (" + left + ")";
+      if (b.dataset.key === NOTWORK) lbl.textContent = "Not working (" + bad + ")";
+    });
+    setFilter(current, newest);
+  }
+
+  // ---- a table on a row: field "table" = {title, columns: [names], rows: [{<column name>: value}], totals, summary} ----
+  function isNum(v) { return typeof v === "number" && isFinite(v); }
+  function makeTable(it) {
+    var t = it.table;
+    if (!t || !Array.isArray(t.columns) || !t.columns.length || !Array.isArray(t.rows)) return null;
+    var list = t.rows.filter(function (r) { return r && typeof r === "object"; });
+    if (!list.length) return null;
+    var cols = t.columns.map(String);
+    var box = el("div", "scores");
+    if (t.title) box.appendChild(el("h3", null, String(t.title)));
+    var scroll = el("div", "scroll"), tbl = el("table"), th = el("thead"), hr = el("tr");
+    cols.forEach(function (c) { hr.appendChild(el("th", null, c)); });
+    th.appendChild(hr); tbl.appendChild(th);
+    var tb = el("tbody"), sum = cols.map(function () { return 0; }), any = cols.map(function () { return false; });
+    list.forEach(function (r) {
+      var tr = el("tr");
+      cols.forEach(function (c, i) {
+        var v = r[c], none = v == null || v === "";
+        tr.appendChild(el("td", none ? "nil" : null, none ? "\u2013" : String(v)));
+        if (i && isNum(v)) { sum[i] += v; any[i] = true; }
+      });
+      tb.appendChild(tr);
+    });
+    tbl.appendChild(tb);
+    if (t.totals && any.some(Boolean)) {
+      var tf = el("tfoot"), fr = el("tr");
+      cols.forEach(function (c, i) { fr.appendChild(el("td", null, i ? (any[i] ? String(Math.round(sum[i] * 100) / 100) : "") : "Total")); });
+      tf.appendChild(fr); tbl.appendChild(tf);
+    }
+    scroll.appendChild(tbl); box.appendChild(scroll);
+    return { box: box, line: t.summary ? String(t.summary) : "" };
+  }
+
+  function makeRow(it, newest, wasOpen, moreWasOpen, bucket, away, nk) {
+    var st = tagOf(it);
+    var d = el("details", "row" + (it.kind === "phase" && !away ? " phase" : ""));
+    d.id = rowId(it._id);
+    if (wasOpen) d.open = true;
+    d.style.setProperty("--c", "var(" + st.c + ")");
+    d.style.setProperty("--cb", "var(" + st.c + "-bg)");
+    var s = el("summary");
+    var runRow = isRunning();
+    s.appendChild(el("span", "num", runRow ? (it._dn || "") : (it.number || (it.kind === "phase" ? "•" : ""))));
+    s.appendChild(el("span", "name", it.kind === "step" && !runRow ? it.name + " (" + it.number + ")" : it.name));
+    s.appendChild(el("span", "tag", st.short));
+    var fresh = isFresh(it, newest);
+    var w = el("span", "when" + (fresh ? " fresh" : ""), fmtWhen(it._stamp));
+    w.title = "Last changed";
+    s.appendChild(w);
+    if (away) s.appendChild(el("span", "pof", "Part of " + (away.kind === "step" ? away.name + " (" + away.number + ")" : away.name)));
+    var cx = makeChecks(it), cc = null;
+    if (cx) { cc = el("span", "ccount"); s.appendChild(cc); }
+    var sc = makeTable(it);
+    if (sc && sc.line) s.appendChild(el("span", "sline", sc.line));
+    var nn = nOpenOn(it._id);
+    if (nn) s.appendChild(el("span", "ncount", nn === 1 ? "1 note for Claude" : nn + " notes for Claude"));
+    var nq = qOpenOn(it._id);
+    if (nq) s.appendChild(el("span", "qcount", nq === 1 ? "A question for you" : nq + " questions for you"));
+    var hasPlan = typeof it.plan === "string" && it.plan.trim() !== "";
+    if (hasPlan) s.appendChild(el("span", "pmark", "Plan written"));
+    if (nk) {
+      var fm = el("span", "fmark"); s.appendChild(fm);
+      var fmText = function () {
+        fm.textContent = d.open ? (nk === 1 ? "Its 1 sub-step is shown below" : "Its " + nk + " sub-steps are shown below")
+          : nk + (nk === 1 ? " sub-step" : " sub-steps") + " folded inside: open to show";
+      };
+      fmText();
+      // only the viewer's own tap is remembered, not an opening done by a filter
+      s.addEventListener("click", function () { if (d.open) delete openDone[it._id]; else openDone[it._id] = true; saveOpenDone(); });
+      d.addEventListener("toggle", function () { fmText(); foldQuiet = true; setFilter(current); foldQuiet = false; });
+    }
+    d.appendChild(s);
+    var qb = makeQuestions(null, it._id);
+    if (qb) d.appendChild(qb);
+    if (hasPlan) {
+      var pf = el("details", "more"), ps = el("summary", null, "Show plan");
+      pf.id = "plan-" + it._id;
+      if (planOpen[it._id]) { pf.open = true; ps.textContent = "Hide plan"; }
+      pf.addEventListener("toggle", function () { planOpen[it._id] = pf.open; ps.textContent = pf.open ? "Hide plan" : "Show plan"; });
+      pf.appendChild(ps); pf.appendChild(mdEl("plantext md", it.plan));
+      d.appendChild(pf);
+    }
+    if (sc) d.appendChild(sc.box);
+    if (cx) d.appendChild(cx.box);
+    var dl = el("dl", "facts");
+    dl.appendChild(el("dt", null, "Where it stands")); dl.appendChild(el("dd", null, st.key));
+    FIELDS.forEach(function (f) {
+      var v = it[f[0]];
+      dl.appendChild(el("dt", null, f[1]));
+      var dd = el("dd");
+      if (!v || /^not recorded$/i.test(v)) { dd.textContent = "not recorded"; dd.className = "empty"; }
+      else { dd.textContent = v; if (f[0] === "waits_on_you" && !/^nothing/i.test(v)) dd.className = "waits"; }
+      dl.appendChild(dd);
+    });
+    dl.appendChild(el("dt", null, "Last changed")); dl.appendChild(el("dd", null, it._stamp ? fmtWhen(it._stamp) : "not recorded"));
+    // Rows with checks: the checks lead; the long facts fold away behind a Details line.
+    var more = null;
+    if (cx) {
+      more = el("details", "more");
+      if (moreWasOpen) more.open = true;
+      more.appendChild(el("summary", null, "Details: what it does, what it does not do yet, where it was shown working"));
+      more.appendChild(dl);
+      d.appendChild(more);
+    } else d.appendChild(dl);
+    d.appendChild(makeNotes(it));
+    rows.push({ el: d, it: it, st: st, cx: cx, cc: cc, more: more, bucket: bucket, nk: nk || 0, under: null });
+    return d;
+  }
+
+  // ---- what the person writes on a row ----
+  function fmtNoteWhen(n) { return n.written ? "Written " + fmtStamp(n.written) : ""; }
+  function makeNotes(it) {
+    var id = it._id, box = el("div", "notes");
+    box.appendChild(el("h3", null, "Say something about this"));
+    var f = el("div", "qform"), taId = "nt-" + id;
+    var lab = el("label", null, "Your words go to Claude when you tap Done."); lab.htmlFor = taId;
+    var ta = el("textarea"); ta.id = taId; ta.dataset.key = "n-" + id; ta.rows = 3; ta.value = nDrafts[id] || "";
+    var row = el("div", "qrow"), btn = el("button", "qbtn", nSaving[id] ? "Saving…" : "Done"); btn.type = "button"; btn.id = "nd-" + id;
+    function ready() { btn.disabled = !!nSaving[id] || !String(nDrafts[id] || "").trim(); }
+    ta.addEventListener("input", function () { nDrafts[id] = ta.value; ready(); });
+    btn.addEventListener("click", function () { noteWrite(it); });
+    ready(); row.appendChild(btn);
+    var m = nState[id];
+    if (m) { var st = el("span", "state" + (m.err ? " err" : m.ok ? " ok" : ""), m.text); st.setAttribute("role", "status"); row.appendChild(st); }
+    f.appendChild(lab); f.appendChild(ta); f.appendChild(row); box.appendChild(f);
+    var ids = notesOn(id);
+    if (ids.length) {
+      var list = el("div", "nlist");
+      ids.slice(0, 3).forEach(function (k) { list.appendChild(noteCard(it, k)); });
+      box.appendChild(list);
+      if (ids.length > 3) {
+        var fold = el("details", "more"); fold.id = "nf-" + id; if (nFold[id]) fold.open = true;
+        fold.addEventListener("toggle", function () { nFold[id] = fold.open; });
+        fold.appendChild(el("summary", null, "Earlier notes (" + (ids.length - 3) + ")"));
+        var inner = el("div", "nlist");
+        ids.slice(3).forEach(function (k) { inner.appendChild(noteCard(it, k)); });
+        fold.appendChild(inner); box.appendChild(fold);
+      }
+    }
+    return box;
+  }
+
+  function noteCard(it, k) {
+    var n = notes[k], c = el("article", "qans ncard"); c.id = "note-" + k;
+    c.appendChild(el("span", "k", fmtNoteWhen(n) || "Written"));
+    if (n.check_text) c.appendChild(el("span", "quiet-line", "About the check: " + n.check_text));
+    if (n.status !== "done" && nEdit[k] != null) {
+      // changing an open note: nothing is written or sent until Done
+      var f = el("div", "qform"), ta = el("textarea"); ta.id = "ne-" + k; ta.dataset.key = "ne-" + k; ta.rows = 3; ta.value = nEdit[k];
+      ta.setAttribute("aria-label", "Change what I said");
+      var row = el("div", "qrow"), ok = el("button", "qbtn", "Done"); ok.type = "button"; ok.id = "ned-" + k;
+      var keep = el("button", "qbtn quiet", "Keep what I said"); keep.type = "button";
+      function ready() { ok.disabled = !String(nEdit[k] || "").trim(); }
+      ta.addEventListener("input", function () { nEdit[k] = ta.value; ready(); });
+      ok.addEventListener("click", function () { noteChange(it, k); });
+      keep.addEventListener("click", function () { delete nEdit[k]; render(); });
+      ready(); row.appendChild(ok); row.appendChild(keep); f.appendChild(ta); f.appendChild(row); c.appendChild(f);
+      return c;
+    }
+    c.appendChild(el("span", "v", n.text || ""));                       // the person's own words, as plain text
+    if (n.status === "done") {
+      c.appendChild(el("span", "k", "What changed"));
+      c.appendChild(mdEl("v md", n.done_note || "Claude acted on this."));
+    } else {
+      c.appendChild(el("span", "quiet-line", "Claude has not acted on this yet"));
+      var acts = el("div", "qrow");
+      var ch = el("button", "clear", "Change what I said"); ch.type = "button"; ch.id = "nc-" + k;
+      ch.addEventListener("click", function () { nEdit[k] = n.text || ""; delete nState[it._id]; render(); var t = $("ne-" + k); if (t) t.focus(); });
+      var back = el("button", "clear", "Take it back"); back.type = "button"; back.id = "nb-" + k;
+      back.addEventListener("click", function () { noteTakeBack(it, k); });
+      acts.appendChild(ch); acts.appendChild(back); c.appendChild(acts);
+    }
+    return c;
+  }
+
+  function noteErr(e, gone) {
+    var code = e && e.code;
+    return code === "invalid_argument" || code === "not_granted" ? "Not saved: only the page's owner and editors can write here."
+      : code === "not_found" ? gone : code === "quota_exceeded" ? "Not saved: the roadmap's storage is full."
+      : "Not saved: no connection right now. Tap again to retry.";
+  }
+  // tell Claude about a note through the shared sender; the line it gives is shown beside the row's Done button
+  function noteTell(it, k, line, lead) {
+    nState[it._id] = { ok: true, text: lead + " Telling Claude…" }; render();
+    sendToClaude(line, function () { return $("note-" + k) || $(rowId(it._id)); }, lead, "note",
+      function (t, err) { nState[it._id] = { ok: !err, err: !!err, text: t }; render(); });
+  }
+  function noteWrite(it) {
+    var id = it._id, text = String(nDrafts[id] || "").trim();
+    if (!text || nSaving[id]) return;
+    if (!db) { nState[id] = { err: true, text: "Not saved: the page is not connected. Open it signed in to Claude." }; render(); return; }
+    var k = id + "--" + Date.now().toString(36) + Math.floor(Math.random() * 36).toString(36);
+    nSaving[id] = true; nState[id] = { text: "Saving…" }; render();
+    db.doc("notes/" + k).set({ row: id, text: text, written: new Date().toISOString(), status: "open" }).then(function () {
+      nSaving[id] = false; delete nDrafts[id];
+      noteTell(it, k, "Written on the roadmap: on " + whereOf(id) + " (notes/" + k + "): " + text, "✓ Saved.");
+    }, function (e) { nSaving[id] = false; nState[id] = { err: true, text: noteErr(e, "Not saved: this row was taken down.") }; render(); });
+  }
+  function noteChange(it, k) {
+    var n = notes[k], text = String(nEdit[k] || "").trim();
+    if (!n || !text) return;
+    if (n.status === "done") { delete nEdit[k]; nState[it._id] = { err: true, text: "Claude already acted on this one, so it can't be changed." }; render(); return; }
+    if (text === String(n.text || "").trim()) { delete nEdit[k]; render(); return; }            // nothing changed: nothing sent
+    if (!db) { nState[it._id] = { err: true, text: "Not saved: the page is not connected. Open it signed in to Claude." }; render(); return; }
+    nState[it._id] = { text: "Saving…" }; render();
+    db.doc("notes/" + k).update({ text: text, changed: new Date().toISOString() }).then(function () {
+      delete nEdit[k];
+      noteTell(it, k, "Changed on the roadmap: what was written on " + whereOf(it._id) + " (notes/" + k + ") now reads: " + text, "✓ Saved.");
+    }, function (e) { nState[it._id] = { err: true, text: noteErr(e, "Not saved: this note is no longer there.") }; render(); });
+  }
+  function noteTakeBack(it, k) {
+    var n = notes[k]; if (!n) return;
+    if (n.status === "done") { nState[it._id] = { err: true, text: "Claude already acted on this one, so it can't be taken back." }; render(); return; }
+    if (!db) { nState[it._id] = { err: true, text: "Not taken back: the page is not connected. Open it signed in to Claude." }; render(); return; }
+    var words = n.text || "";
+    db.doc("notes/" + k).delete().then(function () {
+      delete nEdit[k];
+      noteTell(it, k, "Taken back on the roadmap: what was written on " + whereOf(it._id) + " (notes/" + k + ") was taken back. It read: " + words, "✓ Taken back.");
+    }, function (e) { nState[it._id] = { err: true, text: noteErr(e, "This note is no longer there.").replace("Not saved", "Not taken back") }; render(); });
+  }
+
+  function addFilter(key, label, color) {
+    var b = el("button"); b.type = "button"; b.dataset.key = key;
+    if (color) { var dot = el("span", "dot"); dot.style.background = "var(" + color + ")"; b.appendChild(dot); }
+    b.appendChild(el("span", "lbl", label));
+    b.addEventListener("click", function () { setFilter(key); });
+    $("filters").appendChild(b);
+  }
+
+  function setFilter(key, newest) {
+    current = key;
+    try { localStorage.setItem("roadmap-filter", key); } catch (e) {}
+    if (newest === undefined) newest = newestOf(rows.map(function (r) { return r.it._stamp; }));
+    Array.prototype.forEach.call($("filters").children, function (b) { b.setAttribute("aria-pressed", b.dataset.key === key ? "true" : "false"); });
+    function hit(it) {
+      if (key === "all") return true;
+      if (key === RECENT) return isFresh(it, newest);
+      // a row answered just now stays in view so the answer is seen saved
+      if (key === QFOR) return qOpenOn(it._id) > 0 || Object.keys(qState).some(function (k) { return questions[k] && questions[k].row === it._id; });
+      if (key === NOTES) return nOpenOn(it._id) > 0;
+      if (key === NOTWORK) return tally(it).fails > 0;
+      if (key === TOTRY) { var t = tally(it); return t.marked < t.all; }
+      if (key === NOCHK) return noChecks(it);
+      return shownStatus(it) === key && !noChecks(it);
+    }
+    rows.forEach(function (r) {
+      var match = hit(r.it);
+      var childMatch = r.it.kind === "step" && rows.some(function (c) { return c.it.parent === r.it._id && c.bucket === r.bucket && hit(c.it); });
+      // a sub-row a filter picks out opens its done step, so the sub-row shows
+      if (childMatch && key !== "all" && r.nk && !r.el.open && !foldQuiet) r.el.open = true;
+      r.el.hidden = !(match || childMatch);
+      r.el.classList.toggle("context", !match && childMatch);
+    });
+    // a done step's folded sub-rows show only while the step is open
+    rows.forEach(function (r) { if (r.under && (r.under.el.hidden || !r.under.el.open)) r.el.hidden = true; });
+    // a section shows only while it holds a row to show; with a filter on it is shown open, whatever was stored;
+    // a small heading inside it shows only while a row under it does
+    folds.forEach(function (f) {
+      var has = rows.some(function (r) { return !r.el.hidden && f.el.contains(r.el); });
+      f.el.hidden = !has;
+      f.el.open = key !== "all" ? has : foldOpen(f.key);
+      Array.prototype.forEach.call(f.el.querySelectorAll("details.hgroup"), function (g) {
+        g.hidden = !rows.some(function (r) { return !r.el.hidden && g.contains(r.el); });
+        if (key !== "all" && !g.hidden) g.open = true;
+      });
+      Array.prototype.forEach.call(f.el.querySelectorAll("h3.sub"), function (h) {
+        var box = h.nextElementSibling;
+        h.hidden = !rows.some(function (r) { return !r.el.hidden && box.contains(r.el); });
+      });
+    });
+    if (emptyNote) emptyNote.hidden = !rows.length || rows.some(function (r) { return !r.el.hidden; });
+  }
+
+  // Settings: this project's settings as the main session last recorded them in board/settings ("kind", "helpers",
+  // "writes", "writes_switch", "sessions"). A press never changes a setting here: it saves one request, board/ask-<id>
+  // ({setting, value, session, session_name, asked, status "open"}), and tells Claude; the main session makes the change,
+  // writes the new choice into board/settings and marks the request done. Until then the page shows the choice as asked.
+  // Who writes the roadmap is never asked for: only the command for the person to run themselves is shown, with Copy.
+  var asks = {}, setState = {}, copyMsg = "";
+  var SETS = [
+    { k: "kind", name: "Roadmap kind", c: [["stepped", "Stepped", "a build with an end: every step in order"], ["running", "Running", "ongoing work: live work in groups, finished work folded into History"]] },
+    { k: "writes", name: "Who writes the roadmap", c: [["writer", "A writer session", "a separate Roadmap writer session writes it"], ["main", "The main session", "the project's main session writes it itself"]] },
+    { k: "helpers", name: "Model helpers use", c: [["cheapest", "Cheapest that does the job well", "each helper gets the cheapest model that does its job well"], ["strongest", "Always the strongest", "every helper gets the strongest model"]] }
+  ];
+  var NOT_RECORDED = "Not recorded yet. Claude's main session records it at its next settings change.";
+  function curSetting(k) {
+    if (k === "kind") return settings && settings.kind === "running" ? "running" : "stepped";
+    var v = settings && settings[k]; return typeof v === "string" ? v : "";
+  }
+  function stateLine(id) {
+    var st = setState[id]; if (!st) return null;
+    return el("div", "state " + (st.bad ? "err" : "ok"), st.msg);
+  }
+  function askSetting(id, data, line) {
+    if (!db) { setState[id] = { bad: true, msg: "Not sent: the page is not connected. Open it signed in to Claude." }; renderSettings(); return; }
+    data.asked = new Date().toISOString(); data.status = "open";
+    setState[id] = { msg: "Sending…" }; renderSettings();
+    db.doc("board/" + id).set(data).then(function () {
+      sendToClaude(line + " (board/" + id + ")", function () { return $("set-" + id); }, "✓ Asked.", "request",
+        function (t, err) { setState[id] = { msg: t + " The choice changes here once the main session has made it.", bad: !!err }; renderSettings(); });
+    }, function (e) {
+      var code = e && e.code;
+      setState[id] = { bad: true, msg: code === "invalid_argument" || code === "not_granted" ? "Not sent: only the page's owner and editors can change settings." : "Not sent: no connection right now. Tap it again." };
+      renderSettings();
+    });
+  }
+  function copyCommand(text) {
+    function done(ok) {
+      copyMsg = ok ? "Copied. Paste it into a PowerShell window and press Enter." : "Copy is blocked here: the command is selected, press Ctrl+C.";
+      renderSettings();
+      if (!ok) { var i = $("set-cmd"); if (i) { i.focus(); i.select(); } }
+    }
+    try { navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(false); }); } catch (e) { done(false); }
+  }
+  function renderSettings() {
+    var box = $("setlist"); if (!box) return;
+    $("setbox").hidden = !db;
+    box.textContent = "";
+    SETS.forEach(function (s) {
+      var id = "ask-" + s.k, cur = curSetting(s.k), a = asks[id], row = el("div", "setrow");
+      row.id = "set-" + id;
+      row.appendChild(el("b", null, s.name));
+      row.appendChild(el("div", "means", s.c.map(function (c) { return c[1] + ": " + c[2] + "."; }).join(" ")));
+      var now = s.c.filter(function (c) { return c[0] === cur; })[0];
+      row.appendChild(el("div", "cur", now ? "Now: " + now[1] + "." : NOT_RECORDED));
+      if (s.k === "writes") {
+        // the person's own switch: shown, never asked for, never run
+        var cmd = settings && typeof settings.writes_switch === "string" ? settings.writes_switch : "";
+        if (!cmd) row.appendChild(el("div", "means", "The command to change it shows here once Claude's main session records this project's settings."));
+        else {
+          row.appendChild(el("div", "means", "Only you change this. To change it, run this yourself in a PowerShell window, not in Claude:"));
+          var cp = el("div", "setcopy"), inp = el("input"), cb = el("button", null, "Copy");
+          inp.id = "set-cmd"; inp.readOnly = true; inp.value = cmd; inp.setAttribute("aria-label", "The command to change who writes the roadmap");
+          cb.type = "button"; cb.setAttribute("aria-label", "Copy the command");
+          cb.addEventListener("click", function () { copyCommand(cmd); });
+          cp.appendChild(inp); cp.appendChild(cb); row.appendChild(cp);
+          if (cur === "main") row.appendChild(el("div", "means", "Then, in the project's main session, type /assistant:roadmap-start-writer."));
+          if (copyMsg) row.appendChild(el("div", "state ok", copyMsg));
+        }
+        box.appendChild(row); return;
+      }
+      var btns = el("div", "setbtns"), open = a && a.status === "open" && a.value !== cur ? a : null;
+      s.c.forEach(function (c) {
+        var asked = open && open.value === c[0];
+        var b = el("button", asked ? "asked" : null, c[1] + (asked ? " (asked)" : ""));
+        b.type = "button"; b.setAttribute("aria-pressed", cur === c[0] ? "true" : "false");
+        b.addEventListener("click", function () {
+          if (cur === c[0] || asked) return;
+          askSetting(id, { setting: s.k, value: c[0] }, "Asked on the roadmap: change the setting \"" + s.name + "\" to \"" + c[1] + "\"");
+        });
+        btns.appendChild(b);
+      });
+      row.appendChild(btns);
+      if (open) row.appendChild(el("div", "state", "Asked for " + s.c.filter(function (c) { return c[0] === open.value; }).map(function (c) { return c[1]; })[0] + ". The main session is making the change; it shows here once made."));
+      else if (a && a.status === "done" && a.value !== cur && a.done_note) row.appendChild(el("div", "state err", "Not changed: " + a.done_note));
+      var st = stateLine(id); if (st && !(a && a.status === "done")) row.appendChild(st);
+      box.appendChild(row);
+    });
+    // the questions file, for each of the project's sessions
+    var q = el("div", "setrow"), list = settings && Array.isArray(settings.sessions) ? settings.sessions : null;
+    q.appendChild(el("b", null, "Questions file"));
+    q.appendChild(el("div", "means", "Each session can keep its own questions file. Turning one on or off is asked in that session, and it changes once you say yes there."));
+    if (!list) q.appendChild(el("div", "cur", NOT_RECORDED));
+    else if (!list.length) q.appendChild(el("div", "cur", "No session of this project was open when the settings were last recorded."));
+    (list || []).forEach(function (x) {
+      if (!x || !x.id) return;
+      var id = "ask-questions--" + String(x.id).replace(/[^A-Za-z0-9._-]/g, "").slice(0, 100), a = asks[id], on = x.questions === true;
+      var nm = String(x.name || x.id) + (x.role === "main" ? " (main session)" : x.role === "writer" ? " (Roadmap writer)" : "");
+      var open = a && a.status === "open" && (a.value === "on") !== on ? a : null;
+      var line = el("div", "setsess"), left = el("span", null, nm + ": " + (on ? "on" : "off") + (open ? ", asked to turn it " + open.value : ""));
+      line.id = "set-" + id;
+      var b = el("button", null, on ? "Turn off" : "Turn on"), btns = el("div", "setbtns");
+      b.type = "button"; b.disabled = !!open;
+      b.setAttribute("aria-label", (on ? "Turn the questions file off for " : "Turn the questions file on for ") + nm);
+      b.addEventListener("click", function () {
+        askSetting(id, { setting: "questions", value: on ? "off" : "on", session: String(x.id), session_name: String(x.name || "") },
+          "Asked on the roadmap: turn the questions file " + (on ? "off" : "on") + " for the session \"" + (x.name || x.id) + "\"");
+      });
+      btns.appendChild(b); line.appendChild(left); line.appendChild(btns); q.appendChild(line);
+      if (!open && a && a.status === "done" && (a.value === "on") !== on && a.done_note) q.appendChild(el("div", "state err", "Not changed: " + a.done_note));
+      var st = stateLine(id); if (st && !(a && a.status === "done")) q.appendChild(st);
+    });
+    box.appendChild(q);
+  }
+
+  // Questions in chat: each session's questions file, copied as written by that session (board/questions-file--<session>,
+  // {session, session_name, file, text, open, changed}). Read only: the person answers in that chat.
+  var qfiles = {};
+  function renderQFiles() {
+    var box = $("qfiles"), ids = Object.keys(qfiles).sort(function (a, b) {
+      return String(qfiles[a].session_name || a).localeCompare(String(qfiles[b].session_name || b));
+    });
+    box.textContent = "";
+    box.hidden = !ids.length;
+    applyPulse();
+    if (!ids.length) return;
+    box.appendChild(el("h2", null, "Questions in chat"));
+    ids.forEach(function (id) {
+      var f = qfiles[id], card = el("article", "qfile"), head = el("div", "qfile-head");
+      head.appendChild(el("b", null, String(f.session_name || f.file || "A chat session")));
+      if (f.changed) head.appendChild(el("span", null, "Changed " + fmtStamp(f.changed)));
+      card.appendChild(head);
+      card.appendChild(mdEl("qfile-text md", f.text || ""));
+      card.appendChild(el("div", "means", "Answer these in that chat."));
+      box.appendChild(card);
+    });
+  }
+
+  // live facts from the page's own database
+  var timer = setTimeout(function () {
+    if (!items) fail("The roadmap's facts could not be loaded yet. Check the connection and open the page again.");
+  }, 10000);
+
+  (async function () {
+    try { db = await claude.use("db"); } catch (e) { db = null; }
+    if (!db) { clearTimeout(timer); fail("The roadmap's facts could not be loaded. Open the page signed in to Claude."); return; }
+    db.collection("steps").onSnapshot(function (snap) {
+      items = snap.docs.map(function (d) { var o = Object.assign({}, d.data()); o._id = d.id; o._stamp = stampOf(docTime(d), o.changed); return o; });
+      if (!snap.metadata.fromCache) clearTimeout(timer);
+      render();
+    }, function () { clearTimeout(timer); if (!items) fail("The roadmap's facts could not be loaded."); });
+    db.doc("board/next").onSnapshot(function (snap) {
+      board = snap.exists ? snap.data() : null;
+      boardStamp = board ? stampOf(docTime(snap), board.facts_as_of) : null;
+      render();
+    }, function () {});
+    db.doc("board/settings").onSnapshot(function (snap) {
+      settings = snap.exists ? (snap.data() || {}) : {};
+      render();
+      renderSettings();
+    }, function () {});
+    db.collection("board").onSnapshot(function (snap) {
+      var next = {};
+      var files = {};
+      snap.docs.forEach(function (d) {
+        if (d.id.indexOf("ask-") === 0) next[d.id] = d.data() || {};
+        else if (d.id.indexOf("questions-file--") === 0) files[d.id] = d.data() || {};
+      });
+      asks = next;
+      qfiles = files;
+      renderSettings();
+      renderQFiles();
+    }, function () {});
+    renderSettings();
+    db.collection("marks").onSnapshot(function (snap) {
+      var next = {};
+      snap.docs.forEach(function (d) { next[d.id] = d.data(); });
+      var before = {}, old = realMarks;
+      (items || []).forEach(function (it) { before[it._id] = shownStatus(it); });
+      realMarks = next;
+      if (!snap.metadata.fromCache) marksLoaded = true;
+      if (!items) { mergeMarks(); return; }
+      items.forEach(function (it) {
+        if (held[it._id] || before[it._id] === it.status) return;
+        var keep = {}, byOther = false;
+        checksOf(it).forEach(function (c) {
+          var k = markKey(it, c); if (!old[k]) return;
+          keep[k] = old[k];
+          if (!next[k] && !(Date.now() - (ownClears[k] || 0) < 10000)) byOther = true;
+        });
+        if (!byOther) return;
+        held[it._id] = { until: Date.now() + HOLD_MS, marks: keep };
+        setTimeout(function () { mergeMarks(); render(); }, HOLD_MS + 50);
+      });
+      mergeMarks();
+      // a row whose shown status changed with the marks is drawn again (tag, colour, counts, filters)
+      if (items.some(function (it) { return shownStatus(it) !== before[it._id]; })) render(); else updateChecks();
+    }, function () {
+      var sub = $("cb-sub"); sub.className = "bad"; sub.textContent = "Your marks could not be loaded. Open the page again.";
+    });
+    db.collection("notes").onSnapshot(function (snap) {
+      var next = {};
+      snap.docs.forEach(function (d) { next[d.id] = d.data() || {}; });
+      // a note Claude has acted on can no longer be changed: drop a change being typed for it
+      Object.keys(nEdit).forEach(function (k) { if (!next[k] || next[k].status === "done") delete nEdit[k]; });
+      notes = next;
+      if (items) render();
+    }, function () {});
+    db.collection("questions").onSnapshot(function (snap) {
+      var next = {};
+      snap.docs.forEach(function (d) { var q = d.data() || {}; if (q.source !== "chat") next[d.id] = q; });
+      // A question asked again (back to open after an answer, or open with new wording after this page saved an
+      // answer) starts clean: no "Saved" line, no edit state, no draft made from the old answer. A draft being
+      // typed on a question that was open all along is kept, and so is the "Saved" line of one still answered.
+      Object.keys(next).forEach(function (k) {
+        var was = questions[k], now = next[k];
+        if (!was || qStatus(now) !== "open") return;
+        if (qStatus(was) !== "open") { delete qState[k]; delete qEditing[k]; delete qDrafts[k]; }
+        else if (qState[k] && !qSaving[k] && (String(was.question || "") !== String(now.question || "") || qHistory(was).length !== qHistory(now).length)) {
+          delete qState[k]; delete qEditing[k];
+        }
+      });
+      questions = next;
+      if (items) render();
+    }, function () {
+      var bar = $("qbar"); bar.hidden = false; $("qb-left").textContent = "?";
+      $("qb-label").textContent = "questions could not be loaded"; $("qb-sub").textContent = "Open the page again.";
+    });
+  })();
+})();
+</script>

@@ -1,0 +1,6 @@
+#!/bin/sh
+# Refuses the commit when a message on the page points at something that does not exist, or when the tests mapped to the changed files fail.
+# Only those tests run (githooks/run_matching_tests.py holds the table); never the full set.
+root=$(git rev-parse --show-toplevel) || exit 1
+python "$root/tests/pointers_check.py" || { echo "Refused: fix the messages above (or the thing they point at), then commit again." >&2; exit 1; }
+python "$root/githooks/run_matching_tests.py" || exit 1

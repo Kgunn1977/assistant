@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+.claude/*
+!.claude/settings.json
+!.claude/hooks/
+prof.stats
+*.prof
