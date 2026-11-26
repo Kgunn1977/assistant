@@ -2849,7 +2849,9 @@ window.RM_RUN = function (document, localStorage, claude) {
     if (fn) { fn.hidden = shown > 0 || f[0] === 'held'; fn.textContent = 'Nothing here right now.'; }
     setHtml(bar, FEED_F.map(function (x) {
       var c = (x[2] || FEED_KINDS).reduce(function (t, k) { return t + n[k]; }, 0);
-      return '<button type="button" data-s="feed-f" data-f="' + x[0] + '" aria-pressed="' + (x[0] === f[0]) + '">' + h(x[1]) + '<span class="c">' + c + '</span></button>';
+      /* each filter's title is the name that kind of card goes by on the page, his own from Settings where he gave one (spec 5.1) */
+      var nm = x[2] && typeof secTitle === 'function' ? secTitle(x[2][0]) : '';
+      return '<button type="button" data-s="feed-f" data-f="' + x[0] + '" aria-pressed="' + (x[0] === f[0]) + '">' + h(nm || x[1]) + '<span class="c">' + c + '</span></button>';
     }).join(''));
     var need = n.decide + n.small, hn = $('n-feed'); if (hn) hn.textContent = need ? need + ' need you' : '';
   }
