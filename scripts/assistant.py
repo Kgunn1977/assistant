@@ -1,8 +1,8 @@
 r"""The assistant's own program in the plugin: lay it down, turn it on and off, update it, take it off.
 
     python assistant.py lay-down  --root <folder> [--port N] [--sending yes|no]
-    python assistant.py turn-on   --root <folder>       make the two hidden jobs (only after the person said yes)
-    python assistant.py turn-off  --root <folder>       stop the listener, remove the two jobs
+    python assistant.py turn-on   --root <folder>       make the one hidden job, the listener that also runs the checks (only after the person said yes)
+    python assistant.py turn-off  --root <folder>       stop the listener, remove its job (and an older home's pass job)
     python assistant.py status    --root <folder>
     python assistant.py update-plan  --root <folder>    what an update would do to each general file
     python assistant.py update-apply --root <folder> [--choices <file>] [--wait <minutes>]

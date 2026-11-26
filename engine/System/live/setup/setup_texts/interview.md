@@ -155,10 +155,10 @@ Say the rule plainly: "I never send anything without your approval. Usually you 
 
 ## Last: switching it on [at the computer]
 
-`turn_on`: "Last thing. To keep working, I need two things running in the background, hidden, while this computer is on. One checks your accounts for new messages every 15 minutes. The other keeps your page answering. Nothing else runs. Shall I switch them on now? 1 yes, 2 not yet."
-- Yes: switch them on with
+`turn_on`: "Last thing. To keep working, I need one thing running in the background, hidden, while this computer is on: it keeps your page answering and checks your accounts for new messages every 15 minutes. Nothing else runs. Shall I switch it on now? 1 yes, 2 not yet."
+- Yes: switch it on with
   `python "${CLAUDE_PLUGIN_DATA}/scripts/assistant.py" turn-on --root "<ROOT>"`
-  then `HELPER answer turn_on true`, which saves the answer only after checking both are on. If it refuses, tell them plainly it did not switch on (with what the first step said, in plain words) and stop. Then `HELPER open-page`: "Your page is opening in your browser. Choose its password there, 10 characters or more; type it only there, never here. Tell me when you see your page." Wait for that; if the page did not open, give them the address `open-page` gave, to open themselves.
+  then `HELPER answer turn_on true`, which saves the answer only after checking it is on. If it refuses, tell them plainly it did not switch on (with what the first step said, in plain words) and stop. Then `HELPER open-page`: "Your page is opening in your browser. Choose its password there, 10 characters or more; type it only there, never here. Tell me when you see your page." Wait for that; if the page did not open, give them the address `open-page` gave, to open themselves.
 - Not yet: `HELPER answer turn_on false`, and say the page opens once it is switched on, and that typing /assistant:change switch-on does that any time.
 
 Then `HELPER finish`. Close with three lines: what is set up (one line), the page's address (and the outside address if it is reached from anywhere), and: "To change any of this later, open Settings on your page and press Start beside Change in Tools, or type /assistant:change here."
