@@ -6,7 +6,8 @@ owner (the RSI plan, "Running and cost", "The four parts" 4, "Cards and buttons"
   No job is queued for a section that already has one waiting, or while its rule change card is open.
 - Run by the listener after the press is handled, in a worker of its own (never the chat's one-job-at-a-time queue), one
   section at a time, until the queue is empty or the RSI daily cap is reached (then the jobs wait for the next run).
-  Level 1 (the default): the job does nothing more; teaching on cards is the Level 1 flow. Level 2: coach.coach(section),
+  Level 1 (the default): the section is graded again (its score in Settings stays current) and no change is proposed;
+  teaching on cards is the Level 1 flow. Level 2: coach.coach(section),
   shown on a card; it is never promoted on its own.
   Level 3 (guardrail A15 as amended, only in a section the owner set to Level 3): rounds of grade, coach and grade-draft
   (coach.coach), each draft promoted on its own only by coach.self_promote (it scores higher than his live rules and breaks
@@ -267,8 +268,12 @@ def _job(job, runner, ask, made):
     level = settings_page.learning_levels().get(sec, settings_page.LEARN_DEFAULT)
     if level == 3:
         return _improve(job, runner, ask, made)
-    if level != 2:
-        _log(f"{sec}: level 1: no change proposed; he teaches on the cards")
+    if level != 2:             # level 1: it still learns (his score is graded again), but no change is proposed
+        got = grader.grade_work(sec) if job.get("kind") == "work" else grader.grade(sec, runner=runner)
+        if grader.CAP_REACHED in str((got or {}).get("result") or ""):
+            _log(f"{sec}: level 1: {grader.CAP_REACHED}; the job waits")
+            return "again"
+        _log(f"{sec}: level 1: graded again; no change proposed, he teaches on the cards")
         return "done"
     if open_card(sec):
         _log(f"{sec}: a rule change card is already open")
