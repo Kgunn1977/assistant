@@ -440,6 +440,8 @@ def _do(action, text, when, n=0):
         got = card_search.for_action(action)
         return [], (f"{got['count']} card(s) found ({got['open']} open, {got['closed']} closed): "
                     + ", ".join(f"{c['id']} {c['header']}" for c in got["cards"][:10]))[:900]
+    if kind == "cards_done":   # every open card on a topic closed as done, and the list of what was closed (spec 1.3)
+        return _cards_done(action, text, when)
     if kind == "mail":         # one email's own buttons: label, mark read or unread, star, archive, delete (mail.act, as pressed)
         return _mail_press(action, when)
     if kind == "text":         # the Texts part's own presses: mark read, take back a text waiting to go, throw away a text draft
@@ -497,6 +499,49 @@ def _calendar(action, text):
         out = calendar_view.delete(body)
     _sent_now.append({"what": "calendar", "ok": bool(out.get("ok")), "do": do, "id": (out.get("event") or {}).get("id")})
     return calendar_view.said(out, do)
+
+
+DONE_WORDS = r"\b(close|done|finish|finished|clear|mark|complete|completed|dismiss|wrap)\b"
+
+
+def _cards_done(action, text, when):
+    """{"type": "cards_done", "words": "the topic", "kind", "button", "ids": [...]}: every open card the search finds (card_search.py,
+    every card) or the ids name is closed as done by Done's own code, and the reply lists each card closed. On his own words."""
+    import answers
+    import card_search
+    why = _his_words_refuse(text, DONE_WORDS, CAL_NOT)
+    if why:
+        return [], f"No card was closed: {why}. Tell me plainly to close them."
+    ids = [str(i) for i in action.get("ids") or [] if str(i or "").strip()]
+    words, kind, button = str(action.get("words") or ""), str(action.get("kind") or ""), str(action.get("button") or "")
+    if not ids and not (words.strip() or kind.strip() or button.strip()):
+        return [], "I could not tell which cards you meant, so I closed none."
+    found = card_search.search(words, kind, button, "open", 200)["cards"] if (words.strip() or kind.strip() or button.strip()) else []
+    if ids:
+        snap = {i.get("id"): i for i in (common.read_json(common.ITEMS_JSON, {}) or {}).get("items") or []}
+        found = [c for c in found if c["id"] in ids] if found else \
+            [{"id": i, "header": (snap.get(i) or {}).get("header") or (snap.get(i) or {}).get("title")} for i in ids if i in snap]
+    if not found:
+        return [], "I found no open card like that, so I closed none."
+    changed, closed, failed = {}, [], []
+    for c in found:
+        rec = {"id": c["id"], "at": when.isoformat(timespec="seconds"), "text": "", "label": "Done", "origin": "chat", "action": "done"}
+        try:
+            out = answers.act_on_answer(rec)
+        except Exception as e:  # noqa: BLE001  one card that fails never stops the rest
+            out = {"ok": False, "error": type(e).__name__}
+        if out.get("ok"):
+            closed.append(c)
+            for it in out.get("items") or []:
+                changed[it.get("id")] = it
+        else:
+            failed.append(c)
+    _sent_now.append({"what": "cards", "ok": bool(closed)})
+    line = f"Closed {len(closed)} card{'s' if len(closed) != 1 else ''} as done" + (": " + "; ".join(
+        f"{c.get('header') or c['id']}" for c in closed) if closed else "") + "."
+    if failed:
+        line += f" {len(failed)} could not be closed: " + "; ".join(str(c.get("header") or c["id"]) for c in failed) + "."
+    return list(changed.values()), line[:2000]
 
 
 def _ready_card(iid):
@@ -1289,7 +1334,7 @@ def handle(text, at=None, card=None, own_step=None, queue=True, rules=True, open
             elif claims_draft(said) and not made:
                 # it says it put an email on the page, but no draft ACTION put one there: never claim what was not done
                 said, false_claim = "", True
-            if any((a or {}).get("type") in ("send", "text_send", "calendar") for a in rest) or any(s["what"] == "mail" for s in _sent_now[k_sent:]):
+            if any((a or {}).get("type") in ("send", "text_send", "calendar", "cards_done") for a in rest) or any(s["what"] == "mail" for s in _sent_now[k_sent:]):
                 said = ""       # what was sent or changed, to whom and from where, is said by the program's own lines alone
             elif claims_done(said) and not any(s["ok"] for s in _sent_now) and not got and not made:
                 said, false_done = "", True     # it says it sent or changed something no ACTION line did
