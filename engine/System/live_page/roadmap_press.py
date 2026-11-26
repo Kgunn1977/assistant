@@ -126,6 +126,10 @@ def words(folder, op, path, data):
         return _text(f"{s.get('number') or ''} {s.get('name') or rid}".strip(), 120)
     data = data if isinstance(data, dict) else {}
     if kind == "board":                                    # a settings request from the roadmap's Settings, worded as the page words it
+        if data.get("setting") == "answer":               # an answer to a session's questions file, typed under its copy
+            return (f'Answered on the roadmap, for the questions file of the session '
+                    f'"{_text(data.get("session_name") or data.get("session"), 120)}" ({_text(data.get("file"), 120)}): '
+                    f'{_text(data.get("answer"), 2000)} ({path})')
         if data.get("setting") == "questions":
             return (f'Asked on the roadmap: turn the questions file {_text(data.get("value"), 5)} for the session '
                     f'"{_text(data.get("session_name") or data.get("session"), 120)}" ({path})')

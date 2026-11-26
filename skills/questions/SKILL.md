@@ -5,7 +5,7 @@ description: How a session that keeps its own questions file asks the person que
 
 # The questions file
 
-A session that turned this on has its own questions file at the top of the project's folder: `Questions.md` for the first session, `Questions - <session title>.md` for each further one. It holds only the questions raised in that session that are open, oldest first. Other sessions in the project, including forks and sessions started from this one, do not share it. The person reads it in the side panel beside the chat and answers in chat. It keeps questions from scrolling out of sight and from being answered against the wrong number.
+A session that turned this on has its own questions file at the top of the project's folder: `Questions.md` for the first session, `Questions - <session title>.md` for each further one. It holds only the questions raised in that session that are open, oldest first. Other sessions in the project, including forks and sessions started from this one, do not share it. The person reads it in the side panel beside the chat and answers in chat, or on the roadmap where the project has one. It keeps questions from scrolling out of sight and from being answered against the wrong number.
 
 **Two places for questions to the person.** A question raised by the work (while building, or one a helper reports) goes on the roadmap, on the row it is about, and is answered there with a tap. A question raised in conversation with the person goes in this file and is answered in chat. Each question goes in one place, never both. In a project with only one of the two, every question to the person goes there; with neither, it is asked in chat. When you tell the person you put a work question on the roadmap, that is not a question to them in chat, and the file is not where it goes.
 
@@ -53,7 +53,7 @@ The way a numbered question looks in chat: the number and question at the left m
 
 ## On the roadmap
 
-In a project with a roadmap, the page shows a copy of this file under "Questions in chat", with this session's name; the person reads it there and answers in chat. At the end of every turn in which the file changed, run as one plain command `python "${CLAUDE_PLUGIN_DATA}/scripts/questions_setup.py" roadmap --file "<this session's file>"`, then make the write it saves in `writes_file` with ArtifactData, exactly as written, and if it prints `full_patch`, run that command after. With no roadmap it says so and changes nothing. Never write the copy yourself.
+In a project with a roadmap, the page shows a copy of this file under "Questions in chat", with this session's name (a copy of the file, never cards). The person answers in chat or in the box under the copy on the roadmap. An answer from the roadmap reaches you as a message starting "Answered on the roadmap, for the questions file of the session ..." or "Answered on the roadmap, for your questions file:": take it exactly as an answer typed in chat, by the same rules below. At the end of every turn in which the file changed, run as one plain command `python "${CLAUDE_PLUGIN_DATA}/scripts/questions_setup.py" roadmap --file "<this session's file>"`, then make the write it saves in `writes_file` with ArtifactData, exactly as written, and if it prints `full_patch`, run that command after. With no roadmap it says so and changes nothing. Never write the copy yourself.
 
 ## The checks
 

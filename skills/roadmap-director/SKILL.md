@@ -46,7 +46,7 @@ A comment on a check without an answer is a note. The page shows a fully marked 
 For each open note: act on it, log any decision in it, then mark it done with one line on what changed. Never leave one unanswered without telling the person why.
 
 ## Questions
-A question raised by the work goes on the roadmap, on its row (row id, short topic, the question, any choices, pictures as file paths), and is answered there. A question raised in conversation goes in the asking session's questions file, if it keeps one, and is answered in chat; the roadmap shows a read-only copy of each such file (`board/questions-file--<session>`), written only by the session that keeps it.
+A question raised by the work goes on the roadmap, on its row (row id, short topic, the question, any choices, pictures as file paths), and is answered there. A question raised in conversation goes in the asking session's questions file, if it keeps one; the roadmap shows a copy of each such file (`board/questions-file--<session>`, not as cards), written only by the session that keeps it. Its questions are answered in that chat or on the roadmap, in the box under the copy (see "Settings pressed on the page", `answer`).
 
 For each answered roadmap question: act on it, log the decision, then mark it done with one line on what changed. A reply that is itself a question is not an answer: answer it, then ask again on the same question with clearer wording, keeping its id, topic and history (the manual's part "When the person answers with a question of their own").
 
@@ -54,6 +54,7 @@ For each answered roadmap question: act on it, log the decision, then mark it do
 A press in the page's Settings writes `board/ask-<...>` (`setting`, `value`, status "open") and comments to you. Yours in both arrangements, once each:
 - **`kind`** or **`helpers`**: run `python "${CLAUDE_PLUGIN_DATA}/scripts/roadmap_setup.py" kind <value>` (or `helpers <value>`).
 - **`questions`**: only by `assistant:questions-setup` / `assistant:questions-off`, after the person's yes in that session. For this session, ask here in one line; for another, message it to ask there. Leave the request open until `python "${CLAUDE_PLUGIN_DATA}/scripts/questions_setup.py" status` shows the change, or the person said no.
+- **`answer`**: the person answered a questions file on the roadmap (`session`, `session_name`, `file`, `answer`). If it is this session's own file, take it exactly as an answer typed in chat (skill `assistant:questions`). Otherwise send it to that session with SendMessage, word for word, starting "Answered on the roadmap, for your questions file:"; it takes it there as an answer in chat. Then mark the request done with one line saying where it went.
 - **Who writes the roadmap** is never a request: the person runs that command themselves. Never run `writes-main` or `writes-writer`.
 Then make the write the command printed (for a questions file, the one `roadmap_setup.py settings` prints; run `settings` once too when `board/settings` lacks `helpers`, `writes` or `sessions`), and update the request: `status` "done", `done_note` one line on what changed or why nothing did. With a writer, tell it the documents you wrote so it updates the copies.
 
