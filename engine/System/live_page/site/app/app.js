@@ -1764,6 +1764,9 @@ window.RM_RUN = function (document, localStorage, claude) {
   function stays(it, a) {
     var n = pressName(a);
     if (!n && !isSend(a) && a && !a.calendar && (a.action === 'answer' || a.action === 'change') && a.label && a.question) return true;     /* one question's own answer button: the card stays */
+    /* a card of several questions works as nested cards (spec 4.7): answering one, by its button, the calendar or his own words
+       for it, closes that question alone; the card stays until every question is settled */
+    if (a && !isSend(a) && (a.question || a.calendar || n === 'approve') && questionsOf(it, sect(it)).length > 1) return true;
     if (n === 'rule_offer') return /^(discuss|cancel)$/.test(String(pressOf(a).do));      /* rewording or cancelling a proposed rule: the card stays */
     if (n === 'wait_longer') return a.status === 'done';             /* acted on: the card is waiting again, in its own place */
     return n === 'bring_back' || n === 'never_junk' || n === 'undo' || n === 'always_show' || n === 'write_them' || n === 'old_card' || n === 'old_keep' || (n === 'approve' && !!it.draft && !!sendCfg());
@@ -2028,8 +2031,11 @@ window.RM_RUN = function (document, localStorage, claude) {
   function questionsHtml(it, s) {
     var qs = questionsOf(it, s), first = leadOf(it, s, qs);
     if (!qs.length) return '';
+    var sent = S.ans[it.key], sentQ = sent && (sent.status === 'saved' || sent.status === 'working') && !isSend(sent) ? +(sent.question || (sent.calendar || pressName(sent) === 'approve' ? 1 : 0)) : 0;
     return '<ol class="qs">' + qs.map(function (q, i) {
       var rec = q.choices.filter(function (c) { return c.recommended; })[0];
+      /* the question just answered closes at once, a small closed card with his answer, while the others stay open */
+      if (qs.length > 1 && sentQ === i + 1) return '<li class="q-closed"><div class="q-ask">Answered: ' + hc(q.ask) + '</div><div class="q-said">Your answer: ' + hc(sent.label || saidOf(sent) || sent.text || '') + '</div></li>';
       var btns = i === 0 && first.length ? first : choiceBtns(q.choices, qs.length > 1 ? i + 1 : 0);
       return '<li><div class="q-ask">' + hc(q.ask) + (rec ? ' <span class="q-rec">Recommended: ' + hc(rec.label) + '</span>' : '') + '</div>' +
         '<div class="acts' + (btns.some(function (x) { return x[0] === 'choice' && x[1].length > 30; }) ? ' tall' : '') + '">' + btns.map(btnHtml).join('') + '</div></li>';
