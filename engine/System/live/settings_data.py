@@ -156,9 +156,9 @@ def defs(now=None):
              explain="On (the default) shows pictures in email. Off hides them until you press Show pictures on that email, because senders can tell when their images load. Takes effect at once."),
 
         _one("page", "later_offers", "Snooze options", "checks", pg.get("later_offers") or [],
-             choices=_c((("today", "Later today"), ("tomorrow", "Tomorrow"), ("next_week", "Next week"), ("date", "A date"),
+             choices=_c((("today", "Later today"), ("tomorrow", "Tomorrow"), ("date", "A date"),
                          ("someday", "Someday"))),
-             explain="Which choices the Snooze button offers: Later today, Tomorrow, Next week, A date and Someday. All five are on by default and at least one must stay on. Takes effect at once."),
+             explain="Which other choices the Snooze button offers beside Next week (back on Monday), which is always there: Later today, Tomorrow, A date and Someday. All are on by default. Takes effect at once."),
 
         _one("page", "group_by", "Group cards by", "choice", pg.get("group_by"),
              choices=_c((("nothing", "None"), ("sender", "Sender"), ("area", "Area"), ("conversation", "Conversation"))),

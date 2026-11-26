@@ -503,7 +503,7 @@ def for_page():
                  "snooze_days": page.get("snooze_days") if page.get("snooze_days") in SNOOZE_DAYS else 0,
                  "clock": "24" if str(page.get("clock")) == "24" else "12",
                  "mail_pictures": "hide" if page.get("mail_pictures") == "hide" else "show",      # shown unless he chose Hide
-                 "later_offers": [x for x in LATER_OFFERS if x in page["later_offers"]] if isinstance(page.get("later_offers"), list)
+                 "later_offers": [x for x in LATER_OFFERS if x in page["later_offers"] or x == "next_week"] if isinstance(page.get("later_offers"), list)
                  and page.get("later_offers") else list(LATER_OFFERS),
                  "group_by": _ordermod().settings()[0], "sort_by": _ordermod().settings()[1],
                  "group_kinds": page.get("group_kinds") is not False},        # the bar at the top of Cards: on unless he turned it off
@@ -764,9 +764,9 @@ def check(body):
         out["mail_order"] = list(dict.fromkeys(x.strip().lower() for x in mo))
     if group == "page" and "later_offers" in v:
         lo = v["later_offers"]
-        if not isinstance(lo, list) or not lo or any(x not in LATER_OFFERS for x in lo):
-            raise Refused("Snooze must offer at least one of its choices.")
-        out["later_offers"] = [x for x in LATER_OFFERS if x in lo]
+        if not isinstance(lo, list) or any(x not in LATER_OFFERS for x in lo):
+            raise Refused("Those are not Snooze's choices.")
+        out["later_offers"] = [x for x in LATER_OFFERS if x in lo or x == "next_week"]      # Next week is always on Snooze (spec 4.10)
     return group, out
 
 
