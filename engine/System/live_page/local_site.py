@@ -966,7 +966,7 @@ class Door(BaseHTTPRequestHandler):
             if route == "api/mail/body" and method == "GET":         # the email as sent, shown in a frame that runs nothing
                 if not re.fullmatch(r"\d{1,12}", q.get("id") or ""):
                     return self._json(400, {"error": "bad email"})
-                pictures = q.get("pictures") == "1"
+                pictures = q.get("pictures") != "0"          # shown unless the page asks to hide them (Settings: Hide)
                 got = mail.body_doc(int(q["id"]), pictures)
                 if got is None:
                     return self._json(404, {"error": "no html"})
