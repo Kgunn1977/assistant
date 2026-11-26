@@ -32,11 +32,11 @@ project folder (or pass --project). Commands:
                                does the job well) or "strongest" (always the strongest model). Records it in the config
                                and prints the same write
   settings                     prints the one board/settings write that makes the roadmap page's Settings section show
-                               the settings as they now are: kind, helpers, who writes it (and the command for the
-                               person to change that), and the project's sessions with their questions file
+                               the settings as they now are: kind, helpers, who writes it (and the command that
+                               changes it), and the project's sessions with their questions file
   switch-off / switch-on       for the person only, never Claude: put the project's roadmap arrangement to one
                                side (the blocks stop), or bring it back
-  writes-main / writes-writer  for the person only, never Claude: the main session writes the roadmap itself (no
+  writes-main / writes-writer  the main session writes the roadmap itself (no
                                Roadmap writer; the recorded writer is retired and nothing points at it any more), or
                                back to a Roadmap writer session (start one with /assistant:roadmap-start-writer)
 For a project whose roadmap was made before the plugin (the take-over in /assistant:roadmap-setup):
@@ -596,9 +596,8 @@ def print_settings(project):
 
 
 def set_writes(project, mode):
-    """Who writes the roadmap: "main" (the main session itself) or "writer" (a Roadmap writer session). The person's alone."""
-    if os.environ.get("CLAUDECODE") or os.environ.get("CLAUDE_CODE_ENTRYPOINT"):
-        raise SystemExit("Refused: only the person changes who writes the roadmap, not Claude. Run this yourself in a terminal.")
+    """Who writes the roadmap: "main" (the main session itself) or "writer" (a Roadmap writer session). Changed by the person,
+    or by the main session when the person asks for it (a press in the roadmap page's Settings reaches it as a request)."""
     path = rb.config_path(project)
     if not os.path.isfile(path):
         raise SystemExit("Not done: " + project + " has no roadmap set up (run /assistant:roadmap-setup there first).")

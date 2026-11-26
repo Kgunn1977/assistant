@@ -54,7 +54,7 @@ For each answered roadmap question: act on it, log the decision, then mark it do
 A press in the page's Settings writes `board/ask-<...>` (`setting`, `value`, status "open") and comments to you. Yours in both arrangements, once each:
 - **`kind`** or **`helpers`**: run `python "${CLAUDE_PLUGIN_DATA}/scripts/roadmap_setup.py" kind <value>` (or `helpers <value>`).
 - **`questions`**: only by `assistant:questions-setup` / `assistant:questions-off`, after the person's yes in that session. For this session, ask here in one line; for another, message it to ask there. Leave the request open until `python "${CLAUDE_PLUGIN_DATA}/scripts/questions_setup.py" status` shows the change, or the person said no.
-- **Who writes the roadmap** is never a request: the person runs that command themselves. Never run `writes-main` or `writes-writer`.
+- **`writes`**: run `python "${CLAUDE_PLUGIN_DATA}/scripts/roadmap_setup.py" writes-main` (or `writes-writer`). For `writer`, then start the writer as `assistant:roadmap-start-writer` says.
 Then make the write the command printed (for a questions file, the one `roadmap_setup.py settings` prints; run `settings` once too when `board/settings` lacks `helpers`, `writes` or `sessions`), and update the request: `status` "done", `done_note` one line on what changed or why nothing did. With a writer, tell it the documents you wrote so it updates the copies.
 
 ## Helpers' model

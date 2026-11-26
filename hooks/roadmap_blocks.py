@@ -1,5 +1,5 @@
 """The roadmap's hooks, for a project's main session only. A project works one of two ways, set by "writes" in its
-config.json (only the person changes it, with roadmap_setup.py writes-main or writes-writer):
+config.json (changed with roadmap_setup.py writes-main or writes-writer, by the person or by the main session when asked on the page):
 
 WRITES "main" (the main session writes the roadmap itself):
 - PostToolUse, SubagentStop, UserPromptSubmit: note in the logbook work that the roadmap must show (a helper started,
