@@ -6814,6 +6814,8 @@ window.RM_RUN = function (document, localStorage, claude) {
   /* A paper, picture or message opened over the page, with Close back to the card (D8). */
   function viewOpen(it, b) {
     var ref = b.getAttribute('data-ref'), msg = b.getAttribute('data-msg'), v = {key: it.key, name: b.getAttribute('data-name') || b.textContent, kind: b.getAttribute('data-kind') || '', ref: ref, from: b};
+    /* a paper is opened as what it is: a PDF as a PDF (with Download), a picture as a picture */
+    if (!v.kind || v.kind === 'file') { var ext = (/\.([a-z0-9]{2,5})$/i.exec(v.name || '') || [])[1]; ext = ext ? ext.toLowerCase() : ''; if (ext === 'pdf') v.kind = 'pdf'; else if (/^(png|jpe?g|gif|webp|bmp|heic)$/.test(ext)) v.kind = 'image'; }
     if (b.getAttribute('data-sample')) v.kind = 'sample';
     else if (msg != null && msg !== '') { v.kind = 'message'; v.msg = +msg; if (v.msg > 0 && S.db && !S.mail.hosted) viewMsg(v); }
     if (viewPop(v)) return;
@@ -6845,6 +6847,7 @@ window.RM_RUN = function (document, localStorage, claude) {
       var sz = 900, wd = Math.min(sz, screen.availWidth || sz), ht = Math.min(sz, screen.availHeight || sz);
       var lf = Math.max(0, Math.round(((screen.availWidth || wd) - wd) / 2)), tp = Math.max(0, Math.round(((screen.availHeight || ht) - ht) / 2));
       var to = outside ? '' : url;
+      if (phone && !outside) return false;      /* on a phone a new tab would take the page's place: the paper opens over the page instead */
       w = phone ? window.open(to, 'assistant-viewer') : window.open(to, 'assistant-viewer', 'popup=yes,width=' + wd + ',height=' + ht + ',left=' + lf + ',top=' + tp);
       if (w && outside) { try { w.opener = null; } catch (e) {} w.location.href = url; }
     } catch (e) { w = null; }
@@ -6882,7 +6885,7 @@ window.RM_RUN = function (document, localStorage, claude) {
     el.hidden = !v;
     if (!v) { el.innerHTML = ''; el._html = ''; return; }
     var it = find(v.key) || {}, local = !!S.db && !S.mail.hosted && S.live !== 'off';
-    o += '<div class="view-bar"><b class="view-name">' + h(v.name || '') + '</b><span class="view-acts">' + ((v.kind === 'pdf' || v.kind === 'image') && v.ref && local ? '<a class="btn" id="view-dl" href="api/mail/file?ref=' + mailEnc(v.ref) + '" download="' + h(v.name) + '" rel="noopener">Download</a>' : '') + (v.back ? '<button class="btn" type="button" data-a="view-back">Back to the email</button>' : '') + '<button class="btn" id="view-close" data-a="view-close">Close</button></span></div><div class="view-body host" data-key="' + h(v.key) + '">';
+    o += '<div class="view-bar"><b class="view-name">' + h(v.name || '') + '</b><span class="view-acts">' + ((v.kind === 'pdf' || v.kind === 'image') && v.ref && !(S.mail && S.mail.hosted) ? '<a class="btn" id="view-dl" href="api/mail/file?ref=' + mailEnc(v.ref) + '" download="' + h(v.name) + '" rel="noopener">Download</a>' : '') + (v.back ? '<button class="btn" type="button" data-a="view-back">Back to the email</button>' : '') + '<button class="btn" id="view-close" data-a="view-close">Close</button></span></div><div class="view-body host" data-key="' + h(v.key) + '">';
     if (v.kind === 'pdf' && v.ref && local) o += '<div class="none view-wait" role="status">Opening...</div><iframe class="view-pdf" title="' + h(v.name) + '" src="api/mail/file?ref=' + mailEnc(v.ref) + '&amp;view=1"></iframe>';
     else if (v.kind === 'image' && v.ref && local) o += '<div class="none view-wait" role="status">Opening...</div><img class="view-img" alt="' + h(v.name) + '" src="api/mail/file?ref=' + mailEnc(v.ref) + '&amp;view=1">';
     else if (v.kind === 'message' && v.msg > 0 && local) o += v.err ? '<div class="err">' + h(v.err) + '</div>' : v.msgs ? v.msgs.map(function (m) { return mailMsgHtml(m, true); }).join('') : '<div class="none" role="status">Opening...</div>';
