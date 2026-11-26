@@ -587,7 +587,7 @@ class Door(BaseHTTPRequestHandler):
             return self._send(414, b"", "text/plain")
         route = urlparse(self.path).path.strip("/")
         if route.startswith("api/") and route not in HOLD_OPEN and not (route == "api/answers" and self.headers.get("X-Brief-Key"))                 and update_hold():
-            # an update's check pass has the database: the extension and the page ask again shortly; nothing is lost
+            # an update's check pass has the database: the page asks again shortly; nothing is lost
             return self._json(503, {"error": "updating", "say": "I'm being updated; this page comes back in a minute."},
                               (("Retry-After", "30"),))
         cfg = _load("config")
@@ -626,8 +626,6 @@ class Door(BaseHTTPRequestHandler):
                 return None
             with changed:
                 return self._json(200, {"ok": True, "answers": dict(_answers()["items"])})
-
-        # the Google Messages extension's door: this computer only, the extension's own token only
 
         # sign-in, setup
         if route == "login" and method == "POST":
@@ -868,7 +866,7 @@ class Door(BaseHTTPRequestHandler):
     def _texts(self, route, method, s):
         """The Texts part's doors, for a signed-in browser. Reading is open to the session; every change (a send, a read mark, taking
         a queued text back, discarding a draft) needs the page's own address and its token, and a text is queued only by the owner's
-        own Send press here: the extension takes it from the queue, and nothing else queues one."""
+        own Send press here: the Google Messages link (textlink.py) takes it from the queue, and nothing else queues one."""
         live = os.path.join(os.path.dirname(HERE), "live")
         if live not in sys.path:
             sys.path.insert(0, live)
