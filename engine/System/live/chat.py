@@ -463,6 +463,8 @@ CAL_WORDS = {"add": r"\b(add|put|schedule|book|set up|block( out| off)?|calendar
              "delete": r"\b(cancel|delete|remove|clear|take\b[^.!?]{0,40}\boff)\b"}
 CAL_NOT = r"\b(don'?t|do not|never|not yet|hold off|should i|should we|whether)\b|\b(did|has|have|had|does|is|was)\b[^.!?]{0,30}\b(cancell?ed|moved|added)\b"
 _typed = [None]         # when the owner typed this message (the page's own time): his words are the authority only while fresh
+_pressed = [None]       # his answer by a button on the card's question: a question is asked to act on its answer (spec 4.8)
+PRESSED_NO = r"^\s*(no|nope|not\b|don'?t|do not|never|skip|cancel|leave it|later|wait)"
 PRESSES_FOR_HIM = ("done", "got_it", "later", "bring_back", "junk", "never_junk", "undo", "not_needed", "always_show", "wait_longer",
                    "write_them", "drop", "old_keep", "read", "discard", "should_have_seen")  # never a yes he gives only on a card (standing, write, rule_offer)
 PAGE_BUTTONS = {"refresh_mail": ("mail-pull:", "Refresh mail"), "learn_voice": ("voice-learn", "Learn style now"),
@@ -486,6 +488,8 @@ def _calendar(action, text):
     if do not in ("add", "change", "delete"):
         return "I could not tell what to do on your calendar, so nothing was changed."
     why = _his_words_refuse(text, CAL_WORDS[do], CAL_NOT)
+    if why and _pressed[0] is not None and _pressed[0].strip() and not re.search(PRESSED_NO, _pressed[0], re.I):
+        why = ""        # he answered the card's question by its button: that answer is his say-so for the entry it leads to
     if why:
         return f"Nothing was changed on your calendar: {why}. Tell me plainly to do it."
     body = {k: action.get(k) for k in ("title", "calendar", "day", "all_day", "start", "end", "place", "notes", "find", "on_day") if k in action}
@@ -1195,7 +1199,7 @@ def card_facts(card):
 _scan_note = [None]         # what a rule saved in this message did to other cards: its Undo goes on the reply's turn
 
 
-def handle(text, at=None, card=None, own_step=None, queue=True, rules=True, open_card=None):
+def handle(text, at=None, card=None, own_step=None, queue=True, rules=True, open_card=None, pressed=None):
     """One message from the owner, in the box at the top or typed on a card (card: that card, decorated). Returns what
     act_on_answer returns: ok, items changed, the reply as result; for a card also card_action (what the run decided
     about the card) and made (the Ready to send cards written for it). own_step: the run is the assistant's own next
@@ -1227,6 +1231,7 @@ def handle(text, at=None, card=None, own_step=None, queue=True, rules=True, open
         _sent_now.clear()
         _asked_now.clear()
         _typed[0] = at or when.isoformat(timespec="seconds")
+        _pressed[0] = str(pressed) if pressed is not None and card else None
         false_done = False
         # a line starting with "/" would be taken as a command to the session itself, not as the owner's words
         words = ("(typed on the page) " + text) if text.startswith("/") else text
