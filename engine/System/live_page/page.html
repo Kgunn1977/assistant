@@ -4790,14 +4790,14 @@ html.apv-doc .apv-say{margin:12px 0 0;color:var(--fg-2)}
     CT.did[pid] = key;
     render();
   }
-  /* Start fresh (start_fresh.py): asks first; only Yes sends the press, carrying the confirm the engine checks for. Nothing is
-     deleted by this page; the computer deletes his own rules and lists and says what it did. */
+  /* Start fresh (start_fresh.py): asks first; only Yes sends the press, carrying the confirm the engine checks for. The
+     computer puts his own rules and lists aside and says what it did; Bring back sends the press that puts them back. */
   var FRESH = {ask: false};
   function freshLine() {
-    var a = S.ans && S.ans['start-fresh'], o = '<p class="say"><b>Start fresh</b> Deletes your own rules and lists, so I learn them again from your cards.</p>';
-    if (FRESH.ask) o += '<p class="say">This deletes your own rules and lists. The built-in rules, the rule book and your cards stay. Continue?</p>' +
+    var a = S.ans && S.ans['start-fresh'], o = '<p class="say"><b>Start fresh</b> Puts your own rules and lists aside, so I work as I would for someone new and learn again from your cards. Bring back puts them back.</p>';
+    if (FRESH.ask) o += '<p class="say">This puts your own rules and lists aside, so I work as I would for someone new. The built-in rules, the rule book and your cards stay. Bring back puts them back any time. Continue?</p>' +
       '<div class="acts"><button class="btn primary" type="button" data-s="fresh-go">Yes, start fresh</button><button class="btn" type="button" data-s="fresh-no">No</button></div>';
-    else o += '<div class="acts"><button class="btn" type="button" data-s="fresh-ask">Start fresh</button></div>';
+    else o += '<div class="acts"><button class="btn" type="button" data-s="fresh-ask">Start fresh</button><button class="btn" type="button" data-s="fresh-back">Bring back</button></div>';
     if (a && a.result) o += '<p class="say">' + h(a.result) + '</p>';
     else if (a && a.status === 'saved') o += '<p class="say">Sent to your computer.</p>';
     return o;
@@ -6155,9 +6155,10 @@ html.apv-doc .apv-say{margin:12px 0 0;color:var(--fg-2)}
     }
     if (a === 'fresh-ask') { FRESH.ask = true; render(); return; }
     if (a === 'fresh-no') { FRESH.ask = false; render(); return; }
-    if (a === 'fresh-go') {
+    if (a === 'fresh-go' || a === 'fresh-back') {
+      var back = a === 'fresh-back';
       FRESH.ask = false;
-      if (S.db) S.db.setAnswer('start-fresh', {id: 'start-fresh', action: 'answer', label: 'Start fresh', text: JSON.stringify({start_fresh: 'confirmed'}), at: isoLocal(new Date()), device: device, sent: false, status: 'saved', result: ''}).then(function () { render(); }, function () { render(); });
+      if (S.db) S.db.setAnswer('start-fresh', {id: 'start-fresh', action: 'answer', label: back ? 'Bring back' : 'Start fresh', text: JSON.stringify({start_fresh: back ? 'bring_back' : 'confirmed'}), at: isoLocal(new Date()), device: device, sent: false, status: 'saved', result: ''}).then(function () { render(); }, function () { render(); });
       render(); return;
     }
     if (a === 'reb-no') { REB.ask = false; render(); return; }

@@ -1869,7 +1869,7 @@ def act_on_answer(answer, on_update=None):
             said = voice.learn_now()
             _record(rec, t0, {"id": "voice-learn", "title": "Learn style now"}, "voice_learn", said, True, False)
             return {"ok": True, "items": [], "result": said, "thought": False, "secs": {"own": round(time.time() - t0, 3)}}
-        if rec.get("id") == "start-fresh":  # Settings, Rule book: Start fresh (start_fresh.py), only with his yes to its question
+        if rec.get("id") == "start-fresh":  # Settings, Rule book: Start fresh (start_fresh.py), only with his yes to its question, or Bring back
             if rec.get("action") != "answer":
                 return {"ok": True, "items": [], "result": "", "thought": False, "secs": {}}
             import start_fresh
