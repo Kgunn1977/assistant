@@ -13,6 +13,8 @@ the RSI daily cap), for exactly ONE change; everything else is program code:
   and named exactly ("set": one filter setting and its new value, or one entry added to or taken off one list, checked
   here); it is never put in a draft, and only apply_setting(), on the owner's Apply, makes it, through Settings' own save;
 - the proposal is saved under state\rsi\proposals\. Nothing promotes or rejects it on its own.
+- guardrail A20: every write of the coach step goes through _write_own(), which takes only the draft file and the proposals
+  folder, so the coach can never touch his live rules, the rule book or the grader.
 
 promote(), apply_setting() and reject() are program functions only, for the rule change card to call (rsi_loop.py), and
 self_promote() for the Level 3 loop alone (guardrail A15 as amended: only in a section the owner set to Level 3, only a rule
@@ -87,6 +89,17 @@ SETTING_TASK = ("These misses were made by a program layer (a setting, a junk ru
 SETTING_SHAPE = ('{"change": "setting", "what": "the one setting or list change, in plain words", '
                  '"set": {"setting": "...", "to": "..."} or {"list": "...", "add": "..."} or {"list": "...", "remove": "..."}, '
                  '"reason": "..."}')
+
+
+def _write_own(path, obj):
+    """The coach step's only way to write (guardrail A20): its draft beside the live rules, or a proposal file. Any other
+    path (his live rules, the rule book, the grader's store) is refused."""
+    p = os.path.normcase(os.path.abspath(str(path)))
+    own = (p == os.path.normcase(os.path.abspath(DRAFT))
+           or p.startswith(os.path.normcase(os.path.abspath(PROPOSALS)) + os.sep))
+    if not own:
+        raise ValueError(f"the coach writes only its draft and its proposals, not {path}")
+    common.write_json(path, obj)
 
 
 def _replaying():
@@ -372,7 +385,7 @@ def coach(section, runner=None, ask=None):
         except ValueError as e:
             return f"refused: {e}; nothing was written"
         draft = dict(live_file, rules=rows, next=max(int(live_file.get("next") or 1), new_id + 1))
-        common.write_json(DRAFT, draft)                     # the coach step's one write
+        _write_own(DRAFT, draft)                            # the coach step's one write: its draft
         scored = grader.grade(section, rules_file=DRAFT, runner=runner)
         proposal.update(draft_file=DRAFT, draft_rules=rows, draft_grade=scored.get("file"),
                         **compare(live_grade, scored, section))
@@ -381,7 +394,7 @@ def coach(section, runner=None, ask=None):
                         note="A setting or list change is not tried on a draft; only the owner's Apply makes it, "
                              "through Settings' own save.")
     proposal["file"] = os.path.join(PROPOSALS, f"{stamp}.json")
-    common.write_json(proposal["file"], proposal)
+    _write_own(proposal["file"], proposal)
     return proposal
 
 
@@ -473,7 +486,7 @@ def coach_work(section, ask=None):
                 "misses": [m.get("row") for m in misses], "live_grade": graded.get("file"), "base": _base(live),
                 "rules_before": live, "draft_rules": draft, **work_rules.compare(rows, live, draft)}
     proposal["file"] = os.path.join(PROPOSALS, f"{stamp}.json")
-    common.write_json(proposal["file"], proposal)
+    _write_own(proposal["file"], proposal)
     return proposal
 
 
