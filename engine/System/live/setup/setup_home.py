@@ -344,7 +344,13 @@ def change_command(ss, a):
         if c == "change-edited":
             return dict(book.edited(a.id, a.result == "ok", a.why, change_runner(ss)), ok=True)
         if c == "change-check":
-            return dict(book.check(a.id, change_runner(ss, a.expect)), ok=True)
+            got = book.check(a.id, change_runner(ss, a.expect))
+            try:        # the change's check cards go up on the page now, as for a change made from the page (spec 8.2)
+                import mod_checks
+                mod_checks.after_change(book.get(a.id), got.get("state") == "done")
+            except Exception:  # noqa: BLE001  the next pass puts them up
+                pass
+            return dict(got, ok=True)
         if c == "change-abandon":
             return dict(book.abandon(a.id, a.why, change_runner(ss)), ok=True)
         if c == "change-drop":
