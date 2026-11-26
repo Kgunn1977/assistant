@@ -2815,9 +2815,9 @@ window.RM_RUN = function (document, localStorage, claude) {
      Each kind keeps its own drawing, buttons and fold (the sections it once was); the feed only shows the kinds the filter names,
      in the order Settings (Appearance, Card order) gives, Hidden today always last as the card that opens the held list. */
   var FEED = {f: 'needs'};
-  var FEED_F = [['all', 'All', null], ['needs', 'Needs you', ['decide', 'small']], ['tracked', 'Waiting on others', ['tracked']], ['someday', 'Someday', ['someday']],
+  var FEED_F = [['all', 'All', null], ['needs', 'Needs you', ['decide', 'small']], ['tracked', 'Waiting on others', ['tracked']], ['waiting', 'Waiting', ['waiting']], ['someday', 'Someday', ['someday']],
                 ['fyi', 'FYI', ['fyi']], ['done', 'Done', ['handled', 'saidso']], ['held', 'Hidden', ['held']]];
-  var FEED_GROUPS = [['needs', ['decide', 'small']], ['waiting', ['tracked', 'someday']], ['fyi', ['fyi']], ['done', ['handled', 'saidso']]];
+  var FEED_GROUPS = [['needs', ['decide', 'small']], ['waiting', ['tracked', 'waiting', 'someday']], ['fyi', ['fyi']], ['done', ['handled', 'saidso']]];
   function feedOrder() {
     var st = setts(), o = st && st.page && Array.isArray(st.page.feed_order) ? st.page.feed_order : [], gs = [], out = [];
     o.concat(FEED_GROUPS.map(function (g) { return g[0]; })).forEach(function (k) {
@@ -2849,7 +2849,9 @@ window.RM_RUN = function (document, localStorage, claude) {
     if (fn) { fn.hidden = shown > 0 || f[0] === 'held'; fn.textContent = 'Nothing here right now.'; }
     setHtml(bar, FEED_F.map(function (x) {
       var c = (x[2] || FEED_KINDS).reduce(function (t, k) { return t + n[k]; }, 0);
-      return '<button type="button" data-s="feed-f" data-f="' + x[0] + '" aria-pressed="' + (x[0] === f[0]) + '">' + h(x[1]) + '<span class="c">' + c + '</span></button>';
+      /* each filter's title is the name that kind of card goes by on the page, his own from Settings where he gave one (spec 5.1) */
+      var nm = x[2] && typeof secTitle === 'function' ? secTitle(x[2][0]) : '';
+      return '<button type="button" data-s="feed-f" data-f="' + x[0] + '" aria-pressed="' + (x[0] === f[0]) + '">' + h(nm || x[1]) + '<span class="c">' + c + '</span></button>';
     }).join(''));
     var need = n.decide + n.small, hn = $('n-feed'); if (hn) hn.textContent = need ? need + ' need you' : '';
   }
@@ -4865,7 +4867,7 @@ window.RM_RUN = function (document, localStorage, claude) {
   var AREA_NAME = {top: 'Top (full width)', left: 'Left (the wide column)', right: 'Right (the narrow column)', bottom: 'Bottom (full width)'};
   var DEF_AREA = {top: ['chat', 'about'], left: ['feed', 'roadmaps'], right: ['today'], bottom: ['mail', 'texts', 'calendar']};
   /* the card kinds the Cards feed holds (once each a section of its own); a saved arrangement that names one places Cards there */
-  var FEED_KINDS = ['decide', 'small', 'tracked', 'fyi', 'someday', 'handled', 'saidso', 'held'], NOT_PARTS = ['ready', 'changes'];
+  var FEED_KINDS = ['decide', 'small', 'tracked', 'waiting', 'fyi', 'someday', 'handled', 'saidso', 'held'], NOT_PARTS = ['ready', 'changes'];
   function rmKeys() { return ((S.meta && S.meta.roadmaps) || []).map(function (r) { return 'rm:' + r.key; }); }
   function layoutOf(o) {
     o = o || {};
@@ -4897,7 +4899,7 @@ window.RM_RUN = function (document, localStorage, claude) {
     var L = (S.meta && S.meta.labels) || {};
     if (modTitle(nm)) return modTitle(nm);
     if (/^rm:/.test(nm)) { var r = ((S.meta && S.meta.roadmaps) || []).filter(function (x) { return 'rm:' + x.key === nm; })[0]; return 'Roadmap: ' + (r ? r.name : 'not connected now'); }
-    return {feed: 'Cards', decide: 'Needs you', small: 'Needs you, quick answers', tracked: 'Waiting on others', fyi: 'FYI', someday: 'Someday', roadmaps: 'Roadmaps', ready: 'Drafts', mail: 'Email', texts: 'Texts', calendar: 'Calendar', about: L.about || 'Errors', held: 'Hidden', today: 'Today', handled: 'Done', saidso: 'Done under your approvals', changes: 'Change history', chat: 'Talk to your assistant'}[nm] || nm;
+    return {feed: 'Cards', decide: 'Needs you', small: 'Needs you, quick answers', tracked: 'Waiting on others', waiting: 'Waiting', fyi: 'FYI', someday: 'Someday', roadmaps: 'Roadmaps', ready: 'Drafts', mail: 'Email', texts: 'Texts', calendar: 'Calendar', about: L.about || 'Errors', held: 'Hidden', today: 'Today', handled: 'Done', saidso: 'Done under your approvals', changes: 'Change history', chat: 'Talk to your assistant'}[nm] || nm;
   }
   /* A section the owner hid stays hidden unless it holds something marked important. */
   function hiddenSec(nm, impIn) {      /* a card kind is shown by the feed's filter, never switched off as a part */
@@ -6026,7 +6028,7 @@ window.RM_RUN = function (document, localStorage, claude) {
     renderStrips();
     var act = document.activeElement, actId = act && act.id, selS = null, selE = null;
     if (act && act.tagName === 'TEXTAREA') { selS = act.selectionStart; selE = act.selectionEnd; }
-    var all = S.items, by = {decide: [], words: [], task: [], small: [], tracked: [], motion: [], fyi: [], someday: [], done: [], closed: [], 'new': [], answered: []};
+    var all = S.items, by = {decide: [], words: [], task: [], small: [], tracked: [], motion: [], waiting: [], fyi: [], someday: [], done: [], closed: [], 'new': [], answered: []};
     var shown = 0, total = 0, ages = {a0: 0, a1: 0, a2: 0, a3: 0}, newN = 0, imp = 0, due = 0, openN = {}, impIn = {};
     all.forEach(function (it) {
       /* An item he answered here stays in one place from the press until the answer is cleared, whatever state the engine
@@ -6041,9 +6043,11 @@ window.RM_RUN = function (document, localStorage, claude) {
       if (open) { ages[bucket(it)]++; if (!isR) openN[s] = (openN[s] || 0) + 1; if (it.importance) imp++; if (it.due_date && it.due_date <= today()) due++; }
       if (it.importance && (open || s === 'fyi')) impIn[SEC_OF[s] || 'decide'] = 1;
       if (isR) return;                                                 /* in "Ready to send" */
-      if (match(it)) { if (gone && isLater(a)) by.someday.push(it); else if (gone) by.answered.push(it); else if (s === 'done' && closedOnly(it)) by.closed.push(it); else by[s].push(it); shown++; }
+      /* three kinds of waiting (spec 5.2): Waiting on others (someone else has the next move), Waiting (snoozed, back on its
+         day) and Someday (no date) */
+      if (match(it)) { if (gone && isLater(a)) (onShelf(a) || a.until === 'someday' ? by.someday : by.waiting).push(it); else if (gone) by.answered.push(it); else if (s === 'done' && closedOnly(it)) by.closed.push(it); else by[s].push(it); shown++; }
     });
-    ['small', 'tracked', 'motion', 'fyi', 'someday', 'answered', 'closed', 'done'].forEach(function (k) { by[k] = sortList(by[k]); });
+    ['small', 'tracked', 'motion', 'waiting', 'fyi', 'someday', 'answered', 'closed', 'done'].forEach(function (k) { by[k] = sortList(by[k]); });
     /* "Yours to decide" is ONE list in the engine's rank order; the line names the first card of that list, so both always agree */
     var byS = {}, secOf = function (it) { return byS[it.key] || 'decide'; };
     ['decide', 'words', 'task', 'new'].forEach(function (k) { by[k].forEach(function (it) { byS[it.key] = k; }); });
@@ -6060,6 +6064,7 @@ window.RM_RUN = function (document, localStorage, claude) {
     ['decide', 'tracked', 'today', 'handled'].forEach(function (nm) { $('sec-' + nm).hidden = hiddenSec(nm, impIn); });
     $('sec-fyi').hidden = !by.fyi.length || hiddenSec('fyi', impIn);
     $('sec-someday').hidden = !by.someday.length || hiddenSec('someday', impIn);
+    $('sec-waiting').hidden = !by.waiting.length;
     S.impIn = impIn;
     placeSections();
     renderTop();
@@ -6095,6 +6100,8 @@ window.RM_RUN = function (document, localStorage, claude) {
     $('n-fyi').textContent = by.fyi.length ? String(by.fyi.length) : '';
     setHtml($('someday'), by.someday.length ? listHtml(by.someday.map(function (it) { return [it, 'someday']; }), 'someday') : '');
     $('n-someday').textContent = by.someday.length ? String(by.someday.length) : '';
+    setHtml($('waiting'), by.waiting.length ? listHtml(by.waiting.map(function (it) { return [it, 'someday']; }), 'waiting') : '');
+    $('n-waiting').textContent = by.waiting.length ? String(by.waiting.length) : '';
 
     var hf = handledHtml(by);
     setHtml($('handled'), hf || '<div class="none">' + (emptyWord || (m ? 'Nothing is done yet.' : 'What you answered and what is done will show here.')) + '</div>');
@@ -6559,7 +6566,7 @@ window.RM_RUN = function (document, localStorage, claude) {
     if (isSend(rec)) return 'Sending. The result shows where you pressed Send.';
     if (n === 'done') return 'Marked done.';
     if (n === 'got_it') return 'Got it. This card is closed.';
-    if (n === 'later' || n === 'someday') return rec.until === 'someday' ? 'Snoozed to Someday, under Someday, until you bring it back.' : 'Snoozed until ' + laterWords(p.when, rec.until) + '. It comes back by itself.';
+    if (n === 'later' || n === 'someday') return rec.until === 'someday' ? 'Snoozed to Someday, under Someday, until you bring it back.' : 'Snoozed until ' + laterWords(p.when, rec.until) + ', under Waiting. It comes back by itself.';
     if (n === 'bring_back') return 'Back on your page.';
     if (n === 'junk') return ((it.sender && it.sender.address) || 'This sender') + ' is on your junk list. This card is Done.';
     if (n === 'not_needed') return p.scope === 'sender' ? whoOf(it) + ' is on your ignore list. This card is Done.' : p.scope === 'kind' ? 'Done. I\'m writing a rule for your yes.' : 'Done.';

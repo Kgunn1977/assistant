@@ -58,9 +58,9 @@ AREAS = ("top", "left", "right", "bottom")
 DEFAULT_AREA = {"top": ("chat", "about"), "left": ("feed", "roadmaps"), "right": ("today",), "bottom": ("mail", "texts", "calendar")}
 # the card kinds the Cards feed holds (once each a part of its own): a saved arrangement naming one places Cards there; Ready to send
 # (now Drafts, in Mail) and Changes to your assistant (now Change history, in Settings) are no longer parts of the arrangement
-FEED_KINDS = ("decide", "small", "tracked", "fyi", "someday", "handled", "saidso", "held")
+FEED_KINDS = ("decide", "small", "tracked", "waiting", "fyi", "someday", "handled", "saidso", "held")
 # Card order ranks the Cards filters' kinds (Hidden is always last); an order saved as single kinds reads as their filters
-FEED_GROUPS = {"needs": ("decide", "small"), "waiting": ("tracked", "someday"), "fyi": ("fyi",), "done": ("handled", "saidso")}
+FEED_GROUPS = {"needs": ("decide", "small"), "waiting": ("tracked", "waiting", "someday"), "fyi": ("fyi",), "done": ("handled", "saidso")}
 NOT_PARTS = ("ready", "changes")
 CORE_MODULES = tuple(m for a in AREAS for m in DEFAULT_AREA[a] if m != "roadmaps")
 LOOKS = ("glass", "workshop", "broadsheet",

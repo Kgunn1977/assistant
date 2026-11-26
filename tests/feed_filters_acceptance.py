@@ -1,7 +1,7 @@
 r"""Acceptance (quick): the Cards filter buttons. The page's own renderFeed is cut out of page.html and run under node with
 stand-in sections holding made-up cards. Nothing outside this process is touched.
 
-- The buttons are All, Needs you, Waiting on others, Someday, FYI, Done, Hidden, each with its own count; there is no Waiting button.
+- The buttons are All, Needs you, Waiting on others, Waiting, Someday, FYI, Done, Hidden, each with its own count.
 - Waiting on others counts only the tracked cards and Someday only the someday cards.
 - Pressing Waiting on others shows only the tracked section; pressing Someday only the someday section.
 - A card in each section is tagged with the button's name.
@@ -25,7 +25,7 @@ const pick = (name) => { const i = src.indexOf("  function " + name + "("); if (
 const line = (re) => src.match(re)[0];
 const mk = (id, n) => ({id, hidden: false, className: "", children: [], textContent: "", querySelectorAll: (q) => q === "article" ? new Array(n).fill(0) : []});
 const els = {};
-const counts = {decide: 2, small: 1, tracked: 3, fyi: 4, someday: 5, handled: 6, saidso: 0, held: 0};
+const counts = {decide: 2, small: 1, tracked: 3, waiting: 0, fyi: 4, someday: 5, handled: 6, saidso: 0, held: 0};
 Object.keys(counts).forEach((k) => { els[k] = mk(k, counts[k]); els["sec-" + k] = mk("sec-" + k, 0); });
 els["n-held"] = {textContent: "0"};
 els.feed = {children: Object.keys(counts).map((k) => els["sec-" + k]), className: "", appendChild() {}, querySelectorAll: () => []};
@@ -58,8 +58,8 @@ def main():
     except (ValueError, IndexError):
         print("FAIL the page script did not run under node: " + (r.stderr or r.stdout)[-1500:])
         return 1
-    check("the buttons, in order, with their counts, and no Waiting button",
-          o["bar"], ["All|21", "Needs you|3", "Waiting on others|3", "Someday|5", "FYI|4", "Done|6", "Hidden|0"])
+    check("the buttons, in order, with their counts: Waiting on others, Waiting and Someday",
+          o["bar"], ["All|21", "Needs you|3", "Waiting on others|3", "Waiting|0", "Someday|5", "FYI|4", "Done|6", "Hidden|0"])
     check("Waiting on others shows only the tracked cards", o["tracked"], ["sec-tracked"])
     check("Someday shows only the someday cards", o["someday"], ["sec-someday"])
     html = open(PAGE, encoding="utf-8").read()
