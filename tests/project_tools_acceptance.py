@@ -101,28 +101,24 @@ out["undelivered"] = {"result": r.get("result"), "attempts": len(log()) - n0}
 os.environ["FAKE_MODE"] = ""
 out["adds_changed_nothing"] = tree() == before
 
-# remove, after the page's confirm (the page's part is checked under node): only that tool in that project goes
+# remove: like add, the chosen session is asked once and acts on the person's yes there; nothing changes from here
 n0 = len(log())
 before = tree()
-r = press("remove", "roadmap", P("Alpha"), 8)
-after = tree()
-gone = sorted(k for k in before if k not in after)
-new = sorted(k for k in after if k not in before)
-changed = sorted(k for k in before if k in after and before[k] != after[k])
-out["remove_roadmap"] = {"result": r.get("result"), "gone": gone, "new": new, "changed": changed, "sent": len(log()) - n0,
-                         "listed": [e["folder"] for e in (common.read_json(os.path.join(root, "Live", "personal", "settings.json"), {}) or {}).get("roadmaps") or []],
-                         "now": project_tools.roadmap_on(P("Alpha"))}
-before = tree()
-r = press("remove", "questions", P("Delta"), 9, "s6")
-after = tree()
-out["remove_wrong_session"] = [r.get("result"), project_tools.questions_on(P("Delta")), tree() == after]
-r = press("remove", "questions", P("Delta"), 12, "uuid-delta-main")
-after = tree()
-out["remove_questions"] = {"result": r.get("result"), "changed": sorted(k for k in before if before[k] != after.get(k)),
-                           "new": sorted(k for k in after if k not in before), "gone": sorted(k for k in before if k not in after),
-                           "on": project_tools.questions_on(P("Delta")), "sent": len(log()) - n0}
-before = tree()
-out["remove_twice"] = [press("remove", "roadmap", P("Alpha"), 10).get("result"), press("remove", "questions", P("Delta"), 11, "uuid-delta-main").get("result"), tree() == before]
+r = press("remove", "roadmap", P("Alpha"), 8, "s2")
+out["remove_roadmap"] = {"result": r.get("result"), "new": log()[n0:], "changed": tree() != before, "now": project_tools.roadmap_on(P("Alpha"))}
+n0 = len(log())
+r = press("remove", "roadmap", P("Bravo"), 9, "s3")
+out["remove_roadmap_off"] = [r.get("result"), len(log()) - n0]
+n0 = len(log())
+r = press("remove", "questions", P("Delta"), 10, "s6")
+out["remove_wrong_session"] = [r.get("result"), project_tools.questions_on(P("Delta")), len(log()) - n0]
+n0 = len(log())
+r = press("remove", "questions", P("Delta"), 11, "uuid-delta-main")
+out["remove_questions"] = {"result": r.get("result"), "new": log()[n0:], "on": project_tools.questions_on(P("Delta"))}
+n0 = len(log())
+r = press("remove", "roadmap", P("Alpha"), 12)
+out["remove_no_session"] = [r.get("result"), len(log()) - n0]
+out["removes_changed_nothing"] = tree() == before
 print(json.dumps(out))
 '''
 
@@ -177,27 +173,20 @@ S.listening = false; delete S.ans[k]; PT.key["add-roadmap"] = "pt:add-roadmap:1"
 S.ans["pt:add-roadmap:1"] = {status: "saved"};
 out.off = toolsBlock();
 S.listening = true;
-// remove: asks first
+// remove: like add, the project, then exactly which session; nothing is asked on the page, the session asks
 click("pt-open", {"data-t": "add-roadmap"});      // close the add list
 S.db.posts.length = 0;
 click("pt-open", {"data-t": "remove-roadmap"});
-click("pt-go", {"data-t": "remove-roadmap", "data-f": meta.projects[0].folder});
-out.confirm = toolsBlock();
-out.postsBeforeYes = S.db.posts.length;
-click("pt-no", {});
-out.afterNo = [S.db.posts.length, /Turn the roadmap off/.test(toolsBlock())];
-click("pt-go", {"data-t": "remove-roadmap", "data-f": meta.projects[0].folder});
-click("pt-yes", {"data-t": "remove-roadmap"});
-out.removePosts = S.db.posts.map((p) => ({key: p.key.replace(/\d+$/, "N"), text: p.rec.text}));
-// the questions file's confirm words
+click("pt-proj", {"data-t": "remove-roadmap", "data-f": meta.projects[0].folder});
+out.removeSessions = toolsBlock();
+out.postsAfterProject = S.db.posts.length;
 click("pt-open", {"data-t": "remove-roadmap"});
 click("pt-open", {"data-t": "remove-questions"});
 click("pt-proj", {"data-t": "remove-questions", "data-f": meta.projects[3].folder});
 out.sessionsQ = toolsBlock();
 click("pt-go", {"data-t": "remove-questions", "data-f": meta.projects[3].folder, "data-x": "uuid-delta-main"});
-out.confirmQ = toolsBlock();
-click("pt-yes", {"data-t": "remove-questions"});
 out.removeQPosts = S.db.posts.slice(-1).map((p) => p.rec.text);
+click("pt-open", {"data-t": "remove-questions"}); S.db.posts.length = 0;
 // a project where the tool is already on is not offered Add (the button is disabled, and pressing it posts nothing)
 click("pt-no", {}); click("pt-open", {"data-t": "remove-questions"}); S.db.posts.length = 0;
 click("pt-open", {"data-t": "add-roadmap"});
@@ -307,31 +296,28 @@ def main():
         check("a message that cannot be delivered: one try, Not sent, the command is named", [u.get("attempts"), (u.get("result") or "").startswith("Not sent"), (u.get("result") or "").endswith("type /assistant:roadmap-setup")], [1, True, True])
 
         rr = o.get("remove_roadmap") or {}
-        check("Remove roadmap, Alpha: it is off; the roadmap's own folder is deleted; the page's record stays",
-              [rr.get("now"), rr.get("gone"), "Roadmap page/roadmap.json" in (rr.get("gone") or [])],
-              [False, ["Work/Alpha/.claude/roadmap/config.json"], False])
-        # since 0.1.11 switching off first saves the records in the project's .claude/roadmap-saved folder
-        new = rr.get("new") or []
-        check("Remove roadmap: only the saved records are made (no To Delete folder), and the assistant's own list loses only that project",
-              [[p for p in new if "/.claude/roadmap-saved/" not in p], any("/.claude/roadmap-saved/" in p for p in new),
-               rr.get("listed") == [os.path.join(base, "Echo")]], [[], True, True])
-        check("Remove roadmap changes nothing else: only the settings file changed, no other project was touched, no message was sent",
-              [rr.get("changed"), rr.get("sent")], [["Assistant/Live/personal/settings.json"], 0])
-        rq = o.get("remove_questions") or {}
+        rmsg = ((rr.get("new") or [{}])[0]).get("message", "")
+        check("Remove roadmap, Alpha: exactly one message, to the session chosen, asking for the yes there and naming /assistant:roadmap-off; nothing is turned off from here",
+              [[x["to"] for x in rr.get("new") or []], "Do nothing yet" in rmsg, "run /assistant:roadmap-off" in rmsg, rr.get("now"), rr.get("changed"),
+               "Say yes there" in (rr.get("result") or "")], [["Alpha main"], True, True, True, False, True])
+        ro = o.get("remove_roadmap_off") or []
+        check("Remove roadmap where it is already off: says so and sends nothing", [("already off" in ro[0]) if ro else None, ro[1] if len(ro) > 1 else None], [True, 0])
         ws = o.get("remove_wrong_session") or []
-        check("Remove questions file with a session that has none: nothing is changed", [("has no questions file" in (ws[0] if ws else "")), ws[1] if len(ws) > 1 else None, ws[2] if len(ws) > 2 else None], [True, True, True])
-        check("Remove questions file, Delta, the session that keeps it: it is off; its file stays as it is; only that project's own setting changed; no message was sent",
-              [rq.get("on"), rq.get("changed"), rq.get("new"), rq.get("gone"), rq.get("sent")],
-              [False, ["Work/Delta/.claude/questions/config.json"], [], [], 0])
-        rt = o.get("remove_twice") or []
-        check("Remove again, where it is already off: says so and changes nothing", [("already off" in rt[0]) if rt else None, ("no questions file" in rt[1]) if len(rt) > 1 else None, rt[2] if len(rt) > 2 else None], [True, True, True])
+        check("Remove questions file with a session that has none: nothing is sent or changed", [("has no questions file" in (ws[0] if ws else "")), ws[1] if len(ws) > 1 else None, ws[2] if len(ws) > 2 else None], [True, True, 0])
+        rq = o.get("remove_questions") or {}
+        qmsg = ((rq.get("new") or [{}])[0]).get("message", "")
+        check("Remove questions file, Delta, the session that keeps it: one message to it naming /assistant:questions-off; still on until the person says yes there",
+              [[x["to"] for x in rq.get("new") or []], "run /assistant:questions-off" in qmsg, rq.get("on")], [["Delta main"], True, True])
+        rn = o.get("remove_no_session") or []
+        check("Remove with no session chosen: nothing is sent, the off command is named", [(rn[0] or "").startswith("Not sent"), (rn[0] or "").endswith("type /assistant:roadmap-off"), rn[1] if len(rn) > 1 else None], [True, True, 0])
+        check("nothing was run or changed in any project by a remove", o.get("removes_changed_nothing"), True)
 
         # the page, under node
         folders = [os.path.join(base, n) for n in ("Alpha", "Bravo", "Charlie", "Delta")]
         meta = {"tools": [], "ptools": [{"id": "add-roadmap", "name": names[0], "words": "w-add-roadmap", "tool": "roadmap", "op": "add", "command": "/assistant:roadmap-setup"},
                           {"id": "add-questions", "name": names[1], "words": "w-add-questions", "tool": "questions", "op": "add", "command": "/assistant:questions-setup"},
-                          {"id": "remove-roadmap", "name": names[2], "words": "w-remove-roadmap", "tool": "roadmap", "op": "remove", "command": "/assistant:roadmap-setup"},
-                          {"id": "remove-questions", "name": names[3], "words": "w-remove-questions", "tool": "questions", "op": "remove", "command": "/assistant:questions-setup"}],
+                          {"id": "remove-roadmap", "name": names[2], "words": "w-remove-roadmap", "tool": "roadmap", "op": "remove", "command": "/assistant:roadmap-off"},
+                          {"id": "remove-questions", "name": names[3], "words": "w-remove-questions", "tool": "questions", "op": "remove", "command": "/assistant:questions-off"}],
                 "projects": [{"folder": "C:\\Work\\Alpha", "name": "Alpha", "roadmap": True, "questions": False, "sessions": []},
                              {"folder": "C:\\Work\\Bravo", "name": "Bravo", "roadmap": False, "questions": False, "sessions": [
                                  {"id": "s4", "name": "Bravo latest", "at": "2026-11-19T10:00:00", "child": False, "has": False},
@@ -367,16 +353,14 @@ def main():
               ["Not sent: no Claude session is open in that project." in ns, "<code>/assistant:roadmap-setup</code>" in ns, "data-s=\"pt-copy\"" in ns, "type /assistant" not in ns.split("<code>")[0]], [True, True, True, True])
         check("the Copy button copies exactly the command", p.get("copied"), ["/assistant:roadmap-setup"])
         check("if the listener is off, the page says nothing was sent and offers the command", ["nothing has been sent yet" in p.get("off", ""), "pt-copy" in p.get("off", "")], [True, True])
-        check("Remove: pressing a project asks first, in the owner's words, and sends nothing yet",
-              ["Turn the roadmap off in Alpha? Its page stays as a record." in p.get("confirm", ""), p.get("postsBeforeYes")], [True, 0])
-        check("Remove: No sends nothing and closes the question", p.get("afterNo"), [0, False])
-        check("Remove: Yes sends exactly one press", p.get("removePosts"), [{"key": "pt:remove-roadmap:N", "text": json.dumps({"folder": "C:\\Work\\Alpha"}, separators=(",", ":"))}])
+        rs = p.get("removeSessions", "")
+        check("Remove roadmap: choosing a project lists its sessions (none open here: the off command is offered), and sends nothing",
+              ["No session is open in this project." in rs, "<code>/assistant:roadmap-off</code>" in rs, p.get("postsAfterProject")], [True, True, 0])
         qs = p.get("sessionsQ", "")
         check("Remove questions file: the sessions are listed with the one that keeps it marked and the others cannot be removed; the guide line is the questions one",
               ["Pick the session you're talking with. A questions file keeps that one session's questions." in qs.replace("&#39;", "'"), "has the questions file" in qs, qs.count(">None here</button>"), qs.count(">Remove</button>")], [True, True, 1, 1])
-        check("the questions file's confirm says the file stays, and Yes sends the project and the chosen session",
-              ["Turn the questions file off in Delta? Its file stays as it is." in p.get("confirmQ", ""), p.get("removeQPosts")],
-              [True, [json.dumps({"folder": "C:\\Work\\Delta", "session": "uuid-delta-main"}, separators=(",", ":"))]])
+        check("Remove questions file: pressing the session sends the project and the chosen session at once (the yes is given in that session)",
+              p.get("removeQPosts"), [json.dumps({"folder": "C:\\Work\\Delta", "session": "uuid-delta-main"}, separators=(",", ":"))])
         check("a disabled button sends nothing", p.get("disabledPosts"), 0)
         src = open(os.path.join(PKG, "engine", "System", "live_page", "publish.py"), encoding="utf-8").read()
         check("the page's data carries the four tools and the projects", ["meta[\"ptools\"] = project_tools.listed()" in src, "meta[\"projects\"] = project_tools.projects()" in src], [True, True])

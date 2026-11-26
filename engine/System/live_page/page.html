@@ -4837,9 +4837,9 @@ html.apv-doc .apv-say{margin:12px 0 0;color:var(--fg-2)}
     return o + '</li>';
   }
   /* The four project tools (project_tools.py): Add or Remove the roadmap or the questions file in one of the owner's projects.
-     Pressing one lists the projects, each with whether the tool is on there. Add asks that project's own Claude session, which
-     sets it up once he says yes there; if no session can be asked, the command to type in the project is shown, with Copy.
-     Remove asks him here first, then turns it off from here (a roadmap's own files are deleted; a questions file is kept). */
+     Pressing one lists the projects, each with whether the tool is on there; then that project's open sessions, and the person
+     chooses exactly which one (a roadmap is suggested for a top session). All four send that session the command, which it
+     runs only once he says yes there; if no session can be asked, the command to type in the project is shown, with Copy. */
   var PT = {pick: '', proj: '', confirm: null, key: {}, err: ''};
   function ptAns(t) { var k = PT.key[t.id]; return k ? S.ans[k] : null; }
   function ptCmd(t) {
@@ -4854,31 +4854,31 @@ html.apv-doc .apv-say{margin:12px 0 0;color:var(--fg-2)}
       var miss = /^Not sent/.test(String(said || ''));
       return '<p class="say"><b class="outcome' + (miss || /^Not done/.test(String(said || '')) ? ' bad' : '') + '">' + h(String(said || 'Done').replace(/,? ?(In that project's Claude session, )?type \/assistant:[a-z-]+$/, '')) + '</b></p>' + (miss ? ptCmd(t) : '');
     }
-    return '<p class="say"><b class="working">' + (t.op === 'add' ? 'Asking that project\'s Claude session' : 'Turning it off') + '</b></p>' +
-      (S.listening === false ? '<p class="say">This page can\'t reach your computer, so nothing has been sent yet.</p>' + (t.op === 'add' ? ptCmd(t) : '') : '');
+    return '<p class="say"><b class="working">Asking that project\'s Claude session</b></p>' +
+      (S.listening === false ? '<p class="say">This page can\'t reach your computer, so nothing has been sent yet.</p>' + ptCmd(t) : '');
   }
-  var PT_GUIDE = {roadmap: 'Pick the project\'s top session, the one that oversees the work. A roadmap follows the whole project, including the sessions started from it.',
+  var PT_GUIDE = {roadmap: 'Pick exactly which session. A roadmap is suggested for a higher-level session: the project\'s top session, the one that oversees the work, since a roadmap follows the whole project, including the sessions started from it.',
                   questions: 'Pick the session you\'re talking with. A questions file keeps that one session\'s questions.'};
   function ptSessions(t, pr) {
     var list = pr.sessions || [], o = '<p class="say"><b>' + h(pr.name) + '</b> <button class="btn quiet" type="button" data-s="pt-back">Choose another project</button></p>' +
       '<p class="say">' + h(PT_GUIDE[t.tool]) + '</p>';
-    if (!list.length) return o + '<p class="say">No session is open in this project.</p>' + (t.op === 'add' ? ptCmd(t) : '');
+    if (!list.length) return o + '<p class="say">No session is open in this project.</p>' + ptCmd(t);
     list.forEach(function (x) {
-      var dead = t.op === 'add' ? (t.tool === 'questions' && x.has) : !x.has, d = D(x.at);
+      var dead = t.tool === 'questions' && (t.op === 'add' ? x.has : !x.has), d = D(x.at);
       o += '<div class="pt-row"><span><b>' + h(x.name) + '</b><br><span class="where">' + (d ? 'Last active ' + h(fmtDT(d)) : 'Last active unknown') +
-        (x.child ? ' &middot; started from another session' : ' &middot; top session') + (x.has ? ' &middot; has the questions file' : '') + '</span></span>' +
+        (x.child ? ' &middot; started from another session' : ' &middot; top session') + (t.tool === 'roadmap' && !x.child ? ' &middot; suggested for a roadmap' : '') + (x.has ? ' &middot; has the questions file' : '') + '</span></span>' +
         '<button class="btn' + (dead ? ' quiet' : '') + '" type="button"' + (dead ? ' disabled' : '') + ' data-s="pt-go" data-t="' + h(t.id) + '" data-f="' + h(pr.folder) + '" data-x="' + h(x.id) + '" aria-label="' +
         (t.op === 'add' ? 'Add to ' : 'Remove from ') + h(x.name) + '">' + (dead ? (t.op === 'add' ? 'Already has it' : 'None here') : t.op === 'add' ? 'Add' : 'Remove') + '</button></div>';
     });
     return o;
   }
   function ptPick(t) {
-    var projs = (S.meta && S.meta.projects) || [], o = '', ask = t.tool === 'roadmap' && t.op === 'remove' ? '' : 'x';
-    if (!projs.length) return '<p class="say">I don\'t know any of your projects yet.</p>' + (t.op === 'add' ? ptCmd(t) : '');
+    var projs = (S.meta && S.meta.projects) || [], o = '', ask = 'x';
+    if (!projs.length) return '<p class="say">I don\'t know any of your projects yet.</p>' + ptCmd(t);
     var chosen = ask && PT.proj ? projs.filter(function (p) { return p.folder === PT.proj; })[0] : null;
     if (chosen) o += ptSessions(t, chosen);
     else {
-      o += '<p class="say"><b>' + (t.op === 'add' ? 'Which project?' : 'Which project, to turn it off?') + '</b></p>';
+      o += '<p class="say"><b>Which project?</b></p>';
       projs.forEach(function (p) {
         var on = !!p[t.tool], dead = t.tool === 'roadmap' ? (t.op === 'add' ? on : !on) : (t.op === 'remove' && !on);
         var label = dead ? 'Already ' + (t.op === 'add' ? 'on' : 'off') : ask ? 'Choose' : 'Remove', what = t.tool === 'roadmap' ? 'roadmap' : 'questions file';
@@ -4886,11 +4886,6 @@ html.apv-doc .apv-say{margin:12px 0 0;color:var(--fg-2)}
           '<button class="btn' + (dead ? ' quiet' : '') + '" type="button"' + (dead ? ' disabled' : '') + ' data-s="' + (ask ? 'pt-proj' : 'pt-go') + '" data-t="' + h(t.id) + '" data-f="' + h(p.folder) + '" aria-label="' +
           (ask ? 'Choose a session in ' : 'Remove ' + what + ' from ') + h(p.name) + '">' + label + '</button></div>';
       });
-    }
-    if (PT.confirm && t.op === 'remove') {
-      var pr = projs.filter(function (p) { return p.folder === PT.confirm.f; })[0], nm = pr ? pr.name : PT.confirm.f;
-      o += '<p class="say" role="alert"><b>' + (t.tool === 'roadmap' ? 'Turn the roadmap off in ' + h(nm) + '? Its page stays as a record.' : 'Turn the questions file off in ' + h(nm) + '? Its file stays as it is.') + '</b></p>' +
-        '<div><button class="btn primary" type="button" data-s="pt-yes" data-t="' + h(t.id) + '">Yes, turn it off</button> <button class="btn" type="button" data-s="pt-no">No</button></div>';
     }
     return o + ptResult(t);
   }
@@ -6130,7 +6125,6 @@ html.apv-doc .apv-say{margin:12px 0 0;color:var(--fg-2)}
       var pt = ((S.meta && S.meta.ptools) || []).filter(function (x) { return x.id === b.getAttribute('data-t'); })[0];
       if (!pt || b.disabled) return;
       var pf = a === 'pt-go' ? b.getAttribute('data-f') : PT.confirm && PT.confirm.f, px = a === 'pt-go' ? b.getAttribute('data-x') : PT.confirm && PT.confirm.x;
-      if (pt.op === 'remove' && a === 'pt-go') { PT.confirm = {f: pf, x: px}; render(); return; }      /* he is asked first; nothing is sent yet */
       if (pf) ptSend(pt, pf, px);
       return;
     }
