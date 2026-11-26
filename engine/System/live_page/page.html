@@ -3744,7 +3744,7 @@ html.apv-doc .apv-say{margin:12px 0 0;color:var(--fg-2)}
     if (msg.html) {      /* the email as it was sent, in a frame that may run nothing; pictures from the internet unless Settings says Hide (then on his press) */
       var pics = mailPicsShown() || !!m.pics[msg.id];
       if (msg.remote && !pics) o += '<div class="mail-pics" role="status">Pictures from the internet are hidden. <button class="link" type="button" data-a="mail-pics" data-id="' + id + '">Show pictures</button></div>';
-      o += '<iframe class="mail-html" data-fk="' + id + (pics ? 'p' : '') + '" title="The email as it was sent" sandbox="allow-same-origin allow-popups allow-popups-to-escape-sandbox" referrerpolicy="no-referrer" src="api/mail/body?id=' + mailEnc(msg.id) + (pics ? '&amp;pictures=1' : '') + '"></iframe>';
+      o += '<iframe class="mail-html" data-fk="' + id + (pics ? 'p' : '') + '" title="The email as it was sent" sandbox="allow-same-origin allow-popups allow-popups-to-escape-sandbox" referrerpolicy="no-referrer" src="api/mail/body?id=' + mailEnc(msg.id) + (pics ? '&amp;pictures=1' : '&amp;pictures=0') + '"></iframe>';
     } else o += '<pre class="src-text">' + h(msg.text || '') + '</pre>';
     if ((msg.files || []).length) o += '<div class="kv mail-files"><b>Attachments:</b> ' + msg.files.map(function (f) {
       var fk = attKind(f.name), lab = h(f.name) + (f.size ? ' (' + h(mailSize(f.size)) + ')' : '');

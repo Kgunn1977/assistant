@@ -5,7 +5,7 @@ this module is the second lock: whatever could run, send or reach out is taken o
 
     sanitize(html, message_id, cids, pictures)   (the complete document the frame shows, whether it has pictures from the
                                                   internet). cids: {content id: "att:N"}, the email's own pictures put back
-                                                  in place; pictures: show pictures from the internet (else they are left out)
+                                                  in place; pictures: show pictures from the internet (the default; else left out)
 """
 import html as H
 import re
@@ -169,7 +169,7 @@ class _Clean(HTMLParser):
         pass
 
 
-def sanitize(markup, message_id, cids=None, pictures=False):
+def sanitize(markup, message_id, cids=None, pictures=True):
     """(the whole document to show, whether the email has pictures from the internet)."""
     p = _Clean(message_id, cids, pictures)
     p.feed(markup or "")

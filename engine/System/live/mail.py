@@ -13,7 +13,7 @@ is one press of his on the page; a mail service that cannot make a change says s
     thread(message_id)                  one conversation, oldest first, with each email's files (stored mail only: the
                                         mail service is not asked, so an email opens at once); html: it has its own HTML kept,
                                         remote: that HTML has pictures from the internet
-    body_doc(message_id, pictures)      the email as it was sent, made safe, a whole document for the page's frame
+    body_doc(message_id, pictures=True) the email as it was sent, made safe, a whole document for the page's frame
     labels(address)                     the label names a mailbox has, for the Label box (asked of the service, then kept
                                         for 10 minutes)
     sample(card, message_id)            a junk question card's sender: their recent emails, newest first, and one in full
@@ -414,7 +414,7 @@ def thread(message_id, fresh=False):
     return res
 
 
-def body_doc(message_id, pictures=False):
+def body_doc(message_id, pictures=True):
     """(the email as sent, made safe: a whole document for the page's frame, whether it has pictures from the internet), or
     None when the email has no HTML kept. pictures: show pictures from the internet."""
     import mailhtml

@@ -84,17 +84,17 @@ check("Gmail: its picture is mapped to its stored attachment", list(json.loads(r
 check("Outlook: plain text taken from the HTML is the body", rows["Numbers"][0], "The numbers are in.")
 check("Outlook: its inline picture is mapped", list(json.loads(rows["Numbers"][2]).keys()), ["image001.png@01D"])
 
-doc, remote = mail.body_doc(ids["News"])
+doc, remote = mail.body_doc(ids["News"], pictures=False)
 low = doc.lower()
 check("nothing that runs or sends is left",
       [x for x in ("<script", "onclick", "javascript:", "<form", "<input", "<iframe", "<button", "http-equiv", "alert(") if x in low], [])
-check("pictures from the internet held back, and said so", [remote, "track.example" in low], [True, False])
+check("hidden (Settings: Hide), pictures from the internet are held back, and said so", [remote, "track.example" in low], [True, False])
 check("the email's own picture is put back in place", "/api/mail/file?ref=att:" in doc, True)
 check("links open in a new tab, without the page's address",
       'href="https://shop.example/a" target="_blank" rel="noopener noreferrer"' in doc, True)
 check("its formatting stays", ['<b>there</b>' in doc, ".h{color:#123}" in doc, 'bgcolor="#fafafa"' in doc], [True, True, True])
-doc2, _ = mail.body_doc(ids["News"], pictures=True)
-check("Show pictures lets them load", ["https://track.example/p.gif" in doc2, "track.example/b.gif" in doc2], [True, True])
+doc2, _ = mail.body_doc(ids["News"])
+check("pictures from the internet show by default", ["https://track.example/p.gif" in doc2, "track.example/b.gif" in doc2], [True, True])
 t = mail.thread(ids["News"])["messages"][0]
 check("the thread says the email has HTML and pictures from the internet", [t["html"], t["remote"], t["text"]], [True, True, "Hello there"])
 
