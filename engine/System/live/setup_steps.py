@@ -326,13 +326,13 @@ def allow(sending):
 
 
 # --- roadmaps (optional) ----------------------------------------------------------------------------
-# The Roadmap plugin is a separate thing: this assistant holds none of its files and runs none of them. The
-# whole link is the plugin's written agreement (its reference\agreement.md): a program that wants a project's
+# The roadmap is part of this plugin: a standalone, general-purpose planning tool with its own settings that also
+# connects to the assistant. The link is its written agreement (the plugin's reference\agreement.md): a program that wants a project's
 # roadmap lists itself in <project>\Roadmap page\readers.json, and the roadmap's writer then keeps a plain
 # summary in <project>\Roadmap page\roadmap.json, which the page's reader (live_page\roadmaps.py) shows.
 ROADMAP_SAYS = ("Optional. A roadmap is a private page for one project: it lists every step of that project and where "
                 "each one stands, and Claude keeps it up to date while you work on the project in the Claude desktop app. "
-                "It comes from a separate Claude plugin named Roadmap. Apply it here to any project folder, and to as "
+                "It is part of this assistant plugin: a planning tool of its own, with its own settings, that also shows here. Apply it here to any project folder, and to as "
                 "many as you like, and each of those roadmaps also shows, for reading, in a \"Roadmaps\" part of your page.\n\n"
                 "Press Next to skip this. Nothing about roadmaps shows anywhere until you apply one, and you can come "
                 "back to this step any time.")
@@ -429,7 +429,7 @@ def apply_roadmap(folder):
                 "that project's main session is reminded to have its Roadmap writer write it, at its next message. To have it "
                 "now, say there: \"have the Roadmap writer write the plain copy now\".")
     return ("Applied. One thing is left, in the Claude desktop app: open this folder in the Code tab and send "
-            "/assistant:roadmap-setup (Claude needs the Roadmap plugin for that). The roadmap shows on your page after its first change.")
+            "/assistant:roadmap-setup (the roadmap comes with this assistant plugin). The roadmap shows on your page after its first change.")
 
 
 def take_roadmap_off(folder):

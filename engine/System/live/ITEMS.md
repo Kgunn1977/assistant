@@ -124,7 +124,7 @@ What comes back as the result of the press: `Sent from <account> to <recipients>
 
 ## Roadmaps (added 11/15/26)
 
-Roadmaps come from a separate plugin (Roadmap). The assistant holds none of its files; the link is that plugin's written agreement (`reference\agreement.md` there), which `System\live_page\roadmaps.py` follows as a reader and `setup_steps.py` follows when it lists the assistant in a project's `Roadmap page\readers.json`.
+The roadmap is part of the assistant plugin: a standalone, general-purpose planning tool with its own settings that happens to connect to the assistant. The link is its written agreement (the plugin's `reference\agreement.md`), which `System\live_page\roadmaps.py` follows as a reader and `setup_steps.py` follows when it lists the assistant in a project's `Roadmap page\readers.json`.
 
 The owner chooses which projects to show (`roadmaps` in the personal folder's `settings.json`: `[{"folder": "full path", "applied": "..."}]`, written only by setup). With none chosen the page's data carries no `roadmaps` key and the page shows no roadmap part.
 
