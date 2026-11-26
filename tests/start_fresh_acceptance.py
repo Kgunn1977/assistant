@@ -207,7 +207,7 @@ def main():
         check("1. a confirmed press a listener finds hours later (it was off) is refused the same way; no To Delete folder before the live press",
               [got["stale"].startswith("Not done: this page couldn't reach your computer"), got["to_delete_before"]], [True, False])
         check("2. the confirmed press says what it did", got["said"],
-              "Started fresh: I deleted 8 of your own sets of rules and lists. The built-in rules, the rule book and your cards stay.")
+              "Started fresh: I deleted 8 of your own sets of personal rules and lists. The core rules (how the system works, the built-in ones and yours), the rule book and your cards stay.")
 
         # wholly personal files: deleted outright
         fr = json.loads(text(os.path.join(home, "personal", "filter_rules.json")))
@@ -253,7 +253,7 @@ def main():
         except (ValueError, IndexError):
             check("the page's code ran under node", n.stderr[-1500:], "")
             return finish()
-        q = "This deletes your own rules and lists. The built-in rules, the rule book and your cards stay. Continue?"
+        q = "This deletes your personal rules and lists. The core rules (how the system works, the built-in ones and yours), the rule book and your cards stay. Continue?"
         check("5. Start fresh first only asks; the question is the exact words with Yes and No; nothing is sent",
               ["data-s=\"fresh-ask\"" in pg["first"], q in pg["first"], q in pg["asked"], "data-s=\"fresh-go\"" in pg["asked"],
                "data-s=\"fresh-no\"" in pg["asked"], pg["postsAsked"]], [True, False, True, True, True, 0])

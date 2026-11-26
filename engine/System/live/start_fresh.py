@@ -10,9 +10,12 @@ or update calls it, and a press that reached no listener is refused, not done la
 - a file that also holds other things (personal.json, settings.json, the rules documents) is rewritten in place without
   his entries only.
 
-Core rules are part of the program (its core_rules folder), never in a home, so nothing here reaches them: every entry in
-the home's rules documents is his. The rule book, RSI versions and state, standing approvals, taught guardrails, mods,
-cards and every setting choice are left as they are. A home with nothing of his left changes nothing.
+Core rules are part of the program (its core_rules folder), never in a home, so nothing here reaches them. Core is decided
+by what a rule is about, not by its number (the owner's words: "Core rules are mostly the rules i make regarding how the
+SYSTEM works"): the rules he made about how the system works, in the home's System.md and Repair.md (SYSTEM_DOCS), are kept
+as core rules; only his personal rules (his decisions about his messages, people and calendar) are deleted. The rule book,
+RSI versions and state, standing approvals, taught guardrails, mods, cards and every setting choice are left as they are.
+A home with nothing of his left changes nothing.
 
     start_fresh(home)      {"moved": [...], "record": None, "said": plain words}   (moved: what was deleted or cleared)
     from_press(rec)        the Settings press: done only when it carries the confirm; returns the plain words
@@ -24,19 +27,21 @@ import re
 import paths
 
 CONFIRM = {"start_fresh": "confirmed"}        # what the page sends only after his yes to the question
-QUESTION = "This deletes your own rules and lists. The built-in rules, the rule book and your cards stay. Continue?"
+QUESTION = ("This deletes your personal rules and lists. The core rules (how the system works, the built-in ones and yours), "
+            "the rule book and your cards stay. Continue?")
 NOT_CONFIRMED = "Not done: Start fresh needs your yes to its question first. Nothing was deleted."
 MISSED = ("Not done: this page couldn't reach your computer when you pressed Start fresh, so nothing was deleted. "
           "Press Start fresh in Settings again.")
 NOTHING = "Nothing to delete: your own rules and lists are already cleared."
 FRESH_FOR = dt.timedelta(minutes=10)          # a press older than this (the listener was off) is never acted on late
 
-# The home's rules documents (core\rules.py DOCS): every entry in them is his.
+# The home's rules documents (core\rules.py DOCS) that hold his personal rules: every entry in them is his and is deleted.
 DOCS = (("Resources", "Rules", "Junk rules.md"), ("Resources", "Data", "Junk senders.md"),
-        ("Resources", "Rules", "Repair.md"), ("Resources", "Rules", "People and who handles what.md"),
+        ("Resources", "Rules", "People and who handles what.md"),
         ("Resources", "Rules", "Reading messages.md"), ("Resources", "Rules", "Calendar.md"),
-        ("Resources", "Rules", "Writing the briefing.md"), ("Resources", "Rules", "Your briefing answers.md"),
-        ("Resources", "Rules", "System.md"))
+        ("Resources", "Rules", "Writing the briefing.md"), ("Resources", "Rules", "Your briefing answers.md"))
+# The documents of his rules about how the system works: core rules, kept by Start fresh.
+SYSTEM_DOCS = (("Resources", "Rules", "System.md"), ("Resources", "Rules", "Repair.md"))
 DRAFTS = ("Resources", "Rules", "Draft")
 ENTRY = re.compile(r"^- \[(\d+)\] ")
 SAID = "  You said: "
@@ -196,8 +201,8 @@ def start_fresh(home):
     if not run.moved:
         return {"moved": [], "record": None, "said": NOTHING}
     n = len(run.moved)
-    said = (f"Started fresh: I deleted {n} of your own set{'s' if n != 1 else ''} of rules and lists. "
-            f"The built-in rules, the rule book and your cards stay.")
+    said = (f"Started fresh: I deleted {n} of your own set{'s' if n != 1 else ''} of personal rules and lists. "
+            f"The core rules (how the system works, the built-in ones and yours), the rule book and your cards stay.")
     return {"moved": run.moved, "record": None, "said": said}
 
 

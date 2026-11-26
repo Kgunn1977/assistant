@@ -4794,8 +4794,8 @@ html.apv-doc .apv-say{margin:12px 0 0;color:var(--fg-2)}
      deleted by this page; the computer deletes his own rules and lists and says what it did. */
   var FRESH = {ask: false};
   function freshLine() {
-    var a = S.ans && S.ans['start-fresh'], o = '<p class="say"><b>Start fresh</b> Deletes your own rules and lists, so I learn them again from your cards.</p>';
-    if (FRESH.ask) o += '<p class="say">This deletes your own rules and lists. The built-in rules, the rule book and your cards stay. Continue?</p>' +
+    var a = S.ans && S.ans['start-fresh'], o = '<p class="say"><b>Start fresh</b> Deletes your personal rules and lists, so I learn them again from your cards. The core rules, about how the system works, stay.</p>';
+    if (FRESH.ask) o += '<p class="say">This deletes your personal rules and lists. The core rules (how the system works, the built-in ones and yours), the rule book and your cards stay. Continue?</p>' +
       '<div class="acts"><button class="btn primary" type="button" data-s="fresh-go">Yes, start fresh</button><button class="btn" type="button" data-s="fresh-no">No</button></div>';
     else o += '<div class="acts"><button class="btn" type="button" data-s="fresh-ask">Start fresh</button></div>';
     if (a && a.result) o += '<p class="say">' + h(a.result) + '</p>';
