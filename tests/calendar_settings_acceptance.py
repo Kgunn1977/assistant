@@ -1,7 +1,7 @@
 r"""Acceptance: the Calendar part of Settings, in a scratch home (never the owner's). Three made-up calendars (Work, Family,
 North Building) each with an event today: the setting is its own part named Calendar with the explanation, a save that unticks one
 takes its events off Today at once, the owner's saved setting stays the same key (personal today_calendars), a calendar the
-assistant does not know is refused, and the page carries the Choose calendars link (Today) and the Settings link (Calendar).
+assistant does not know is refused, and no calendar header carries a Settings link.
 
     python tests\calendar_settings_acceptance.py
 """
@@ -72,8 +72,8 @@ if __name__ == "__main__":
     check("an unknown calendar is refused", got.get("refused"), False)
     check("the old Sources group no longer takes calendars", got.get("old_group_refused"), False)
     page = open(os.path.join(PKG, "engine", "System", "live_page", "page.html"), encoding="utf-8").read()
-    check("Today has Choose calendars and the Calendar header has no Settings link, Choose calendars still opening the Calendar part",
-          (page.count('data-s="cal-set">Choose calendars<'), page.count('id="cl-h">Calendar</h2><button'), "setGo('calendar')" in page), (1, 0, True))
+    check("neither the Calendar header nor Today's header carries a Settings link (the setting is in Settings)",
+          (page.count('data-s="cal-set"'), page.count('id="cl-h">Calendar</h2><button'), page.count('id="td-h">Today</h2><button')), (0, 0, 0))
     import shutil
     shutil.rmtree(tmp, ignore_errors=True)
     for n, ok, got_, want in results:
