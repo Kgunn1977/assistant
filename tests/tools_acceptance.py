@@ -102,7 +102,7 @@ for (const t of tools) press("tool-start", {getAttribute: () => t.id}, S, talkPo
 console.log(JSON.stringify({html: html, posted: posted, jumped: jumped, inTop: /var top = [^\n]*toolsBlock\(\)/.test(src)}));
 '''
 
-WANT_LISTED = [["update", "Update", True], ["change", "Change", True], ["undo", "Undo a change", True],
+WANT_LISTED = [["update", "Update", True], ["undo", "Undo a change", True],
                ["introduce", "Introduce a project", True], ["setup", "Set up again", True], ["voice", "Writing style builder", True]]
 
 
@@ -162,9 +162,9 @@ def main():
         html = p.get("html", "")
         check("the page's Tools part shows every tool's name, its (i) with its explanation, and plain words with Start",
               [all(f"<b>{x['name']}<button class=\"info\"" in html and f"data-x=\"{x['explain']}\"" in html and x["words"] in html for x in listed),
-               html.count("data-s=\"tool-start\""), p.get("inTop")], [True, 6, True])
+               html.count("data-s=\"tool-start\""), p.get("inTop")], [True, 5, True])
         check("Start posts that tool's start to the chat and goes to the chat",
-              [p.get("posted"), p.get("jumped")], [[{"text": "Start: " + x["name"], "key": f"tool:{x['id']}:N", "label": "Start " + x["name"]} for x in listed], ["chat"] * 6])
+              [p.get("posted"), p.get("jumped")], [[{"text": "Start: " + x["name"], "key": f"tool:{x['id']}:N", "label": "Start " + x["name"]} for x in listed], ["chat"] * 5])
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
     for name, ok, got, want in results:

@@ -161,7 +161,7 @@ Say the rule plainly: "I never send anything without your approval. Usually you 
   then `HELPER answer turn_on true`, which saves the answer only after checking both are on. If it refuses, tell them plainly it did not switch on (with what the first step said, in plain words) and stop. Then `HELPER open-page`: "Your page is opening in your browser. Choose its password there, 10 characters or more; type it only there, never here. Tell me when you see your page." Wait for that; if the page did not open, give them the address `open-page` gave, to open themselves.
 - Not yet: `HELPER answer turn_on false`, and say the page opens once it is switched on, and that typing /assistant:change switch-on does that any time.
 
-Then `HELPER finish`. Close with three lines: what is set up (one line), the page's address (and the outside address if it is reached from anywhere), and: "To change any of this later, open Settings on your page and press Start beside Change in Tools, or type /assistant:change here."
+Then `HELPER finish`. Close with three lines: what is set up (one line), the page's address (and the outside address if it is reached from anywhere), and: "To change any of this later, tell your assistant in Talk to your assistant at the top of your page, or type /assistant:change here."
 
 ## Changing an answer
 
