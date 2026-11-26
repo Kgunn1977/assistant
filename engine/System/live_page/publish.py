@@ -503,11 +503,6 @@ def build(items_path, changed=None):
     except Exception:  # noqa: BLE001  a roadmap that cannot be read never stops the page
         pass
     standing = read_json(os.path.join(HOME, "standing_feed.json"))         # what standing approvals did, and the ladder (standing.py)
-    try:        # the one line at the top of the page (order.py)
-        import order
-        meta["top"] = order.top(shown, (standing or {}).get("today") or 0)
-    except Exception:  # noqa: BLE001
-        pass
     held = read_json(os.path.join(HOME, "held.json"))      # what was kept off the page, by day, with why (held.py)
     try:        # a day stored as a date is worded for today each time the page is built (dates.py)
         import dates

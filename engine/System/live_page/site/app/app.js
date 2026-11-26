@@ -2851,7 +2851,6 @@ window.RM_RUN = function (document, localStorage, claude) {
       var c = (x[2] || FEED_KINDS).reduce(function (t, k) { return t + n[k]; }, 0);
       return '<button type="button" data-s="feed-f" data-f="' + x[0] + '" aria-pressed="' + (x[0] === f[0]) + '">' + h(x[1]) + '<span class="c">' + c + '</span></button>';
     }).join(''));
-    var need = n.decide + n.small, hn = $('n-feed'); if (hn) hn.textContent = need ? need + ' need you' : '';
   }
   /* ---------- Drafts: Ready to send, inside Email; its header says how many wait and opens them ---------- */
   var RDO = {open: false, was: 0};
