@@ -466,6 +466,22 @@ def messages_for(con, message_ids, most=10):
     return out
 
 
+def junk_judged(con, it, most=10):
+    """The emails a one-sender Junk or never junk card is about: the ones from that sender the judge called junk, newest
+    first (spec 3.9: the card shows every message judged junk, not one sample). [] for any other card."""
+    import presses
+    rid = presses.junk_ask_rule(it) if presses.is_junk_ask(it) else None
+    if rid is None:
+        return []
+    e = next((x for x in presses._rules().parse("senders") if x["id"] == rid and x.get("pattern")), None)
+    if not e:
+        return []
+    rows = con.execute("""SELECT m.id FROM messages m JOIN answered a ON a.domain = 'judged' AND a.key = 'msg:' || m.id
+                          WHERE m.direction = 'in' AND m.channel = 'email' AND a.verdict = 'noise'
+                          AND m.from_key ILIKE ? ESCAPE '\\' ORDER BY m.ts DESC LIMIT ?""", [e["pattern"], most]).fetchall()
+    return [r[0] for r in rows]
+
+
 def last_at(con, message_ids):
     """When the newest message behind a card came, to the minute, or None. The newest is picked here, not in the
     query: a max() over such a list once failed inside the database engine (comeback.py)."""
@@ -626,6 +642,13 @@ def _extras(con, it):
             docs = []
         if docs:
             extra["documents"] = docs
+    if not it["source_messages"] and it.get("state") != "done":
+        try:        # a junk question card: every email judged junk from its sender, each one he can open and read
+            judged = junk_judged(con, it)
+            if judged:
+                extra["messages"] = messages_for(con, judged)
+        except Exception:  # noqa: BLE001  the emails never cost the card the rest
+            pass
     if it["source_messages"]:
         try:        # each message behind the card, so its Context can open it over the page
             extra["messages"] = messages_for(con, it["source_messages"])

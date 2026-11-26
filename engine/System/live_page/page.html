@@ -2577,10 +2577,18 @@ html.apv-doc .apv-say{margin:12px 0 0;color:var(--fg-2)}
       (it.rule && it.rule.reason ? '<div class="why rule-why">Because: ' + hc(it.rule.reason) + '</div>' : '') +
       (it.rec_front && s !== 'done' ? '<div class="rec-front">Recommended: ' + hc(it.rec_front) + '</div>' : '') +
       (why ? '<div class="why">' + hc(why) + '</div>' : '') + (s === 'done' && (closedOnly(it) || lastDid(it)) ? '<div class="why">' + hc(closedOnly(it) ? closedWhy(it) : lastDid(it)) + '</div>' : '') +
-      (it.tip && s !== 'done' ? '<div class="why tip">' + hc(it.tip) + '</div>' : '');      /* a one-time tip, the first time this thing appears (onboard.py) */
+      (it.tip && s !== 'done' ? '<div class="why tip">' + hc(it.tip) + '</div>' : '') +      /* a one-time tip, the first time this thing appears (onboard.py) */
+      junkMsgsHtml(it, s);
     var rest = scanHtml(it.rule_scan) + '<div class="hide-on-answer stack">' + (old ? oldHtml(it) + boxHtml(it) : (it.review && s !== 'done' ? reviewHtml(it) : '') + (it.rsi && s !== 'done' ? rsiHtml(it) : '') + pickHtml(it, s) + answeredHtml(it, s) + questionsHtml(it, s) + buttons(it, s)) + '</div>' + answered(a) +
       (isOpen ? '<div class="card-in">' + inside(it, s) + '</div>' : '');
     return '<article class="card host' + (it.importance && !a ? ' urgent' : '') + '" data-key="' + h(it.key) + '"' + stateAttr(a) + '>' + bn + head + rest + '</article>';
+  }
+  /* A card asking Junk or Never junk about a sender: every email judged junk, each a link that opens it to read (spec 3.9) */
+  function junkMsgsHtml(it, s) {
+    var ms = it.sample && s !== 'done' ? (it.messages || []) : [];
+    if (!ms.length) return '';
+    return '<div class="why junk-msgs">' + (ms.length === 1 ? 'The email judged junk: ' : 'The ' + ms.length + ' emails judged junk: ') +
+      ms.map(function (m) { return viewLink(h(m.subject || msgWords(m)), {msg: m.id, name: m.subject || msgWords(m)}); }).join(', ') + '.</div>';
   }
   function cards(list, s) { return '<div class="cards">' + list.map(function (it) { return card(it, s); }).join('') + '</div>'; }
   /* Done: what he answered (each card drawn from its own place), what the assistant closed with nothing done (named so), what is finished */
