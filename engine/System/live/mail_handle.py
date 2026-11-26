@@ -20,6 +20,8 @@ THE CHAT. The assistant's reply carries ACTION lines (chat.py). A plan is made f
                   unread, newest (only the newest this many), account, folder (inbox, all, junk, archive, trash; default inbox)
     A plan that finds exactly one email (any op but unsubscribe and rule) is done at once, as that email's own button does it,
     with no yes asked: one email is never a bulk change. done_now[0] says so to the chat for that call.
+    Organizing (move between folders, mark read or unread, archive, label, star) is done at once, however many emails, when the
+    owner's own words in that message plainly ask for it: he gave the box full access to organize his mail (spec 1.2).
 """
 import datetime as dt
 import email.message
@@ -42,6 +44,8 @@ MOST = 200                      # emails one plan covers
 MOST_SENDERS = 25               # senders one unsubscribe plan looks at
 PLAN_MINUTES = 30
 SAMPLE = 5
+ORGANIZE = ("move", "read", "unread", "archive", "label", "unlabel", "star", "unstar")     # done at once on his plain words
+HEDGE = re.compile(r"\b(don'?t|do not|never|not yet|hold off|should i|should we|would you|whether|what if|how many|which)\b|\?\s*$", re.I)
 OPS = ("archive", "trash", "junk", "move", "unsubscribe", "rule", "read", "unread", "star", "unstar", "label", "unlabel")
 OP_WORDS = {"archive": "archive", "trash": "move to the trash (nothing is deleted for good)", "junk": "move to junk", "move": "move",
             "read": "mark read", "unread": "mark unread", "star": "star (flag)", "unstar": "take the star (flag) off", "label": "label", "unlabel": "take a label off"}
@@ -433,9 +437,16 @@ def _folder_target(account, wanted):
 done_now = [False]      # the last plan() was done at once (one email): the chat then says only the program's line
 
 
-def plan(action, when):
+def _plainly(text):
+    """True when the owner's own words in this message plainly ask for something to be done (not a question, not put off)."""
+    t = " ".join(str(text or "").split())
+    return bool(t) and not HEDGE.search(t)
+
+
+def plan(action, when, text=""):
     """A mail_plan ACTION: finds the mail, keeps the plan, and returns the line that shows it (count and a sample) and asks for
-    the yes; nothing is changed. A plan that finds exactly one email is done at once instead (see the top)."""
+    the yes; nothing is changed. A plan that finds exactly one email is done at once instead, and so is organizing asked for
+    in his own plain words (see the top)."""
     done_now[0] = False
     op = str(action.get("op") or "")
     if op not in OPS:
@@ -476,6 +487,11 @@ def plan(action, when):
         words = f"{OP_WORDS[op]} \"{name}\" on" if op == "label" else f"take the label \"{name}\" off"
     else:
         words = OP_WORDS[op]
+    if op in ORGANIZE and len(got["ids"]) > 1 and _plainly(text):      # organizing on his own words: done at once
+        base["used"] = True
+        _keep(base)
+        done_now[0] = True
+        return _go_acts(base) + (f" There are {got['count'] - len(got['ids'])} more {what}; ask again for the rest." if more else "")
     if got["count"] == 1 and len(got["ids"]) == 1:      # one email: done at once, as its own button does it
         base["used"] = True
         _keep(base)
@@ -712,7 +728,7 @@ def chat_action(action, when, text):
     """The ACTION types of the chat for mail. Returns the line to add to the reply."""
     kind = str((action or {}).get("type") or "")
     if kind == "mail_plan":
-        return plan(action, when)
+        return plan(action, when, text)
     if kind == "mail_go":
         return go(action, when, text)
     if kind == "mail_folder":
