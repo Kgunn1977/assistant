@@ -1,7 +1,7 @@
 r"""Connections: the ways the assistant reaches an owner's accounts.
 
 One file in this folder per KIND of connection (Microsoft work mail, Google
-mail, Google calendar, texts from a phone's backups). The files ship
+mail, Google calendar). The files ship
 with the product and name nobody. WHICH accounts are connected, their addresses
 and their sign-ins belong to the owner: the list is connections.json in their
 personal folder, and every secret (a sign-in, a token, an app secret) is in the
