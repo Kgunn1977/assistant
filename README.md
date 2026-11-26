@@ -7,6 +7,8 @@ A Claude plugin for Windows. It gives you:
 1. **An assistant** that runs on your own computer, reads your mail, messages and calendar every 15 minutes, and keeps one private page of what needs you, where you answer it.
 2. **Roadmaps** for your projects: a live page per project that Claude keeps up to date while you work, which the assistant also shows on its page.
 
+A layout made for the phone is not part of this release; it comes with version 2.0.
+
 ## What you need
 
 - Windows 10 or 11.
