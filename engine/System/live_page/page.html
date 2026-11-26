@@ -7032,21 +7032,22 @@ html.apv-doc .apv-say{margin:12px 0 0;color:var(--fg-2)}
     var n = m.held_today != null ? +m.held_today : (hd.today != null ? +hd.today : now.count || 0), old = 0;
     earlier.forEach(function (d) { old += d.count || d.rows.length; });
     var nothing = 'Nothing was hidden today.' + (old ? ' See earlier days.' : '');
-    $('n-held').textContent = n ? n : '';
-    /* in the feed it is one card, the last, that opens the list; the list itself shows under the Hidden filter */
+    var all = n + old;
+    $('n-held').textContent = all ? all : '';
+    /* in the feed it is one card, always the last, that opens every held-back message, today's and earlier days' (spec 5.5);
+       the list itself shows under the Hidden filter */
     var one = FEED.f !== 'held', sec = $('sec-held');
     if (sec) sec.classList.toggle('held-one', one);
     if (one) {
-      setHtml(el, '<article class="card held-card"><span>' + (n ? 'Hidden today: <b>' + n + '</b>.' : 'Nothing was hidden today.') + '</span>' +
-        (n || old ? ' <button class="btn held-see" type="button" data-s="feed-f" data-f="held">' + (n ? 'See them' : 'See earlier days') + '</button>' : '') +
+      setHtml(el, '<article class="card held-card"><span>' + (all ? 'Held back: <b>' + all + '</b>' + (old && n ? ' (' + n + ' today)' : n ? ' today' : '') + '.' : 'Nothing is held back.') + '</span>' +
+        (all ? ' <button class="btn held-see" type="button" data-s="feed-f" data-f="held">See them all</button>' : '') +
         (m.tips && m.tips.hidden ? '<div class="why tip">' + hc(m.tips.hidden) + '</div>' : '') + '</article>');
       return;
     }
     if (!n && !old) { setHtml(el, '<div class="none">' + nothing + '</div>'); return; }
     var inner = (now.rows || []).length ? '<div class="cards">' + now.rows.map(heldRow).join('') + '</div>' + (now.count > now.rows.length ? '<div class="kv">Showing the newest ' + now.rows.length + ' of ' + now.count + '.</div>' : '')
       : '<div class="kv">' + (n ? 'The list has not reached this page yet.' : 'Nothing was hidden today.') + '</div>';
-    if (earlier.length) inner += '<details class="more" data-d="held-earlier"' + (S.open['held-earlier'] ? ' open' : '') + '><summary>Earlier days <span class="cnt">' + old + '</span></summary><div class="inside">' +
-      earlier.map(function (d) { return '<div class="held-day">' + h(fmtD(D(d.date))) + ', ' + (d.count || d.rows.length) + ' hidden</div><div class="cards">' + d.rows.map(heldRow).join('') + '</div>'; }).join('') + '</div></details>';
+    if (earlier.length) inner += earlier.map(function (d) { return '<div class="held-day">' + h(fmtD(D(d.date))) + ', ' + (d.count || d.rows.length) + ' held back</div><div class="cards">' + d.rows.map(heldRow).join('') + '</div>'; }).join('');
     setHtml(el, '<div class="held-in">' + inner + '</div>');
   }
   function gotItAll() {
