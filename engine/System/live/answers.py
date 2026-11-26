@@ -1103,6 +1103,11 @@ def _owner_send(rec):
     t0 = time.time()
     snap = common.read_json(common.ITEMS_JSON, {}).get("items") or []
     item = next((i for i in snap if i.get("id") == rec.get("id")), None)
+    if item is None and rec.get("origin") == "chat" and rec.get("id"):     # drafted in this same reply: not on the page's copy yet
+        try:
+            item = items.card_for(rec["id"], wait=True)
+        except TimeoutError:
+            item = None
     rec.setdefault("at", common.now().isoformat(timespec="seconds"))
     ready = item is not None and str(item.get("source_key") or "").startswith("live:ready-")
     if ready:       # a draft in Ready to send: the card as it stands now, never the page's copy of it
@@ -1110,7 +1115,7 @@ def _owner_send(rec):
             con = db.connect()    # waits for a pass to let go; a busy store is never "already sent"
         except TimeoutError:
             said = "Not sent: I'm checking for messages right now, so nothing went out. Try again in a minute."
-            return {"ok": True, "items": [], "result": said, "thought": False, "sent": False, "secs": {"own": round(time.time() - t0, 3)}}
+            return {"ok": True, "items": [], "result": said, "thought": False, "sent": False, "busy": True, "secs": {"own": round(time.time() - t0, 3)}}
         try:
             now_card = _row(con, item["id"])
         finally:
