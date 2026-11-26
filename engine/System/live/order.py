@@ -86,6 +86,7 @@ def key_for(it, sort, today):
     # what asks something of him comes before what only waits on others, which comes before what needs nothing
     need = {"waiting": 1, "nothing": 2}.get(it.get("needs") or card_mod.needs(it), 0)
     strength = -int(((it.get("contact") or {}) if isinstance(it.get("contact"), dict) else {}).get("level") or 0)
+    asking = strength if need == 0 else 0       # someone he is often in touch with who asks something of him ranks higher
     importance = -(it.get("importance") or 0)
     # Due date: the soonest due date first (late ones are the soonest), then important, then how often he is in touch, then age
     due_first = (need, 0 if due else 1, due or dt.date.max, importance, strength, _when(it))
@@ -99,8 +100,8 @@ def key_for(it, sort, today):
         return (closed, need, _waited(it))
     if sort == "recently_active":
         return (closed, need, -_last(it))
-    if sort == "important_senders_first":         # Importance: the most important first, then the newest
-        return (closed, need, importance, -_from(it))
+    if sort == "important_senders_first":         # Importance: the most important first, then whoever he is most often in
+        return (closed, need, importance, asking, -_from(it))   # touch with among those asking something of him, then the newest
     return (closed,) + due_first
 
 
