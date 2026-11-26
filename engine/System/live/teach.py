@@ -135,7 +135,7 @@ def _ask(item, way, change="", pressed=None):
     return (out if ok else None), why
 
 
-def _card(rid, text, way, source, note, pass_id="press", reason="", pressed=None):
+def _card(rid, text, way, source, note, pass_id="press", reason="", pressed=None, book=None):
     """Make or rewrite the rule card, with why the rule exists (shown under it). Returns it as the feed carries it."""
     import answers
     import db
@@ -147,7 +147,7 @@ def _card(rid, text, way, source, note, pass_id="press", reason="", pressed=None
                           why=f"You pressed \"{pressed}\" on a card." if pressed else
                           f"You pressed \"{'I did not need this' if way == 'show_less' else 'Always show this'}\" on a card and chose this kind of message.",
                           extra={"rule": {"text": text, "way": way, "from": " ".join(str(source or "").split())[:120],
-                                          "reason": filters._reason(reason)}})
+                                          "reason": filters._reason(reason), "book": filters.book_of(book)}})
     return items.card_for(iid, wait=True)
 
 
@@ -160,7 +160,8 @@ def propose(item, way, words="", pressed=None):
     if out is None:
         return None, f"I could not work out a rule just now ({why}). Nothing was changed; you can write one yourself in Settings, under Filters, Rules."
     card_ = _card(filters.next_rule_id(), out["rule"], way, item.get("header") or item.get("title"), out.get("note"),
-                  reason=filters._reason(out.get("reason")) or _pressed(way, item, words, pressed), pressed=pressed)
+                  reason=filters._reason(out.get("reason")) or _pressed(way, item, words, pressed), pressed=pressed,
+                  book=filters.book_of_card(item))        # the rule goes into the book of the source the card came from
     return card_, f"I proposed a rule: \"{card_['rule']['text']}\" It is a card on your page; nothing changes until you approve it."
 
 
@@ -174,7 +175,8 @@ def rewrite(item, words):
         return None, f"I could not rewrite the rule just now ({why}). The card is as it was."
     rid = int(str(item["source_key"])[len(PREFIX):])
     card_ = _card(rid, out["rule"], rule.get("way") or "show_less", rule.get("from"), out.get("note"),
-                  reason=filters._reason(out.get("reason")) or rule.get("reason") or _pressed(rule.get("way"), item, words))
+                  reason=filters._reason(out.get("reason")) or rule.get("reason") or _pressed(rule.get("way"), item, words),
+                  book=rule.get("book"))
     return card_, f"The rule now reads: \"{card_['rule']['text']}\" Nothing changes until you approve it."
 
 
@@ -183,7 +185,7 @@ def approve(item):
     rule = item.get("rule") or {}
     rid = int(str(item["source_key"])[len(PREFIX):])
     saved = filters.add_rule(rule.get("text") or str(item.get("title") or "")[10:], rule.get("way") or "show_less", rule.get("from"), rid=rid,
-                             reason=rule.get("reason") or "")
+                             reason=rule.get("reason") or "", book=rule.get("book") or filters.book_of_card(item))
     clash = [(a, b) for a, b in filters.contradictions(filters.rules()) if saved["id"] in (a["id"], b["id"])]
     said = "The rule is saved. It starts the next time I check for messages. You can change or pause it in Settings, under Filters, Rules."
     if clash:

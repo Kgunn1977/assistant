@@ -5,6 +5,7 @@ rule and every check of a Save; this file only describes, in plain words, what s
 already holds: for each setting its group, label, help words (a live line only), explanation (its (i) pop-up), kind of
 control, choices, present value and whether a page may change it. A setting added later is one more entry here and the page shows it.
 """
+import filters
 import settings_page
 
 ON_PC = "Paste this into Claude on your computer."
@@ -169,7 +170,8 @@ def defs(now=None):
              explain="How much mail reaches your page as cards. Show more shows anything you might want, including every note a person wrote you, and a new setup starts here; Balanced shows what asks something of you or what you'd plainly want to know (a setup made earlier keeps its choice, Balanced if never changed); Only what needs me shows only what you must decide, answer or do. It starts the next time I check for messages, and anything I hide is under Hidden in Cards, with the reason."),
         _one("filter", "rules", "Rules", "rules", f.get("rules") or [],
              ways=_c((("show_less", "Show less"), ("always_show", "Always show"), ("card_rule", "How cards are written"))),
-             explain="Your own rules, one plain sentence each with a line on why (you can change it), saved as Show less, Always show or How cards are written. I follow them when I sort mail and write cards, and rules you approve on a card or give me in chat are saved here; each can be paused or removed. Starts the next time I check for messages."),
+             books=_c(tuple(filters.books())),
+             explain="Your own rules, one plain sentence each with a line on why (you can change it), saved as Show less, Always show or How cards are written. Every message source has its own rule book (Email, Texts, and any other source you connect): each rule is in one book and I follow it only for messages from that source. I follow them when I sort messages and write cards, and a rule you approve on a card goes into the book of the source that card came from; each can be moved to another book, paused or removed. Starts the next time I check for messages."),
         _one("filter", "always_through", "Priority senders", "list", f.get("always_through") or [],
              explain="Names, addresses or domains, one per line, whose messages I never hide. A message from them always becomes a card and counts for important-sender notifications. Starts the next time I check for messages."),
         _one("filter", "nothing_needed", "Mail needing no action", "choice", f.get("nothing_needed"),

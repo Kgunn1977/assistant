@@ -1755,7 +1755,7 @@ def _offer_answered(item, offer, do, when, on_update):
     rule = filters.add_rule(offer.get("text") or "", offer.get("way") or "card_rule",
                             "You told me in Talk to your assistant" if made else
                             f"Your words on the card \"{str(item.get('header') or item.get('title') or '')[:80]}\"",
-                            reason=offer.get("reason") or "")
+                            reason=offer.get("reason") or "", book=None if made else filters.book_of_card(item))
     if made:
         _asked_told(item, offer, "Approved", f"Your rule is saved: \"{rule['text']}\".")
     it, _ = _land(_set(item["id"], extra=extra or None, **back))
@@ -1828,7 +1828,7 @@ def _rule_offer(before, item, press, rec, on_update):
     if do == "approve":
         rule = filters.add_rule(offer.get("text") or "", offer.get("way") or "card_rule",
                                 f"Your words on the card \"{str((before or {}).get('header') or (before or {}).get('title') or '')[:80]}\"",
-                                reason=offer.get("reason") or "")
+                                reason=offer.get("reason") or "", book=filters.book_of_card(before or item))
         note, scanned = _scan_after(rule, item["id"], on_update, it or item)
         said = " ".join(x for x in (f"Your rule is saved: \"{rule['text']}\".", said, scanned) if x)
         now = it or item
