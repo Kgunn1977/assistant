@@ -34,7 +34,7 @@ The eight statuses, written exactly:
 | Ready, waiting for your look | It is in the main copy and Claude has checked all it can; the person has not yet tried what only they can. Written with at least one check, each with `needs_person`, and a "Checked by Claude, <date>: ..." line in `shown_working`, in the same write; any other Ready write is refused by the plugin's guard. |
 | Ready, known fault | It is in the main copy and something about it is known not to work. Written the same way as "Ready, waiting for your look" (checks with `needs_person`, and the "Checked by Claude" line); any other Ready write is refused. |
 | First pass, to be redone | A rough version exists and is to be redone |
-| Done, confirmed | The person tried it and confirmed it. Also: Claude checked it and it needs nothing from the person; `shown_working` then reads "Checked by Claude, <date>: <what was checked>". |
+| Done, confirmed | The person tried it and confirmed it: every check marked Works (`shown_working` adds "Your checks, <date>"), or they said it is done ("You confirmed it, <date>"). Claude never confirms its own work: work it checked itself is "Ready, waiting for your look" until the person confirms it, and the plugin's guard refuses a "Done, confirmed" write with neither line. |
 
 A Ready status is written only on a row that carries at least one check, in the same write or already there. A row set to a Ready status with no checks has nothing for the person to try; the page shows it as a fault ("No checks to try: tell Claude"), not as waiting on the person, and the writer refuses to write it.
 

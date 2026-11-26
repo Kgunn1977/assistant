@@ -910,10 +910,10 @@ check("writer skill: a Ready status is written only with checks the person alone
       ('"Ready, waiting for your look"' in wrule, '"Ready, known fault"' in wrule, "`needs_person`" in wrule, "Checked by Claude, <date>" in wrule, "do not write the status" in wrule, "receipt" in wrule, "Never invent a check" in wrule), (True,) * 7)
 check("manual: both Ready statuses need checks with needs_person and the Checked by Claude line, else refused; a row with none is shown as a fault",
       ("refused by the plugin's guard" in manual, '{"id", "text", "needs_person"}' in manual, "No checks to try: tell Claude" in manual, "the writer refuses to write it" in manual), (True, True, True, True))
-check("manual: Done, confirmed also means Claude checked it, with the shown_working line", ('Checked by Claude, <date>: <what was checked>' in manual, "needs nothing from the person" in manual), (True, True))
-check("director skill: Ready only with checks sent together; work Claude checked is Done, confirmed with the shown_working line",
-      ("only when it carries checks" in dskill, "the writer refuses a Ready status for a row with none" in dskill, '"Done, confirmed" with `shown_working` reading "Checked by Claude, <date>: <what you checked>"' in dskill,
-       "needs nothing from the person" in dskill), (True,) * 4)
+check("manual: Done, confirmed only on the person's checks or word; Claude never confirms its own work", ("Claude never confirms its own work" in manual, '"You confirmed it, <date>"' in manual), (True, True))
+check("director skill: Ready only with checks sent together; work Claude checked is Ready for the person to confirm, never Done, confirmed",
+      ("only when it carries checks" in dskill, "the writer refuses a Ready status for a row with none" in dskill, "You can't judge your own work" in dskill,
+       "never on yours" in dskill), (True,) * 4)
 check("page: a Ready row with no checks is shown as a fault in its tag, its colour, its filter and its count, and not as still to try",
       ('NOCHK_SHORT = "No checks to try: tell Claude"' in page_src, "function noChecks(it) { return CHECK_STATES.indexOf(it.status) >= 0 && !checksOf(it).length; }" in page_src,
        'short: NOCHK_SHORT, c: "--s-fault"' in page_src, "var st = tagOf(it);" in page_src.split("function makeRow", 1)[1][:200],

@@ -26,7 +26,7 @@ The roadmap is a log of what is going on in the project, so the person can see i
 3. Bring the copies up to date when readers ask for them (below), then end with the receipt.
 
 ## What you are sent
-- **A decision or a change**: new rows, or changes to `status`, `does`, `not_yet`, `waits_on_you`, `plan` (whole), `release`, `idea`, and "What's next". Work started is "Being worked on now"; a piece built but not yet in the main copy is "Built, waiting to be merged", never Ready or Done.
+- **A decision or a change**: new rows, or changes to `status`, `does`, `not_yet`, `waits_on_you`, `plan` (whole), `release`, `idea`, and "What's next". Work started is "Being worked on now"; a piece built but not yet in the main copy is "Built, waiting to be merged", never Ready or Done. A row is "Done, confirmed" only when the person confirmed it, with `shown_working` saying "Your checks, <date>" or "You confirmed it, <date>": Claude can't judge its own work, and the guard refuses any other Done write.
 - **A phase** always carries `parent`, its step's id; one sent without it is not written.
 - **A Ready status needs a check the person alone can do**: write "Ready, waiting for your look" or "Ready, known fault" only with the row's checks in the same write, each carrying `needs_person`, and a `shown_working` line "Checked by Claude, <date>: ...". Sent without these, do not write the status: leave the row and say in your receipt it was refused and why. Never invent a check or a reason.
 - **Checks**: write the whole `checks` list. Keep an unchanged check's id; give a reworded or new one a new id. A check missing what to open, what to do or what should be seen, or two joined into one, goes back in your receipt; write the whole ones.

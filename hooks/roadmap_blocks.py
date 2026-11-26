@@ -338,6 +338,24 @@ def refuse_ready(data, cfg):
     return None
 
 
+DONE = "Done, confirmed"
+CONFIRMED_BY_PERSON = ("Your checks, ", "You confirmed it, ")
+SELF_CONFIRM_REFUSED = ("Refused: you can't judge your own work. A row is \"Done, confirmed\" only on the person's word or their "
+                        "checks: its shown_working says \"Your checks, <date>\" or \"You confirmed it, <date>\". Work you checked "
+                        "yourself is \"Ready, waiting for your look\", with checks for them to confirm it.")
+
+
+def refuse_self_confirm(data, cfg):
+    """PreToolUse, whoever writes: a row written "Done, confirmed" must say, in the same write, that the person confirmed it
+    (their checks or their word); Claude's own check never confirms its own work."""
+    if not roadmap_write(data, cfg):
+        return None
+    for d in _row_writes(data.get("tool_input") or {}):
+        if d.get("status") == DONE and not any(x in str(d.get("shown_working") or "") for x in CONFIRMED_BY_PERSON):
+            return SELF_CONFIRM_REFUSED
+    return None
+
+
 def questions_file_only(data):
     """True when every write of this call is to a session's copy of its questions file ("board" documents
     "questions-file--..."), which the session that keeps that file writes itself."""
@@ -444,7 +462,7 @@ def main(data, cfg_path=None, log_file=None, now=None):
             why = refuse_other_writer(data, cfg)
         elif note_untold(data, cfg, log, now):
             save_json(log, log_file)
-        why = why or refuse_ready(data, cfg)
+        why = why or refuse_ready(data, cfg) or refuse_self_confirm(data, cfg)
         return (2, why) if why else (0, None)
     if event == "Stop":
         if not direct(cfg):
