@@ -2448,7 +2448,8 @@ html.apv-doc .apv-say{margin:12px 0 0;color:var(--fg-2)}
     render(); renderTalk();
   }
   /* Later offers five things, these four and a date, or only the ones the owner kept in Settings. */
-  function laterOffers() { var st = setts(), l = st && st.page && st.page.later_offers; return Array.isArray(l) && l.length ? l : ['today', 'tomorrow', 'next_week', 'date', 'someday']; }
+  /* Snooze's choices; Next week (back Monday) is always one of them, whatever Settings says (spec 4.10) */
+  function laterOffers() { var st = setts(), l = st && st.page && st.page.later_offers; l = Array.isArray(l) && l.length ? l.slice() : ['today', 'tomorrow', 'next_week', 'date', 'someday']; if (l.indexOf('next_week') < 0) l.push('next_week'); return l; }
   /* The teaching presses a card may offer (ITEMS.md "Teaching presses on a card"): the engine names them, in order. */
   var TEACH = {not_needed_sender: 'This sender', not_needed_kind: 'This kind of message', not_needed_this: 'Only this one', always_sender: 'This sender', always_kind: 'This kind of message'};
   function teachOf(it, s) {
@@ -2535,7 +2536,9 @@ html.apv-doc .apv-say{margin:12px 0 0;color:var(--fg-2)}
     return '<div class="answered-line"><span class="res">' + h(a.result || 'Answered') + '</span>' +
       (saidOf(a) ? '<span class="said">"' + h(saidOf(a)) + '"</span>' : '') +
       '<span class="rec-note">' + note + '</span>' +
-      (isSend(a) ? '' : '<button class="link" data-a="undo">Undo</button>') + '</div>';
+      (isSend(a) ? '' : '<button class="link" data-a="undo">Undo</button>') +
+      /* a snoozed card has Next week, which brings it back on Monday (spec 4.10) */
+      (isLater(a) && a.until !== 'someday' && st !== 'failed' ? '<button class="btn" data-a="later-go" data-when="next_week">Next week</button>' : '') + '</div>';
   }
   function stateAttr(a) { return a && a.action !== 'applied' ? ' data-state="' + h(a.action) + '"' : ''; }     /* an answer the engine holds never hides the buttons and box */
   /* The assistant rewrote the card from the owner's answer: the card itself now says it all. */
