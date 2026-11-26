@@ -42,6 +42,12 @@ def main():
     check("a Ready write with both is let through", write({"status": ready, "checks": GOOD, "shown_working": CHECKED}), None)
     check("other writes pass (Done, confirmed with the line; an update with no status)",
           [write({"status": "Done, confirmed", "shown_working": CHECKED}), write({"name": "Tiles"})], [None, None])
+    def done(line):
+        ti = {"action": "update", "url": PAGE, "collection": "steps", "doc_id": "step-05", "data": {"status": "Done, confirmed", "shown_working": line}}
+        return rb.refuse_self_confirm({"hook_event_name": "PreToolUse", "tool_name": "ArtifactData", "tool_input": ti}, CFG)
+    check("Claude can't confirm its own work: Done, confirmed on its own check is refused; on the person's checks or word it passes",
+          [done(CHECKED) is not None and "can't judge your own work" in done(CHECKED), done(CHECKED + "\nYour checks, 11/21"),
+           done("You confirmed it, 11/21")], [True, None, None])
     r = rb.refuse_ready({"hook_event_name": "PreToolUse", "tool_name": "ArtifactData", "tool_input": {
         "action": "batch", "url": PAGE, "writes": [
             {"op": "update", "collection": "steps", "doc_id": "step-01", "data": {"status": "Done, confirmed", "shown_working": CHECKED}},
