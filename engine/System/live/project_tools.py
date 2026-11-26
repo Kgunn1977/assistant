@@ -8,14 +8,13 @@ project, Remove questions file from a project. They work on one of the owner's p
                          questions file, introduced projects.
     sessions_of(folder)  the project's open sessions for the person to choose from, none chosen for them: id, name, last active,
                          child (started from another session), has (keeps the questions file). Top-level sessions first.
-    handle(rec)          one press from the page, id "pt:<op>-<tool>:<ms>", words {"folder": ..., "session": <the chosen id>}:
-                           add     sends the CHOSEN session ONE message asking it to run /assistant:roadmap-setup or
-                                   /assistant:questions-setup after the person says yes IN THAT SESSION. Nothing runs in the
-                                   project from here. Chosen session gone, or not sent: "Not sent: ..." and the page shows the
-                                   command to type in the project, with a Copy button.
-                           remove  turns it off through the plugin's own off script (the roadmap's own files are deleted; a questions file is kept).
-                                   The page asked for the owner's yes first. The questions file is per session, so the session
-                                   that keeps it is chosen; a roadmap belongs to the project, so Remove roadmap names no session.
+    handle(rec)          one press from the page, id "pt:<op>-<tool>:<ms>", words {"folder": ..., "session": <the chosen id>}.
+                         All four work the same way: the person chooses the project and exactly which session, and that
+                         CHOSEN session gets ONE message asking it to run the command (/assistant:roadmap-setup,
+                         /assistant:questions-setup, /assistant:roadmap-off or /assistant:questions-off) after the person
+                         says yes IN THAT SESSION. Nothing runs in the project from here. Chosen session gone, or not sent:
+                         "Not sent: ..." and the page shows the command to type in the project, with a Copy button.
+                         A roadmap is suggested for a higher-level (top) session.
 
 The message goes the way the roadmap presses go (live_page\roadmap_press.py deliver): a hidden Claude run with message tools only.
 """
@@ -37,23 +36,24 @@ MAX_PROJECTS = 150
 MAX_SESSIONS = 15
 
 TOOLS = (
-    {"id": "add-roadmap", "explain": "Sets up the roadmap in a project. You choose the project and its top session, and that session sets it up once you say yes there. If no session can be asked, the command to type in the project is shown with a Copy button.",
+    {"id": "add-roadmap", "explain": "Sets up the roadmap in a project. You choose the project and exactly which session (a roadmap is suggested for a higher-level session, the project's top one), and that session sets it up once you say yes there. If no session can be asked, the command to type in the project is shown with a Copy button.",
      "name": "Add roadmap to a project", "tool": "roadmap", "op": "add",
      "words": "Sets up the roadmap in a project. Choose the project and session; that session sets it up once you say yes there."},
     {"id": "add-questions", "explain": "Turns on the questions file in a project, which keeps one session's questions. You choose the project and the session, and that session does it once you say yes there.",
      "name": "Add questions file to a project", "tool": "questions", "op": "add",
      "words": "Turns on the questions file in a project. Choose the project and session; that session does it once you say yes there."},
-    {"id": "remove-roadmap", "explain": "Turns a project's roadmap off after you confirm. Its page stays as a record, and the roadmap's own files are deleted.",
+    {"id": "remove-roadmap", "explain": "Turns a project's roadmap off. You choose the project and exactly which session, and that session turns it off once you say yes there. Its page stays as a record, and the roadmap's own files are deleted.",
      "name": "Remove roadmap from a project", "tool": "roadmap", "op": "remove",
-     "words": "Turns a project's roadmap off after you confirm. Its page stays as a record; the roadmap's own files are deleted."},
-    {"id": "remove-questions", "explain": "Turns the questions file off for one session of a project after you confirm. Its file stays as it is, and nothing is deleted.",
+     "words": "Turns a project's roadmap off. Choose the project and session; that session does it once you say yes there."},
+    {"id": "remove-questions", "explain": "Turns the questions file off for one session of a project. You choose the project and the session that keeps it, and that session does it once you say yes there. Its file stays as it is, and nothing is deleted.",
      "name": "Remove questions file from a project", "tool": "questions", "op": "remove",
-     "words": "Turns the questions file off for one session of a project after you confirm. Its file stays as it is; nothing is deleted."},
+     "words": "Turns the questions file off for one session of a project. Choose the project and session; that session does it once you say yes there."},
 )
 
 
 def listed():
-    return [dict(id=t["id"], name=t["name"], words=t["words"], explain=t["explain"], tool=t["tool"], op=t["op"], command=COMMANDS[t["tool"]]) for t in TOOLS]
+    return [dict(id=t["id"], name=t["name"], words=t["words"], explain=t["explain"], tool=t["tool"], op=t["op"],
+                 command=(COMMANDS if t["op"] == "add" else OFF_COMMANDS)[t["tool"]]) for t in TOOLS]
 
 
 def _norm(folder):
@@ -257,10 +257,12 @@ def projects():
 
 
 # ---- the message ----------------------------------------------------------------------------------------------------------------
-def message(tool, folder):
-    return (f"A request from the person, made on the assistant's page (Settings, Tools): turn on the {LABEL[tool]} in this project "
+def message(tool, folder, op="add"):
+    cmd = (COMMANDS if op == "add" else OFF_COMMANDS)[tool]
+    what = f"turn on the {LABEL[tool]}" if op == "add" else (f"turn off the {LABEL[tool]}" if tool == "roadmap" else f"turn off this session's {LABEL[tool]}")
+    return (f"A request from the person, made on the assistant's page (Settings, Tools): {what} in this project "
             f"({folder}). Do nothing yet. First ask the person here, in this session, in one line, whether to go ahead. Only after "
-            f"they answer yes in this session, run {COMMANDS[tool]}. If they say no, or do not answer, run nothing and change "
+            f"they answer yes in this session, run {cmd}. If they say no, or do not answer, run nothing and change "
             "nothing. Nothing else is asked of this session.")
 
 
@@ -277,13 +279,13 @@ def _deliver(folder, name, text):
 
 
 # ---- the press ----------------------------------------------------------------------------------------------------------------
-def _fallback(tool, why):
-    return f"Not sent: {why}. In that project's Claude session, type {COMMANDS[tool]}"
+def _fallback(tool, why, op="add"):
+    return f"Not sent: {why}. In that project's Claude session, type {(COMMANDS if op == 'add' else OFF_COMMANDS)[tool]}"
 
 
 def handle(rec):
     """One press from the page. Returns {"ok", "result"} for the listener (a refusal is plain words in "result" too). The words
-    carry the project and, except for Remove roadmap (a roadmap belongs to the project), the session the person chose."""
+    carry the project and the session the person chose; that session is asked, and acts only on the person's yes there."""
     m = ID.match(str(rec.get("id") or ""))
     try:
         body = json.loads(rec.get("text") or "")
@@ -298,44 +300,18 @@ def handle(rec):
     if not folder:
         return {"ok": True, "result": "Not done: that project is not one I know. Nothing was changed."}
     name = os.path.basename(folder.rstrip("\\/")) or folder
-    if op == "remove" and tool == "roadmap":
-        if not roadmap_on(folder):
-            return {"ok": True, "result": f"The roadmap is already off in {name}. Nothing was changed."}
-        return {"ok": True, "result": _remove(tool, folder, name)}
     session = next((s for s in sessions_of(folder) if chosen and s["id"] == chosen), None)
     if session is None:
-        return {"ok": True, "result": _fallback(tool, "the session you chose is no longer open in that project") if op == "add"
-                else "Not done: the session you chose is no longer open in that project. Nothing was changed."}
-    if op == "add":
-        if (tool == "roadmap" and roadmap_on(folder)) or (tool == "questions" and session["has"]):
-            return {"ok": True, "result": f"The {LABEL[tool]} is already on in {name}" + (" for that session" if tool == "questions" else "") + ". Nothing was sent."}
-        outcome, detail = _deliver(folder, session["name"], message(tool, folder))
-        if outcome != "delivered":
-            return {"ok": True, "result": _fallback(tool, f"the session \"{session['name']}\" could not be reached")}
-        return {"ok": True, "result": f"Sent to the session \"{session['name']}\" (the one you chose). Say yes there and it sets up the {LABEL[tool]} in {name}; "
-                                      "nothing runs until you do."}
-    if not session["has"]:
-        return {"ok": True, "result": f"That session has no questions file in {name}. Nothing was changed."}
-    return {"ok": True, "result": _remove(tool, folder, name, session["id"])}
-
-
-def _remove(tool, folder, name, session=""):
-    script = ""
-    for d in data_dirs():
-        if os.path.isfile(os.path.join(d, "scripts", SCRIPTS[tool])):
-            script = os.path.join(d, "scripts", SCRIPTS[tool])
-            break
-    if not script:
-        return f"Not done: the plugin's script is not on this computer. In that project's Claude session, type {OFF_COMMANDS[tool]}"
-    cmd = [sys.executable, script, "--project", folder, "off"] + (["--root", os.path.dirname(common.HOME)] if tool == "roadmap" else ["--session", session])
-    env = {k: v for k, v in os.environ.items() if k not in ("CLAUDECODE", "CLAUDE_CODE_ENTRYPOINT")}
-    try:
-        r = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=60, env=env,
-                           creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
-    except subprocess.TimeoutExpired:
-        return f"Not done: it took too long and was stopped. In that project's Claude session, type {OFF_COMMANDS[tool]}"
-    if r.returncode:
-        return f"Not done: {' '.join((r.stderr or r.stdout).split())[-200:]}. In that project's Claude session, type {OFF_COMMANDS[tool]}"
-    if tool == "roadmap":
-        return f"The roadmap is off in {name}. Its page stays as a record; the roadmap's own files were deleted."
-    return f"The questions file is off for that session in {name}. Its file stays as it is."
+        return {"ok": True, "result": _fallback(tool, "the session you chose is no longer open in that project", op)}
+    if op == "add" and ((tool == "roadmap" and roadmap_on(folder)) or (tool == "questions" and session["has"])):
+        return {"ok": True, "result": f"The {LABEL[tool]} is already on in {name}" + (" for that session" if tool == "questions" else "") + ". Nothing was sent."}
+    if op == "remove" and tool == "roadmap" and not roadmap_on(folder):
+        return {"ok": True, "result": f"The roadmap is already off in {name}. Nothing was sent."}
+    if op == "remove" and tool == "questions" and not session["has"]:
+        return {"ok": True, "result": f"That session has no questions file in {name}. Nothing was sent."}
+    outcome, detail = _deliver(folder, session["name"], message(tool, folder, op))
+    if outcome != "delivered":
+        return {"ok": True, "result": _fallback(tool, f"the session \"{session['name']}\" could not be reached", op)}
+    doing = f"sets up the {LABEL[tool]}" if op == "add" else f"turns the {LABEL[tool]} off"
+    return {"ok": True, "result": f"Sent to the session \"{session['name']}\" (the one you chose). Say yes there and it {doing} in {name}; "
+                                  "nothing runs until you do."}
