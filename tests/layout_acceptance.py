@@ -30,7 +30,7 @@ if what == "save":
     rm = [m for m in mods if m.startswith("rm:")]
     out["default"] = settings_page.for_page()["page"]["order"]
     want = {"top": ["chat", rm[0]], "left": ["feed"], "right": ["today", "about"], "bottom": ["texts", "mail"]}
-    want_full = dict(want, bottom=want["bottom"] + ["calendar"])
+    want_full = dict(want, bottom=want["bottom"] + ["calendar", "contacts"])
     ok, said = settings_page.save({"settings": {"group": "page", "values": {"order": want, "hidden": ["calendar"]}}})
     out["saved"] = [ok, said[:60]]
     bad, said2 = settings_page.save({"settings": {"group": "page", "values": {"order": {"top": ["chat", "chat"]}}}})
@@ -125,8 +125,8 @@ def main():
         rm = [m for m in got.get("default", {}).get("left", []) if m.startswith("rm:")]
         check("default: Cards then the new roadmap on the left, Today on the right", (got.get("default", {}).get("top"),
               got.get("default", {}).get("left", [])[:1], len(rm), got.get("default", {}).get("right"), got.get("default", {}).get("bottom")),
-              (["chat", "about"], ["feed"], 1, ["today"], ["mail", "texts", "calendar"]))
-        older = {"top": ["chat", "about"], "left": ["feed"] + rm, "right": ["today"], "bottom": ["mail", "texts", "calendar"]}
+              (["chat", "about"], ["feed"], 1, ["today"], ["mail", "texts", "calendar", "contacts"]))
+        older = {"top": ["chat", "about"], "left": ["feed"] + rm, "right": ["today"], "bottom": ["mail", "texts", "calendar", "contacts"]}
         check("an arrangement saved with the card kinds as parts reads as Cards, without Ready to send or Changes", got.get("older"), older)
         check("an arrangement using all four areas is saved", got.get("saved", [None])[0], True)
         check("a part named twice is refused", got.get("refused"), False)
@@ -150,7 +150,7 @@ def main():
         js = json.loads(r.stdout or "{}") if r.returncode == 0 else {"error": r.stderr[-300:]}
         check("the page places every part where it was saved", js.get("saved"), got.get("want"))
         check("with nothing saved the page has Cards on the left and Today on the right", js.get("none"), {"top": ["chat", "about"], "left": ["feed", "rm:" + key],
-                                                                         "right": ["today"], "bottom": ["mail", "texts", "calendar"]})
+                                                                         "right": ["today"], "bottom": ["mail", "texts", "calendar", "contacts"]})
         check("the page reads an older arrangement the same way", js.get("older"), dict(older, left=["feed", "rm:" + key]))
         r = subprocess.run(["node", "-e", READY, page], capture_output=True, text=True)
         rd = json.loads(r.stdout or "{}") if r.returncode == 0 else {"error": r.stderr[-300:]}

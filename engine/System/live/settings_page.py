@@ -55,7 +55,7 @@ LATER_OFFERS = ("today", "tomorrow", "next_week", "date", "someday")
 # width, left is the wide column, right the narrow one; on a phone they stack top, left, right, bottom. Each connected
 # roadmap is its own module, "rm:<key>". The default is the page as it was before modules could be moved.
 AREAS = ("top", "left", "right", "bottom")
-DEFAULT_AREA = {"top": ("chat", "about"), "left": ("feed", "roadmaps"), "right": ("today",), "bottom": ("mail", "texts", "calendar")}
+DEFAULT_AREA = {"top": ("chat", "about"), "left": ("feed", "roadmaps"), "right": ("today",), "bottom": ("mail", "texts", "calendar", "contacts")}
 # the card kinds the Cards feed holds (once each a part of its own): a saved arrangement naming one places Cards there; Ready to send
 # (now Drafts, in Mail) and Changes to your assistant (now Change history, in Settings) are no longer parts of the arrangement
 FEED_KINDS = ("decide", "small", "tracked", "fyi", "someday", "handled", "saidso", "held")
