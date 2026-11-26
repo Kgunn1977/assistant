@@ -17,7 +17,7 @@ session that turns it on has its own file; the first keeps Questions.md, each fu
                                         in a project with a roadmap: saves the one database write that copies this file, as
                                         written, to the roadmap page (board/questions-file--<session id>), and, when a reader
                                         keeps the full copy, the patch for it. Run after each turn the file changed. The page
-                                        only shows it; answers are given in chat. With no roadmap it says so and changes nothing.
+                                        shows it; answers are given in chat or under the copy there. With no roadmap it says so and changes nothing.
 
 Sessions are recorded by their local_... id (it survives app restarts); an older record by the session's own id is moved to
 the local id the next time that session is seen.
