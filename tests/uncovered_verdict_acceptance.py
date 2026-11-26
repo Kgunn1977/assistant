@@ -120,7 +120,7 @@ WANT = {
     "uncovered": [0, ["task", False, "no rule; the sender reads like a supplier"], ["noise", True, "12"], True],
     "bad": [1, True, True, None],
     "schema again": ["task", False, "no rule; the sender reads like a supplier"],
-    "card uncovered": "You haven't told me how to handle this kind yet. My guess: a supplier asking to confirm a delivery day. "
+    "card uncovered": "You haven't told me how to handle this kind yet, so I'm asking instead of guessing. "
                       "Sam Example wrote to you on 11/20.",
     "card covered": "Sam Example wrote to you on 11/20.",
     "rewrites": [0, [["noise", False, "no rule"], ["noise", False, "no rule"]], ["task", None, None], [], ["ignore", None, None]],
@@ -130,7 +130,7 @@ NAMES = {
     "uncovered": "a verdict with covered=false and leaned_on is accepted and stored; covered=true with a rule id too",
     "bad": "covered set to the text 'false' refuses the whole commit, naming it; nothing is written",
     "schema again": "the schema applied again keeps what was stored",
-    "card uncovered": "the card from an uncovered verdict says 'My rules don't cover this; my best guess: ...' in its why",
+    "card uncovered": "the card from an uncovered verdict asks instead of guessing, in its why",
     "card covered": "a card from a covered verdict keeps its plain why",
     "rewrites": "an uncovered row rewritten by 'I should have seen this' (held.py) or the card writer's skip (think.py) keeps"
                 " no stale covered=false",
