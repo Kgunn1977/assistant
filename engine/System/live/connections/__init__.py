@@ -1,7 +1,7 @@
 r"""Connections: the ways the assistant reaches an owner's accounts.
 
 One file in this folder per KIND of connection (Microsoft work mail, Google
-mail, Google calendar, texts from a phone's backups). The files ship
+mail, Google calendar). The files ship
 with the product and name nobody. WHICH accounts are connected, their addresses
 and their sign-ins belong to the owner: the list is connections.json in their
 personal folder, and every secret (a sign-in, a token, an app secret) is in the
@@ -107,7 +107,7 @@ def _write(data):
 
 def listed(kind=None, everything=False):
     """The owner's connections that are switched on (all of them with everything=True)."""
-    gone = ("phone_texts",)         # a type that no longer exists (texts come only from the Messages extension): a connection left in the list is ignored, not an error
+    gone = ("phone_texts",)         # a type that no longer exists (texts come only through the Google Messages link, never phone backups): a connection left in the list is ignored, not an error
     return [c for c in _file()["connections"]
             if c.get("type") not in gone and (everything or c.get("on", True)) and (kind is None or c.get("kind") == kind)]
 

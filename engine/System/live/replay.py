@@ -2,9 +2,8 @@ r"""Rebuild the owner's data day by day, as a new user would have it: erase the 
 its sources and sort it as the 15-minute check would have that day, one week per run.
 
     python replay.py dry-run            what erase would move and keep, and what day 1 would read; touches nothing, asks no service
-    python replay.py prepare [--start 2026-09-01] [--texts-folder <folder>]
-                                        Sync off (the page's own Sync setting), one harmless read of every account, the phone
-                                        backups filed by day (read once)
+    python replay.py prepare [--start 2026-09-01]
+                                        Sync off (the page's own Sync setting), one harmless read of every account
     python replay.py erase              the working data deleted outright; a fresh database keeping contacts
     python replay.py run-week           the next 7 days (or up to yesterday); stops and writes a report
     python replay.py continue           the same as run-week
@@ -170,16 +169,6 @@ def _own_reader(c):
     return (fn, getattr(mod, "NAME", c["type"])) if callable(fn) else (None, None)
 
 
-def _texts_folder(st):
-    if st.get("texts_folder"):
-        return st["texts_folder"]
-    import connections
-    for c in connections._file().get("connections") or []:     # read whole: the list of connections in use leaves this type out
-        if c.get("type") == "phone_texts" and c.get("folder"):
-            return c["folder"]
-    return ""
-
-
 def _sync_off():
     """Sync off through the page's own Sync setting (it switches the scheduled check off too). Returns its plain line."""
     import settings_page
@@ -238,24 +227,15 @@ def dry_run():
             say(f"  {_own_reader(c)[1]} {label}: read by its own day reader, from {s.isoformat()} to before {e.isoformat()}")
         else:
             say(f"  {label}: the replay has no day reader for this kind ({c['type']}); it is left out")
-    folder = _texts_folder(st)
-    full, hourly = rs.backups(folder)
-    if full:
-        filed = os.path.isfile(os.path.join(rs.TEXTS, "days", f"{day}.jsonl"))
-        say(f"  texts: phone backups in {folder}: the full one {os.path.basename(full)} ({os.path.getsize(full) / 1e9:.1f} GB) and "
-            f"{len(hourly)} hourly ones" + ("; this day's texts are already filed" if filed else "; prepare files them by day first"))
-    else:
-        say(f"  texts: no phone backups found{' in ' + folder if folder else ''}")
     return 0
 
 
 # --- prepare ------------------------------------------------------------------------------------------------------------
-def prepare(start=None, texts_folder=None):
+def prepare(start=None):
     st = state()
     if start:
         st["start"] = start
-    if texts_folder:
-        st["texts_folder"] = texts_folder
+    st.pop("texts_folder", None)            # texts never come from phone backups
     st.setdefault("start", START.isoformat())
     say("Sync: " + _sync_off())
     import connections
@@ -267,14 +247,6 @@ def prepare(start=None, texts_folder=None):
         except Exception as e:  # noqa: BLE001
             bad.append(label)
             say(f"  PROBLEM: {label}: {type(e).__name__}: {str(e)[:200]}")
-    folder = _texts_folder(st)
-    if folder:
-        import replay_sources as rs
-        n_files, n_texts = rs.spool_texts(folder, _first_day(st), _yesterday(), zone(), say)
-        say(f"  texts: {n_files} backup file(s) read, {n_texts} text(s) filed by day")
-        st["texts_folder"] = folder
-    else:
-        say("  texts: no phone backup folder is known; texts are left out (prepare --texts-folder <folder> names one)")
     st["prepared_at"] = dt.datetime.now().isoformat(timespec="seconds")
     save_state(st)
     replay_guard.mark_running(True)         # from now on nothing else on the computer imports (the page's Refresh, the texts link)
@@ -460,8 +432,6 @@ def _counts(start, end):
         elif _own_reader(c)[0]:     # an added chat-style type stores under its kind, with its label as the account
             out[f"{_own_reader(c)[1]} {label}"] = db.query("SELECT count(*) FROM messages WHERE channel=? AND account=? AND ts >= ? AND ts < ?",
                                                           (c["kind"], label, lo, hi))[0][0]
-    if state().get("texts_folder") and "sms" in {str(s).lower() for s in common.personal().get("sources") or []}:
-        out["texts"] = db.query("SELECT count(*) FROM messages WHERE channel='sms' AND ts >= ? AND ts < ?", (lo, hi))[0][0]
     return out
 
 
@@ -482,7 +452,6 @@ def _run_day(day, z, cards_before):
     dids = {r[0]: r[1] or "" for r in db.query("SELECT id, assistant_did FROM live_items")}
     rec = {"day": day.isoformat(), "hours": round((end.timestamp() - start.timestamp()) / 3600), "sources": {}, "problems": []}
 
-    st = state()
     for c in _sources_on():
         label = c.get("label") or c.get("address") or c["id"]
         limits.step(f"replay read {label}")
@@ -500,8 +469,6 @@ def _run_day(day, z, cards_before):
             raise
         except Exception as e:  # noqa: BLE001  the day is not sorted on half its record: it stops here, and continue reads it again
             raise DayStopped(f"{label} could not be read for {day}: {type(e).__name__}: {str(e)[:300]}") from e
-    if "sms" in {str(s).lower() for s in common.personal().get("sources") or []} and st.get("texts_folder"):
-        rs.texts_day(day)
     rec["sources"] = _counts(start, end)
 
     # the usual filing steps, then conversations for mail the service gave none (never snoozes: they reach the mail service),
@@ -615,9 +582,6 @@ def run_week(limit_days=WEEK):
     z = zone()
     done_now, stopped = [], None
     try:
-        if st.get("texts_folder"):
-            import replay_sources as rs
-            rs.spool_texts(st["texts_folder"], _first_day(st), _yesterday(), z, say)     # hourly backups that arrived since
         for _ in range(limit_days):
             st = state()
             day = next_day(st)
@@ -737,12 +701,11 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description="Rebuild the assistant's data day by day.")
     ap.add_argument("command", choices=("dry-run", "prepare", "erase", "run-week", "continue", "status", "report"))
     ap.add_argument("--start")
-    ap.add_argument("--texts-folder")
     a = ap.parse_args(argv)
     if a.command == "dry-run":
         return dry_run()
     if a.command == "prepare":
-        return prepare(a.start, a.texts_folder)
+        return prepare(a.start)
     if a.command == "erase":
         return erase()
     if a.command in ("run-week", "continue"):

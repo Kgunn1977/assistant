@@ -5,8 +5,8 @@ called: the computer's own web opener is replaced by one that fails the test, so
    counts back to zero); the fresh database's ids start after the old ones.
 2. Day windows are midnight to midnight in Los Angeles: 24 hours, 25 on 2026-11-01, 23 on 2027-03-14.
 3. Two stand-in days: each source read for its day only (a mail one second before midnight stays on its day, an added chat
-   type's messages read by its own day reader on their own day, an event that started the evening before is left out), texts filed once from two
-   backups that overlap; the sort is told the day's end and never sees a later message; a card made on day 1 is closed on
+   type's messages read by its own day reader on their own day, an event that started the evening before is left out), texts never read from the
+   phone backups left in a folder; the sort is told the day's end and never sees a later message; a card made on day 1 is closed on
    day 2 when the record shows it paid.
 4. Every outbound function refuses under the replay flag.
 5. A day that stops partway (a source that fails) is not counted; continue reads it again and nothing is stored twice.
@@ -272,12 +272,12 @@ db.execute("INSERT INTO messages (channel, account, provider_id, ts, direction, 
 check(replay.run_week(limit_days=2) == 0, "run-week finished two days")
 recs = replay.days()
 d1, d2 = recs[0], recs[1]
-check(d1["sources"] == {"mail pat@example.com": 2, "mail pat@work.example": 1, "Board Team": 1, "calendar pat@example.com": 1, "texts": 2},
+check(d1["sources"] == {"mail pat@example.com": 2, "mail pat@work.example": 1, "Board Team": 1, "calendar pat@example.com": 1},
       f"day 1 read each source for its day only: {d1['sources']}")
-check(d2["sources"] == {"mail pat@example.com": 1, "mail pat@work.example": 0, "Board Team": 1, "calendar pat@example.com": 0, "texts": 1},
-      f"day 2: the reply made that day, the mail just after midnight, the text filed once: {d2['sources']}")
-check(db.query("SELECT count(*) FROM messages WHERE channel='sms' AND provider_id LIKE 'bk:%'")[0][0] == 3,
-      "texts from two overlapping backups stored once each, nothing from before the start")
+check(d2["sources"] == {"mail pat@example.com": 1, "mail pat@work.example": 0, "Board Team": 1, "calendar pat@example.com": 0},
+      f"day 2: the reply made that day, the mail just after midnight: {d2['sources']}")
+check(db.query("SELECT count(*) FROM messages WHERE channel='sms' AND provider_id LIKE 'bk:%'")[0][0] == 0,
+      "texts never come from phone backups: the backups in the folder are not read")
 check(seen["until"][0].startswith("2026-09-01T23:59:59") and seen["today"][0] == dt.date(2026, 9, 1) and seen["later"] == 0,
       "the sort was told it is the end of day 1 and never shown the later text")
 check(d1["cards_made"] == 1 and d1["cards_closed"] == 0 and d2["cards_closed"] == 1, f"card made day 1, closed day 2: {d1}, {d2}")
