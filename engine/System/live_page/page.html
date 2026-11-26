@@ -1906,7 +1906,7 @@ html.apv-doc .apv-say{margin:12px 0 0;color:var(--fg-2)}
                ['important_senders_first', 'Importance'], ['recently_active', 'Recently active']];
   var SORT_SAYS = 'How the cards are ordered. Due date (the default): the soonest due date first, so late cards lead, then important cards, then the oldest. ' +
     'Newest first and Oldest first: by the date at the top right of each card. Waiting longest: the card that has sat longest where it is now comes first. ' +
-    'Importance: the most important first, and among equals the newest; it gets better as I learn what matters to you. ' +
+    'Importance: the most important first; among cards that ask something of you, the people you are most often in touch with come first; then the newest. It gets better as I learn what matters to you. ' +
     'Recently active: the card with the latest message first. Saved at once, on every device.';
   var GROUP_SAYS = 'On (the default): the cards stay together by kind, in the order Card order in Settings gives (Needs you, Waiting and Someday, FYI, Done), and Sort by orders them within each kind. ' +
     'Off: every card the filter shows in one list, ordered by Sort by alone. Hidden is always last either way. Saved at once, on every device.';
@@ -1944,13 +1944,14 @@ html.apv-doc .apv-say{margin:12px 0 0;color:var(--fg-2)}
   }
   /* One key per card for each sort, the same as the engine's (order.key_for, without its asks-first part); smaller comes first.
      Due date: the soonest due date first, then important, then how often he is in touch with the sender, then the oldest.
-     Waiting longest: since the card last moved (state_changed_at). Importance: importance, then the newest. Recently active: the latest message. */
+     Waiting longest: since the card last moved (state_changed_at). Importance: importance, then how often he is in touch with
+     whoever asks something of him on the card (order.key_for), then the newest. Recently active: the latest message. */
   function lastT(it) { var t = T(it.last_at); (it.messages || []).forEach(function (m) { t = Math.max(t, T(m.when)); }); return t || fromT(it); }
   function sortKey(it, mode) {
     if (mode === 'newest') return [-fromT(it)];
     if (mode === 'oldest') return [fromT(it)];
     if (mode === 'waiting') return [T(it.state_changed_at) || fromT(it)];
-    if (mode === 'important') return [-(+it.importance || 0), -fromT(it)];
+    if (mode === 'important') return [-(+it.importance || 0), /^(answer|approval|do)$/.test(String(it.needs || '')) ? -(+((it.contact || {}).level) || 0) : 0, -fromT(it)];
     if (mode === 'recent') return [-lastT(it)];
     var due = it.due_date ? T(String(it.due_date).slice(0, 10)) : 0;
     return [due ? 0 : 1, due, -(+it.importance || 0), -(+((it.contact || {}).level) || 0), T(it.source_when) || T(it.created_at) || T(it.updated_at)];
