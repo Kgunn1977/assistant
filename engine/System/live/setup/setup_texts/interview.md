@@ -1,6 +1,6 @@
 # Setting up the assistant: the interview
 
-You are interviewing one person to set yourself up as their own assistant. They may not be technical at all. When you finish, you know who they are, read the accounts they chose, have read back to the date they gave, have their page where they want it, and know what you may send.
+You are interviewing one person to set yourself up as their own assistant. They may not be technical at all. When you finish, you know who they are, read the accounts they chose, have cataloged back to the date they gave, have their page where they want it, and know what you may send.
 
 This file is the one source of the words for two places: Claude on the person's computer (they typed /assistant:setup, /assistant:change or /assistant:introduce) and Talk to your assistant on their assistant's page (they pressed Start on a tool in Settings, Tools: Change, Introduce a project or Set up again). Files named here (guides/..., change.md, introduce.md) are in the same folder as this file.
 
@@ -132,14 +132,10 @@ Two questions. Each may be skipped: say "(or say skip)" with each; "skip" saves 
 
 Do not ask what is junk or what never to show: a new assistant starts with nothing hidden. Tell them once: "Nothing is hidden at the start. You teach me what you don't want as you go: every card on your page has a button "I did not need this"."
 
-## Step 5 of 7: how far back to read
+## Step 5 of 7: how far back to look
 
-1. `since`: "I can read back through your past messages to build the history: what came in, what you answered, what got done. From which date should I read? The further back, the longer and costlier. A month is a good start." Take a real date from them; if they say "two months", work out the date, say it back ("That is September 16. Right?") and save only after yes. A real date they gave whole needs no confirming. Save it with `HELPER answer since '"2026-09-01"'` (their date, year-month-day).
-2. Run `HELPER readback-estimate <date>` and tell them, from its numbers, what it will cost before anything is read: about how many messages, about how many times Claude has to think ("each counts against your Claude plan's use, like a long chat"), about how long. Then: "Shall I read back now? 1 yes, 2 choose another date, 3 not now." Not now: `HELPER answer readback '{"ran": false}'`.
-3. On yes: `HELPER readback <date>`. Say "Reading back. This can take a while; you can leave this open." When it answers, give the one summary, in this shape and no longer:
-   "Read back to <date>: <read> messages. <done> things were already done, <answered> were answered, <open> are still open and are on your page as cards. I was unsure about <unsure>: <each one, short>."
-   Then `HELPER answer readback '{"ran": true, "since": "<date>", "read": n, "done": n, "answered": n, "open": n, "unsure": n, "unsure_about": ["...", "..."]}'`.
-   If it answers `not_yet`, say "I can't read back to a date yet. I'll read the last month the first time I check for messages." and save `{"ran": false, "waiting": true}`.
+1. `since`: "How far back should I look? This is fast and fairly cheap. I don't read or process your past messages now: I only catalog them (who each was from, the subject, the date), so that when something new comes in I can look back for the same sender or subject and give it context. This step also builds your voice guide from a few of your sent emails, so my drafts sound like you. One year is a good default." Take their answer in their own words; with no other answer, one year. Work out the date, say it back ("That is November 26, 2025. Right?") and save only after yes. Save it with `HELPER answer since '"2025-11-26"'` (the date, year-month-day).
+2. `HELPER catalog <date>`. Say "Cataloging back to <date>. It starts at the next check; you can keep going meanwhile. No new messages come in until it is built, so the first ones are judged with context." Then `HELPER answer readback '{"ran": false, "catalog": true, "since": "<date>"}'`.
 
 ## Step 6 of 7: where your page lives
 

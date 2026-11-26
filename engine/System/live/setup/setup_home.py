@@ -619,6 +619,15 @@ def cards(ss):
     return dict(progress(ss), cards=onboard.state().get("begun"))
 
 
+def catalog_back(ss, since):
+    """The look-back: catalog the envelopes of past messages back to `since` (catalog.py), and nothing more. Nothing is read or
+    made into cards; new messages are then given context from it. The voice guide is built from it as on the setup cards."""
+    ss.make_home()
+    import catalog
+    catalog.start(dt.date.fromisoformat(since))
+    return {"since": since, "catalog": "started"}
+
+
 def readback(ss, since, estimate_only):
     fn = getattr(ss, "read_back", None)
     if fn is None:
@@ -688,6 +697,7 @@ def main(argv=None):
     s = sub.add_parser("project-intro"); s.add_argument("name"); s.add_argument("on", choices=("show", "on", "off"))
     s = sub.add_parser("project-line"); s.add_argument("name"); s.add_argument("on", choices=("show", "on", "off"))
     s = sub.add_parser("project-remove"); s.add_argument("name")
+    s = sub.add_parser("catalog"); s.add_argument("since")
     s = sub.add_parser("readback-estimate"); s.add_argument("since")
     s = sub.add_parser("readback"); s.add_argument("since")
     sub.add_parser("reach-status")
@@ -823,6 +833,8 @@ def run(ss, a):
         return dict(project_line(ss, a.name, a.on == "on", show_only=a.on == "show"), ok=True)
     if c == "project-remove":
         return {"ok": True, "removed": project_remove(ss, a.name)}
+    if c == "catalog":
+        return dict(catalog_back(ss, _since(a.since)), ok=True)
     if c in ("readback-estimate", "readback"):
         return dict(readback(ss, _since(a.since), c == "readback-estimate"), ok=True)
     if c == "reach-status":
