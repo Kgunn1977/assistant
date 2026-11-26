@@ -1007,18 +1007,22 @@ def card_record(item, act, text, said, made, when=None):
     return _set(item["id"], did=did, **fields)
 
 
-CLOSED_ON_SAVE = "Closed when you saved your words: nothing more is needed from you."
+CLOSED_ON_SAVE = "Closed when you saved your words."
 
 
-def close_if_free(rec, item):
-    """Save closes the card (the owner's ask of 11/23): once his words are acted on, a card the assistant left with nothing
-    for him (handled) is Done. One that still waits on him (a question, a step only he can take) stays open with the
-    answer showing; one now waiting on someone else stays under Waiting, and one whose email waits in Drafts for his Send
-    stays too. Changes rec in place and returns it."""
+def close_if_free(rec, item, others=None):
+    """Save sends his words and closes the card in one step (spec 4.5: "I could just hit save and it sends it and closes the
+    card."): once his words are acted on, the card is Done whatever the reply left on it, a question or an email in Drafts
+    (that waits in Drafts for his Send) included. Only a card now waiting on someone else stays, under Waiting, and an answer
+    to one question of several closes that question alone while the card's other questions are still open (spec 4.7).
+    Changes rec in place and returns it."""
     f = rec.get("fields") if isinstance(rec, dict) else None
-    if isinstance(f, dict) and (f.get("state") or item.get("state")) == "handled" and f.get("status") != "Email in Drafts":
-        f["state"] = "done"
-        rec["did"] = (rec.get("did") + "\n" if rec.get("did") else "") + CLOSED_ON_SAVE
+    if not isinstance(f, dict) or (f.get("state") or item.get("state")) in ("done", "in_motion"):
+        return rec
+    if [a for a in (others or []) if str(a or "").strip()] and [a for a in (f.get("asks") or []) if str(a or "").strip()]:
+        return rec
+    f["state"] = "done"
+    rec["did"] = (rec.get("did") + "\n" if rec.get("did") else "") + CLOSED_ON_SAVE
     return rec
 
 
@@ -2219,7 +2223,7 @@ def act_on_answer(answer, on_update=None):
                                                                    was=presses._was(before) if before else None)
                     if one or several(before or item):      # a card of several: its answered questions are kept on it
                         after_one_answer(follow, item, others, result, changed=redo, new=rec.get("text") or "", before=before)
-                    close_if_free(follow, item)
+                    close_if_free(follow, item, others)
                     if timing.get("rule_offer"):        # the answer gave or asked about a rule: the four buttons ask it
                         follow, result = _offer_after(before or item, follow, rec.get("text") or "", timing["rule_offer"], result, rec)
                 else:
