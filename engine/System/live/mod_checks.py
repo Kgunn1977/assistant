@@ -218,19 +218,32 @@ def reopen(name, cid, why=""):
         sync(name)
 
 
+def _own_check(c):
+    """The check a change gets when its edit wrote none: try what was asked for, expect what was agreed."""
+    asked = " ".join(str(c.get("asked") or "").split()).rstrip(".")
+    agreed = " ".join(str(c.get("agreed") or "").split()).rstrip(".")
+    return {"try": f"Use the change you asked for: {asked or agreed}.", "expect": f"{agreed or asked}.", "for": c.get("id")}
+
+
 def after_change(c, ok):
-    """change_job.py calls this when a change ends: a fix puts a new card up for its check; a change that made or changed
-    a mod puts up the cards for the checks it wrote."""
+    """change_job.py and the computer's change-check (setup_home.py) call this when a change ends: a fix puts a new card up
+    for its check; a change that made or changed a mod puts up the cards for the checks it wrote, and a change that wrote no
+    new check gets one of its own, so every change shows check cards on the page (spec 8.2)."""
     paths = c.get("paths") or []
-    names = {p.split("/")[2] for p in paths if p.startswith("Live/mods/") and p.count("/") >= 3}
+    home = os.path.basename(os.path.normpath(common.HOME)) or "Live"
+    names = {p.split("/")[2] for p in paths if p.split("/")[:2] in (["Live", "mods"], [home, "mods"]) and p.count("/") >= 3}
     for name in names:
         doc = load(name)
-        if doc is None:
+        if doc is None and not ok:
             continue
-        for x in doc.get("checks") or []:
+        doc = doc if isinstance(doc, dict) else {"checks": []}
+        doc["checks"] = [x for x in doc.get("checks") or [] if isinstance(x, dict)]
+        for x in doc["checks"]:
             if x.get("change") == c.get("id"):
                 x["state"], x["card"] = "open", ""
                 x.pop("change", None)
+        if ok and not any(x.get("state", "open") == "open" and not x.get("card") or x.get("for") == c.get("id") for x in doc["checks"]):
+            doc["checks"].append(_own_check(c))
         save(name, doc)
         sync(name)
     if names:
