@@ -2326,7 +2326,7 @@ html.apv-doc .apv-say{margin:12px 0 0;color:var(--fg-2)}
     var openCard = s !== 'done' && s !== 'someday';
     if (s === 'done') lead.push(['back', 'Bring it back', 'primary']);
     else if (s === 'someday') { lead.push(['back', 'Bring it back', 'primary']); lead.push(['done', 'Done', '']); }
-    else if (it.rsi && it.rsi.id) { if (!qs.length) lead = leadOf(it, s, qs); }      /* a rule change card: Approve or Apply, and Reject; no Snooze or Done */
+    else if (it.rsi && it.rsi.id) { if (!qs.length) lead = leadOf(it, s, qs); tail.push(['done', 'Done', '']); }      /* a rule change card: Approve or Apply, and Reject, then Done like every card */
     else {
       if (!qs.length) lead = leadOf(it, s, qs);         /* with a question, its buttons are under it (questionsHtml) */
       if (sendCfg() && replyOf(it) && !it.draft && !cal && !it.rule && !(it.update && it.update.version) && !(it.roadmap && it.roadmap.key)) tail.push(['write', 'Reply', '']);
