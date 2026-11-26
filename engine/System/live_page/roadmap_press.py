@@ -42,7 +42,8 @@ CONFIG = os.path.join(".claude", "roadmap", "config.json")
 ID = re.compile(r"^rm:([0-9a-f]{10}):(\d{10,14})-(\d{1,6})$")
 PATH = re.compile(r"^((marks|notes|questions)/[A-Za-z0-9._-]{1,120}|board/ask-[A-Za-z0-9._-]{1,116})$")   # board/ask-*: a settings request, set only
 ASK_NAMES = {"kind": ("Roadmap kind", {"stepped": "Stepped", "running": "Running"}),
-             "helpers": ("Model helpers use", {"cheapest": "Cheapest that does the job well", "strongest": "Always the strongest"})}
+             "helpers": ("Model helpers use", {"cheapest": "Cheapest that does the job well", "strongest": "Always the strongest"}),
+             "writes": ("Who writes the roadmap", {"writer": "A writer session", "main": "The main session"})}
 OPS = ("set", "update", "delete")
 MAX_DATA = 20000
 RETRY_AFTER = 900          # seconds: a press still unsent this long is tried again at the next pass

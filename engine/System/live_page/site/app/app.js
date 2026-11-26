@@ -1323,22 +1323,6 @@ window.RM_RUN = function (document, localStorage, claude) {
       row.appendChild(el("div", "means", s.c.map(function (c) { return c[1] + ": " + c[2] + "."; }).join(" ")));
       var now = s.c.filter(function (c) { return c[0] === cur; })[0];
       row.appendChild(el("div", "cur", now ? "Now: " + now[1] + "." : NOT_RECORDED));
-      if (s.k === "writes") {
-        // the person's own switch: shown, never asked for, never run
-        var cmd = settings && typeof settings.writes_switch === "string" ? settings.writes_switch : "";
-        if (!cmd) row.appendChild(el("div", "means", "The command to change it shows here once Claude's main session records this project's settings."));
-        else {
-          row.appendChild(el("div", "means", "Only you change this. To change it, run this yourself in a PowerShell window, not in Claude:"));
-          var cp = el("div", "setcopy"), inp = el("input"), cb = el("button", null, "Copy");
-          inp.id = "set-cmd"; inp.readOnly = true; inp.value = cmd; inp.setAttribute("aria-label", "The command to change who writes the roadmap");
-          cb.type = "button"; cb.setAttribute("aria-label", "Copy the command");
-          cb.addEventListener("click", function () { copyCommand(cmd); });
-          cp.appendChild(inp); cp.appendChild(cb); row.appendChild(cp);
-          if (cur === "main") row.appendChild(el("div", "means", "Then, in the project's main session, type /assistant:roadmap-start-writer."));
-          if (copyMsg) row.appendChild(el("div", "state ok", copyMsg));
-        }
-        box.appendChild(row); return;
-      }
       var btns = el("div", "setbtns"), open = a && a.status === "open" && a.value !== cur ? a : null;
       s.c.forEach(function (c) {
         var asked = open && open.value === c[0];
