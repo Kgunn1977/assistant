@@ -362,10 +362,9 @@ def switch(cmd, claude):
     r = subprocess.run([sys.executable, os.path.join(ROOT, "scripts", "roadmap_setup.py"), "--project", P, cmd], capture_output=True, text=True, env=env)
     return r.returncode == 0 and "Refused" not in r.stderr
 
-SAVED = os.path.join(P, ".claude", "roadmap-saved")
-check("switch-off run inside Claude goes through: the records saved first, then the arrangement put aside",
+check("switch-off run inside Claude goes through: the arrangement put aside, no saved copy made",
       (switch("switch-off", True), os.path.isfile(CFG), os.path.isdir(os.path.join(P, ".claude", "roadmap-off")),
-       len(os.listdir(SAVED)) == 1 and os.path.isfile(os.path.join(SAVED, os.listdir(SAVED)[0], "config.json"))), (True, False, True, True))
+       os.path.exists(os.path.join(P, ".claude", "roadmap-saved"))), (True, False, True, False))
 code, _, _ = as_process("roadmap_blocks.py", {"hook_event_name": "UserPromptSubmit", "session_id": DIR, "cwd": P, "prompt": "Go."})
 code2, _, _ = as_process("roadmap_blocks.py", {"hook_event_name": "PreToolUse", "session_id": DIR, "cwd": P, "tool_name": "Agent", "tool_input": {"prompt": "x"}})
 check("switched off: the blocks stand down and write nothing", (code, code2, os.path.isdir(os.path.join(P, ".claude", "roadmap"))), (0, 0, False))
@@ -376,31 +375,6 @@ as_process("roadmap_blocks.py", {"hook_event_name": "UserPromptSubmit", "session
 as_process("roadmap_blocks.py", {"hook_event_name": "PreToolUse", "session_id": DIR, "cwd": P, "tool_name": "Agent", "tool_input": {"prompt": "x"}})
 code, out, _ = as_process("roadmap_blocks.py", {"hook_event_name": "UserPromptSubmit", "session_id": DIR, "cwd": P, "prompt": "Next."})
 check("switched back on: the reminder works again", (code, "told the plan" in out), (0, True))
-
-# ---- switch-off saves the records; switch-on restores them from the saved copy (a made-up project) ----
-import shutil
-MADE = os.path.join(tempfile.mkdtemp(), "Made Up Garden Shed")
-made_rm = os.path.join(MADE, ".claude", "roadmap")
-os.makedirs(made_rm)
-made_files = {"config.json": '{"name": "Garden shed", "page_url": "https://example.com/made-up"}', "ids.json": '{"r1": "row-0001"}',
-              "logbook.jsonl": '{"at": "2030-01-02", "said": "made-up entry"}' + chr(10)}
-for n, body in made_files.items():
-    with open(os.path.join(made_rm, n), "w", encoding="utf-8") as fh:
-        fh.write(body)
-def made_switch(cmd):
-    env = {k: v for k, v in os.environ.items() if k != "CLAUDE_PROJECT_DIR"}
-    env["CLAUDECODE"] = "1"
-    return subprocess.run([sys.executable, os.path.join(ROOT, "scripts", "roadmap_setup.py"), "--project", MADE, cmd], capture_output=True, text=True, env=env).returncode
-def made_read(folder):
-    return {n: open(os.path.join(folder, n), encoding="utf-8").read() for n in sorted(os.listdir(folder))}
-rc = made_switch("switch-off")
-made_saved = os.path.join(MADE, ".claude", "roadmap-saved")
-saved_one = os.path.join(made_saved, os.listdir(made_saved)[0]) if os.path.isdir(made_saved) and os.listdir(made_saved) else ""
-check("made-up project: switch-off saves config, ids and logbook", (rc, os.path.isdir(made_rm), bool(saved_one) and made_read(saved_one) == made_files), (0, False, True))
-shutil.rmtree(os.path.join(MADE, ".claude", "roadmap-off"))     # only the saved copy is left
-rc = made_switch("switch-on")
-check("made-up project: switch-on restores the records from the saved copy", (rc, os.path.isdir(made_rm) and made_read(made_rm) == made_files), (0, True))
-shutil.rmtree(os.path.dirname(MADE), ignore_errors=True)
 
 # ---- the lock also covers the project's own hook scripts, and refuses putting changed settings in place ----
 check("Write a project hook script", bool(lock.decide({"tool_name": "Write", "tool_input": {"file_path": ".claude/hooks/guard.py"}, "cwd": P})), True)
