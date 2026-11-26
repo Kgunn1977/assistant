@@ -5279,11 +5279,11 @@ html.apv-doc .apv-say{margin:12px 0 0;color:var(--fg-2)}
   /* A list of rules: sentences the owner adds, edits, pauses and removes, in one list for each way a rule can work. */
   function sRulesNow(x) {
     var d = sDraft(x.group)[x.id];
-    return (d || sNow(x) || []).map(function (r) { return {id: r.id == null ? null : r.id, text: String(r.text || ''), reason: String(r.reason || ''), way: r.way == null ? null : r.way, on: r.on !== false, made: r.made, from: r.from}; });
+    return (d || sNow(x) || []).map(function (r) { return {id: r.id == null ? null : r.id, text: String(r.text || ''), reason: String(r.reason || ''), way: r.way == null ? null : r.way, on: r.on !== false, made: r.made, from: r.from, book: r.book || 'email'}; });
   }
   function sRulesSeen(x, d) { if (!d[x.id + '__seen']) d[x.id + '__seen'] = (sNow(x) || []).map(function (r) { return r.id; }).filter(function (i) { return i != null; }); }
   function sRules(x, lab, note) {
-    var g = x.group, f = x.id, list = sRulesNow(x), ways = sChoices({choices: x.ways}), path = h(g + '.' + f), o = '<label>' + lab + '</label>' + note, said = SET.said[g];
+    var g = x.group, f = x.id, list = sRulesNow(x), ways = sChoices({choices: x.ways}), books = sChoices({choices: x.books}), path = h(g + '.' + f), o = '<label>' + lab + '</label>' + note, said = SET.said[g];
     if (!ways.length) ways = [[null, '']];
     ways.forEach(function (w, wi) {
       var n = 0, dk = 'radd:' + g + '.' + f + '|' + (w[0] == null ? '' : w[0]), aid = sId(g, f) + '-add' + wi;
@@ -5295,6 +5295,7 @@ html.apv-doc .apv-say{margin:12px 0 0;color:var(--fg-2)}
         o += '<div class="rule"><textarea autocomplete="off" name="box-11" id="' + sId(g, f) + '-' + i + '" aria-label="The rule, in one sentence" data-rule="' + path + '" data-i="' + i + '">' + h(r.text) + '</textarea>' +
           '<input type="text" autocomplete="off" name="box-13" class="nm" id="' + sId(g, f) + '-why' + i + '" aria-label="Why this rule" data-rule="' + path + '" data-i="' + i + '" data-k="reason" value="' + h(r.reason) + '" placeholder="Why this rule (optional)" maxlength="300">' +
           '<div class="set-line"><select aria-label="On or paused" id="' + sId(g, f) + '-on' + i + '" data-rule="' + path + '" data-i="' + i + '" data-k="on"><option value="1"' + (r.on ? ' selected' : '') + '>On</option><option value="0"' + (r.on ? '' : ' selected') + '>Paused</option></select>' +
+          (books.length ? '<select aria-label="Rule book: the message source it is for" id="' + sId(g, f) + '-book' + i + '" data-rule="' + path + '" data-i="' + i + '" data-k="book">' + books.map(function (b) { return '<option value="' + h(b[0]) + '"' + (String(b[0]) === String(r.book) ? ' selected' : '') + '>' + h(b[1]) + ' rule book</option>'; }).join('') + '</select>' : '') +
           '<span class="nm wnote">' + (r.id == null ? 'New, not saved yet' : made ? 'Made ' + h(fmtD(made)) + (r.from ? (/^You /.test(r.from) ? '. ' + h(r.from) : ', from "' + h(r.from) + '"') : '') : '') + '</span>' +
           '<button class="btn" type="button" data-s="rule-del" data-rule="' + path + '" data-i="' + i + '">Remove</button></div></div>';
       });
@@ -5314,7 +5315,7 @@ html.apv-doc .apv-say{margin:12px 0 0;color:var(--fg-2)}
     var list = sRulesNow(x), i = +t.getAttribute('data-i'), d = S.drafts['set:' + g] || {};
     if (!list[i]) return false;
     var rk = t.getAttribute('data-k');
-    if (rk === 'on') list[i].on = t.value === '1'; else if (rk === 'reason') list[i].reason = t.value; else list[i].text = t.value;
+    if (rk === 'on') list[i].on = t.value === '1'; else if (rk === 'book') list[i].book = t.value; else if (rk === 'reason') list[i].reason = t.value; else list[i].text = t.value;
     sRulesSeen(x, d);
     d[f] = list; S.drafts['set:' + g] = d; delete SET.said[g];
     return t.tagName === 'SELECT';
@@ -5987,7 +5988,7 @@ html.apv-doc .apv-say{margin:12px 0 0;color:var(--fg-2)}
         var long = rl.filter(function (r) { return r.reason.replace(/\s+/g, ' ').trim().length > 300; })[0];
         if (long) { bad = 'A rule\'s reason is at most 300 characters. This one is longer: "' + long.reason + '"'; return; }
         v[f + '_seen'] = d[f + '__seen'] || (sNow(x) || []).map(function (r) { return r.id; }).filter(function (i) { return i != null; });
-        v[f] = rl.map(function (r) { var e = {id: r.id, text: r.text.replace(/\s+/g, ' ').trim(), reason: r.reason.replace(/\s+/g, ' ').trim(), on: !!r.on}; if (r.way != null) e.way = r.way; return e; });
+        v[f] = rl.map(function (r) { var e = {id: r.id, text: r.text.replace(/\s+/g, ' ').trim(), reason: r.reason.replace(/\s+/g, ' ').trim(), on: !!r.on}; if (r.way != null) e.way = r.way; if (r.book) e.book = r.book; return e; });
       }
       else if (x.control === 'ladder') {
         v[f] = sLadderNow(x).map(function (r) { return {id: r.id, kind: r.kind, area: r.area, level: r.level, on: !!r.on}; });

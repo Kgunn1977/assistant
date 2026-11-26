@@ -6,8 +6,11 @@ mail is written in; the owner's choices live in their personal folder (settings.
 filter_rules.json for the rules). An absent setting is its default.
 
     get()                 the settings in force, defaults filled in
-    rules()               the owner's rules: [{"id", "text", "way", "on", "made", "from", "reason"}]; "reason" (why the rule
+    rules()               the owner's rules: [{"id", "text", "way", "on", "made", "from", "reason", "book"}]; "reason" (why the rule
                           exists, one short line) is absent on a rule made before reasons were kept
+    books()               the rule books, one per message source: email, texts, and each other source connected (Slack...);
+                          every rule is in one book ("book"), and is obeyed only for messages from that source
+    book_of_card(item)    the book of the source the card's messages came from
     lines_for_sorting()   the settings and rules as plain sentences for the sorting step's instructions
     holds()               (message id, source) for unjudged mail the settings hold back mechanically
     gets_through(key)     True for a sender on "people who always get through"
@@ -42,6 +45,12 @@ _seen = {"ids": None}       # the rule numbers the page held when it drew its li
 WAYS = ("show_less", "always_show", "card_rule")      # card_rule: how cards are written, saved from his corrections
 WAY_WORDS = {"show_less": "show less", "always_show": "always show", "card_rule": "how cards are written"}
 RULE_MIN, RULE_MAX, RULES_MOST = 8, 300, 60
+# Every message source has its own rule book (the owner's words: "Every message source has it's own rule book. Email, text,
+# slack in my case."): a rule is in one book and obeyed only for that source's messages. A rule made before books were kept
+# is in the email book.
+BOOK_DEFAULT = "email"
+TEXT_KINDS = ("sms", "mms", "rcs", "text", "texts")
+NOT_MESSAGES = ("calendar",)
 REASON_MAX = 300            # why a rule exists: optional, one short line, capped like the rule's own words
 
 
@@ -55,10 +64,64 @@ def get():
     return out
 
 
-# --- the owner's rules ----------------------------------------------------------------------------
-def rules(only_on=False):
+# --- the rule books, one per message source --------------------------------------------------------
+def book_of(channel):
+    """The rule book a message's channel belongs to: "email", "texts", or the source's own kind (a connection's, as "slack")."""
+    c = str(channel or "").strip().lower()
+    if not c:
+        return BOOK_DEFAULT
+    return "texts" if c in TEXT_KINDS else c
+
+
+def books():
+    """[(book, its name)] for every message source: email, texts, then each other source connected, and any book a rule is in."""
+    out = {"email": "Email", "texts": "Texts"}
+    try:
+        for k, v in common.channels().items():
+            b = book_of(k)
+            if k not in NOT_MESSAGES and b not in out:
+                out[b] = str((v or {}).get("title") or k)
+    except Exception:  # noqa: BLE001  the core's two still stand
+        pass
     got = common.read_json(RULES_FILE, {}) or {}
-    out = [r for r in got.get("rules") or [] if isinstance(r, dict) and r.get("text") and r.get("way") in WAYS]
+    for r in got.get("rules") or []:
+        b = book_of((r or {}).get("book")) if isinstance(r, dict) else None
+        if b and b not in out:
+            out[b] = b[:1].upper() + b[1:]
+    return list(out.items())
+
+
+def book_name(book):
+    return dict(books()).get(book_of(book), str(book))
+
+
+def book_of_card(item):
+    """The book of the source the card's messages came from (the newest one that came in); the email book when none says."""
+    ids = [int(m) for m in ((item or {}).get("source_messages") or [])[:25] if str(m).isdigit()]
+    if not ids:
+        return BOOK_DEFAULT
+    try:
+        import db
+        con = db.try_connect()
+        if con is None:
+            return BOOK_DEFAULT
+        try:
+            row = con.execute(f"SELECT channel FROM messages WHERE id IN ({','.join('?' for _ in ids)}) "
+                              "ORDER BY direction = 'in' DESC, ts DESC LIMIT 1", ids).fetchone()
+        finally:
+            con.close()
+        return book_of(row[0]) if row else BOOK_DEFAULT
+    except Exception:  # noqa: BLE001
+        return BOOK_DEFAULT
+
+
+# --- the owner's rules ----------------------------------------------------------------------------
+def rules(only_on=False, book=None):
+    got = common.read_json(RULES_FILE, {}) or {}
+    out = [dict(r, book=book_of(r.get("book"))) for r in got.get("rules") or []
+           if isinstance(r, dict) and r.get("text") and r.get("way") in WAYS]
+    if book is not None:
+        out = [r for r in out if r["book"] == book_of(book)]
     return [r for r in out if r.get("on", True)] if only_on else out
 
 
@@ -82,11 +145,13 @@ def _reason(text):
     return " ".join(str(text or "").split())[:REASON_MAX]
 
 
-def add_rule(text, way, source="", rid=None, reason=""):
-    """One more rule, switched on, with why it exists when that is known. Returns it."""
+def add_rule(text, way, source="", rid=None, reason="", book=None):
+    """One more rule, switched on, in the rule book of one message source (the email book when not said), with why it
+    exists when that is known. Returns it."""
     rows = rules()
     rule = {"id": rid or next_rule_id(), "text": " ".join(str(text).split())[:RULE_MAX], "way": way, "on": True,
-            "made": common.now().isoformat(timespec="seconds"), "from": " ".join(str(source or "").split())[:120]}
+            "made": common.now().isoformat(timespec="seconds"), "from": " ".join(str(source or "").split())[:120],
+            "book": book_of(book)}
     if _reason(reason):
         rule["reason"] = _reason(reason)
     _write_rules([r for r in rows if r["id"] != rule["id"]] + [rule])
@@ -125,7 +190,7 @@ def check_rules(value):
         raise ValueError(f"Rules must be a list of at most {RULES_MOST}.")
     out = []
     for r in value:
-        if not isinstance(r, dict) or set(r) - {"id", "text", "way", "on", "made", "from", "reason"}:
+        if not isinstance(r, dict) or set(r) - {"id", "text", "way", "on", "made", "from", "reason", "book"}:
             raise ValueError("A rule holds its words, why it is there, show less or always show, and on or paused.")
         text = " ".join(str(r.get("text") or "").split())
         if not RULE_MIN <= len(text) <= RULE_MAX:
@@ -136,6 +201,10 @@ def check_rules(value):
         if rid is not None and (isinstance(rid, bool) or not isinstance(rid, int)):
             raise ValueError("A rule's number was not understood.")
         row = {"id": rid, "text": text, "way": r["way"], "on": bool(r.get("on", True))}
+        if r.get("book") not in (None, ""):
+            if not isinstance(r["book"], str) or not re.fullmatch(r"[a-z0-9_-]{1,30}", r["book"].strip().lower()):
+                raise ValueError("A rule's rule book is one of your message sources.")
+            row["book"] = book_of(r["book"])
         if "reason" in r:
             if r["reason"] is not None and not isinstance(r["reason"], str):
                 raise ValueError("A rule's reason is a line of plain words.")
@@ -157,7 +226,8 @@ def save_rules(clean, seen=None):
         was = old.get(r["id"]) if r["id"] is not None else None
         row = {"id": r["id"] if was else next_rule_id(), "text": r["text"], "way": r["way"], "on": r["on"],
                "made": (was or {}).get("made") or common.now().isoformat(timespec="seconds"),
-               "from": (was or {}).get("from") or "You wrote it in Settings"}
+               "from": (was or {}).get("from") or "You wrote it in Settings",
+               "book": book_of(r.get("book") or (was or {}).get("book"))}
         reason = _reason(r["reason"] if "reason" in r else (was or {}).get("reason"))      # a Save that sent none keeps it
         if reason:
             row["reason"] = reason
@@ -167,7 +237,7 @@ def save_rules(clean, seen=None):
 
 
 def rules_for_page():
-    return [{k: r.get(k) for k in ("id", "text", "way", "on", "made", "from", "reason")} for r in rules()]
+    return [{k: r.get(k) for k in ("id", "text", "way", "on", "made", "from", "reason", "book")} for r in rules()]
 
 
 # --- what the sorting step is told ----------------------------------------------------------------
@@ -221,10 +291,29 @@ def lines_for_sorting():
                    "noise or ignore.")
     live = rules(only_on=True)
     if live:
-        out.append(f"{owner}'s own rules, in their words. Obey each one. When a rule is the reason for a verdict of noise or ignore, "
-                   "start the reason with `owner rule <its number>:` exactly.")
-        for r in live:
-            out.append(f"  owner rule {r['id']} ({WAY_WORDS[r['way']]}): {r['text']}{because(r)}")
+        out.append(f"{owner}'s own rules, in their words. {BOOKS_SAID} Obey each one, only for messages from its own book's "
+                   "source. When a rule is the reason for a verdict of noise or ignore, start the reason with `owner rule <its "
+                   "number>:` exactly.")
+        out += rule_lines(live)
+    return out
+
+
+BOOKS_SAID = ("They are kept in one rule book per message source (each message's \"channel\" says its source: email is the "
+              "Email book, sms and other texts the Texts book, any other source its own), and a rule never applies to another "
+              "source's messages.")
+
+
+def rule_lines(rows):
+    """His rules as the sorting step is told them, book by book: a line naming each book, then its rules. Every line starts
+    "  owner rule " (the grader swaps a draft's rules in by that)."""
+    out = []
+    names = dict(books())
+    for b in list(names) + sorted({book_of(r.get("book")) for r in rows} - set(names)):
+        mine = [r for r in rows if book_of(r.get("book")) == b]
+        if mine:
+            out.append(f"  owner rule book {names.get(b, b)}: the rules below are only for {names.get(b, b).lower()} messages")
+        for r in mine:
+            out.append(f"  owner rule {r.get('id')} ({WAY_WORDS[r['way']]}): {r['text']}{because(r)}")
     return out
 
 
@@ -239,10 +328,11 @@ def lines_for_writing():
         more = []
     if not live and not more:
         return "(none yet)"
-    return "\n".join([f"- owner rule {r['id']}: {r['text']}{because(r)}" for r in live] + more)
+    return "\n".join([f"- owner rule {r['id']} ({book_name(r['book'])} rule book: only for cards from {book_name(r['book']).lower()} "
+                      f"messages): {r['text']}{because(r)}" for r in live] + more)
 
 
-def save_correction(text, source, reason=""):
+def save_correction(text, source, reason="", book=None):
     """A correction he gave, saved as one of his rules on how cards are written. Returns (the rule, the line to show
     him), or (None, "") when the words are not a usable rule. Kept in his own data, so updates never touch it."""
     text = " ".join(str(text or "").split())
@@ -250,7 +340,7 @@ def save_correction(text, source, reason=""):
         return None, ""
     low = text.lower()
     same = next((r for r in rules() if r["way"] == "card_rule" and " ".join(r["text"].lower().split()) == low), None)
-    rule = same or add_rule(text, "card_rule", source, reason=reason)
+    rule = same or add_rule(text, "card_rule", source, reason=reason, book=book)
     shown = text if low.startswith("from now on") else "from now on, " + text[:1].lower() + text[1:]
     return rule, f"Saved: {shown[:1].upper() + shown[1:]} (Settings, Filters, Rules, to change or remove it.)"
 
