@@ -37,7 +37,7 @@ Setup is an interview of about 30 minutes. Nothing runs in the background until 
 | Command | What it does |
 |---|---|
 | `/assistant:setup` | First-time setup, as an interview |
-| `/assistant:change` | Change a setting, or ask for a change to how your assistant works (also from Start beside Change in Settings, Tools, on your page) |
+| `/assistant:change` | Change your accounts, where your page opens, what may be sent, how far back it reads, or switch it on. A change to how your assistant works is asked for in Talk to your assistant (or a Claude session that joined it) and comes back as a card with Approve, Disapprove and Discuss |
 | `/assistant:introduce` | Introduce a project to the assistant |
 | `/assistant:undo` | Undo a change you asked for to how your assistant works |
 | `/assistant:adopt` | Move an assistant you already run onto the plugin, keeping everything it knows |

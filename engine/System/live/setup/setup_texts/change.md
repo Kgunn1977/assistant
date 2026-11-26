@@ -2,7 +2,7 @@
 
 Before anything, read `interview.md` (in the same folder as this file): its sections "How you talk" and "The helper", including "Steps that need the computer". Talk exactly that way and use that helper the same way; `HELPER` below means the same command, with the same ROOT (find the assistant as `interview.md`, "Starting", step 1 does: the folder this session is open in, then the folders in `${CLAUDE_PLUGIN_DATA}/roots.json`; never lay it down from here: if it is not on this computer, say /assistant:setup comes first, and stop).
 
-If the person typed a word after /assistant:change, or named one thing when they pressed Start on Change in Settings, Tools, go straight to that part. Otherwise ask: "What would you like to change? 1 your accounts, 2 where your page can be opened, 3 what I may send, 4 read further back, 5 switch me on, 6 how I work or look, 7 undo a change made before." For 6 (or a word like program, works, looks, rule), follow `change-program.md` (in this folder). For 7 (or undo), follow its section 7. Do one part, end with one line saying what changed, then ask "Anything else to change? 1 yes, 2 no."
+If the person typed a word after /assistant:change, go straight to that part. Otherwise ask: "What would you like to change? 1 your accounts, 2 where your page can be opened, 3 what I may send, 4 read further back, 5 switch me on, 6 how I work or look, 7 undo a change made before." For 6 (or a word like program, works, looks, rule), follow `change-program.md` (in this folder). For 7 (or undo), follow its section 7. Do one part, end with one line saying what changed, then ask "Anything else to change? 1 yes, 2 no."
 
 Every choice list below leaves out what is already true and is numbered afresh from 1.
 
