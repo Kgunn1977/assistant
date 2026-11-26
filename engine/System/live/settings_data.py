@@ -231,7 +231,7 @@ def defs(now=None):
              choices=_c((("choose", "Automatic"), ("casual", "Casual"), ("everyday", "Everyday"), ("formal", "Formal"))),
              explain="How formal drafted emails are. Automatic (the default) picks for each recipient: everyday for people you write to often, formal for someone new. Casual, Everyday and Formal fix it for every draft and change the greeting and sign-off that drafts start and end with. Used the next time a draft is written."),
         _one("voice", "learned", "Learned style", "words", vo.get("learned"),
-             explain="How many of your sent messages I learned your style from, and when. You can't edit it here: I learn it again by myself once a day, or you can press Learn style now or use the Writing style builder in Tools. Drafts use the saved style until I learn it again."),
+             explain="How many of your sent messages I learned your style from, and when. You can't edit it here: I learn it only when you run it: press Learn style now or use the Writing style builder in Tools. Drafts use the saved voice file until you run it again; what your edits to my drafts taught goes into it then."),
         _one("voice", "greetings", "Greetings", "list", vo.get("greetings") or [],
              explain="How your drafts open, one per line. Only the first line is used, at every tone. If this is empty, I use the greeting I learned from your sent mail. Used the next time a draft is written."),
         _one("voice", "signoffs", "Sign-offs", "list", vo.get("signoffs") or [],
