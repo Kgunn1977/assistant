@@ -2214,13 +2214,17 @@ html.apv-doc .apv-say{margin:12px 0 0;color:var(--fg-2)}
       }
       story = parts.join('');
     }
+    /* Context is one narrative (spec 3.2): every message and paper it rests on is a link inside the story itself; one the story
+       does not name is told in the same story, as a link, never listed apart. There is no Evidence section. */
+    var tell = [];
+    if (unlinked.length) tell.push((msgs.length === 1 ? 'It came in ' : unlinked.length < msgs.length ? 'It also rests on ' : 'It rests on ') + unlinked.map(function (m) { return viewLink(h(msgWords(m)), {msg: m.id, name: m.subject || msgWords(m)}); }).join(', ') + '.');
+    else if (it.source_text && (it.source_ref || it.source_who) && !msgs.length) tell.push(viewLink('The message it came from', {msg: -1, name: it.source_ref || it.source_who}) + ' is where it started.');
+    if (left.length) tell.push((left.length === 1 ? 'The paper with it is ' : 'The papers with it are ') + (left.length > 1 ? left.slice(0, -1).join(', ') + ' and ' + left[left.length - 1] : left[0]) + '.');
+    if (tell.length) story = (story ? story + ' ' : '') + tell.join(' ');
     var o = lead.length ? '<p class="ctx-lead">' + lead.join(' ') + '</p>' : '';
     if (story) o += '<div class="detail story">' + story + '</div>';
     if (it.rule && it.rule.from) o += '<p>This rule came from what you pressed on the card <b>' + hc(it.rule.from) + '</b>.</p>';
     if (it.update && it.update.version) o += updHtml(it);
-    if (left.length) o += '<p>' + (left.length === 1 ? 'The paper: ' : 'The papers: ') + left.join(', ') + '.</p>';
-    if (unlinked.length) o += '<p>' + (msgs.length === 1 ? 'It came in ' : unlinked.length < msgs.length ? 'It also rests on ' : 'It rests on ') + unlinked.map(function (m) { return viewLink(h(msgWords(m)), {msg: m.id, name: m.subject || msgWords(m)}); }).join(', ') + '.</p>';
-    else if (it.source_text && (it.source_ref || it.source_who)) o += '<p>' + viewLink('The message it came from', {msg: -1, name: it.source_ref || it.source_who}) + '.</p>';
     if (it.sample && s !== 'done') o += '<p>' + viewLink('Their newest email', {sample: 1, name: 'Their newest email'}) + ' shows what this sender writes.</p>';
     if (it.roadmap && it.roadmap.key && rmCan() && rmDoc(it.roadmap.key)) o += '<p><button class="link" data-a="rm-card">Open it in the roadmap</button></p>';
     var a = ageDays(it), about = [statusSay(it.status), a < 1 ? 'arrived today' : plural(a, 'day') + ' old'].filter(Boolean);
