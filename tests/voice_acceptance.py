@@ -6,7 +6,7 @@ and Claude as a stand-in for the humanize pass.
 - Forcing Casual changes the draft.
 - The humanize pass runs on every draft (the plugin's humanize-text skill, the same text in the engine as in skills\).
 - The profile file is only under the owner's data folder.
-- A pass learns the voice by itself, at most once a day.
+- No pass learns the voice by itself: only his run of the builder writes the voice file.
 - Settings has the Voice choice (Casual, Everyday, Formal, Let the assistant choose) and shows the profile, which the owner can
   correct; a correction holds over a rebuild.
 - The Writing style builder's steps run from the page's chat.
@@ -171,13 +171,12 @@ def main():
         check("no greeting and his sign-off: saved, read back, and used at every level (a formal draft too)", o.get("no greeting"),
               [True, "Saved, read back: greetings now no greeting.", "Saved, read back: signoffs now Thanks,.", "The prices are below.", "Thanks,"])
 
-        # a pass learns the voice by itself, at most once a day; Learn my voice now and the command learn it at once
+        # no pass learns the voice by itself; Learn my voice now and the command learn it at once
         vf = os.path.join(home, "personal", "voice.json")
         if os.path.isfile(vf):
             os.remove(vf)
         r = subprocess.run([sys.executable, os.path.join(live, "pass.py")], capture_output=True, text=True, env=env, timeout=900)
-        check("a pass learns the voice by itself when it is not learned yet (at most once a day)", (r.returncode, os.path.isfile(vf)), (0, True))
-        os.remove(vf)
+        check("a pass does not learn the voice by itself", (r.returncode, os.path.isfile(vf)), (0, False))
         press = ("import sys, json; sys.path.insert(0, sys.argv[1]); import answers; "
                  "print(json.dumps(answers.act_on_answer({'id': 'voice-learn', 'action': 'answer', 'text': ''})))")
         r = subprocess.run([sys.executable, "-c", press, live], capture_output=True, text=True, env=env, timeout=300, cwd=live)

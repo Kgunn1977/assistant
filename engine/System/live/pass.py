@@ -332,12 +332,6 @@ def main():
                 parts.append(f"contacts recounted in {time.time() - t1:.0f}s")
         except Exception as e:  # noqa: BLE001
             problems.append(f"contact strength not recounted: {type(e).__name__}: {e}"[:200])
-        try:        # his writing style, learned again from what he sent at most once a day (program code, no AI), after the
-            import voice    # recount it reads; time allowing, never in an update's quick check (voice.py)
-            if limits.enough(120) and not os.environ.get("ASSISTANT_QUICK_PASS") and voice.refresh():
-                parts.append("your writing style learned again from what you sent")
-        except Exception as e:  # noqa: BLE001
-            problems.append(f"your writing style could not be learned: {type(e).__name__}: {e}"[:200])
     except Exception as e:  # noqa: BLE001
         outcome = "failed"
         problems.append(f"the check stopped on an error: {type(e).__name__}: {e}"[:300])

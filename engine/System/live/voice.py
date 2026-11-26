@@ -1,13 +1,17 @@
 r"""The owner's voice: learned from what they sent (mail, texts from the phone or the page, any other channel connected), used for
-every draft the assistant writes, and taught by how the owner changes those drafts.
+every draft the assistant writes. The voice builder runs only when the owner starts it (the owner's words: "I just want to be
+able to run it and then have a voice file"): nothing learns the voice on its own, by day or by week.
 
     build(now=None)             learn the profile from the owner's sent messages: greetings, sign-offs, typical phrases, how
                                 formal they are with each kind of recipient, the stock phrases they never use, and their style on
                                 each channel (email, texts, any other) and with each person who gets a different one (how formal,
                                 how long, how they open and sign off). Kept in <home>\personal\voice.json (the owner's computer
-                                only), with the owner's own corrections and what their edits taught, which a rebuild never replaces.
-    refresh()                   build(), by a pass, at most once a day (program code, no AI); also on the owner's asking (Settings,
-                                Your voice, Learn my voice now; the Writing style builder in Settings, Tools; assistant.py voice-learn)
+                                only: the voice file), with the owner's own corrections, which a rebuild never replaces. The stock
+                                phrases it never uses come from the plugin's humanize-text skill (its word list, as
+                                prompts\humanize.md) as well as the usual written-for-you ones. What his edits to drafts taught since
+                                the last run (kept aside in voice_edits.json) goes into the voice file at this run, not before.
+                                Run only on his asking (Settings, Your voice, Learn my voice now; the Writing style builder in
+                                Settings, Tools; assistant.py voice-learn; the setup).
     learn_now()                 build(), with the words the page and the command say
     profile()                   the profile as it stands, the owner's corrections over what was learned
     level_for(to)               Casual, Everyday or Formal for these recipients: the owner's Settings choice, or, under "Let the
@@ -18,7 +22,7 @@ every draft the assistant writes, and taught by how the owner changes those draf
                                 level put in. Returns (body, {"level", "humanized", "style"}).
     write_text(text, to, name)  a text draft shaped to how the owner texts this person, or texts at all
     compare(drafted, sent)      what the owner changed in a draft before sending it
-    learn_edit(...)             what one sent draft teaches the profile (writing.py calls it)
+    learn_edit(...)             what one sent draft teaches, kept aside for the next run of the builder (writing.py calls it)
     for_page() / save_owner()   what Settings shows, and the owner's corrections from it
 
 No warning is given before a send that does not sound like the owner (a declared assumption; it can be added later).
@@ -33,6 +37,7 @@ from collections import Counter
 import common
 
 FILE = os.path.join(common.PERSONAL, "voice.json")
+PENDING = os.path.join(common.PERSONAL, "voice_edits.json")   # what his edits taught since the builder last ran
 LEVELS = ("casual", "everyday", "formal")
 LABEL = {"casual": "Casual", "everyday": "Everyday", "formal": "Formal", "choose": "Let me choose"}
 GREETING = re.compile(r"^\s*(hi|hey|hello|dear|good morning|good afternoon|morning|hiya)\b[^\n]{0,60}?[,!:.]?\s*$", re.I)
@@ -260,7 +265,8 @@ def build(now=None, con=None, save=True, extra_rows=()):
         "greetings": [NO_GREETING] if greets_rarely else [x for x, _n in greets.most_common(4)],
         "greeted": f"{sum(greets.values())} of {emails} emails", "signoffs": [x for x, _n in signs.most_common(4)],
         "phrases": phrases, "kinds": kinds, **_styles(feats, names),
-        "never": [p for p in STOCK if p.lower() not in joined][:10],
+        "never": ([p for p in STOCK if p.lower() not in joined][:10]
+                  + [w for w in skill_words() if not re.search(r"\b" + re.escape(w.lower()) + r"\b", joined)][:30]),
         "levels": {"casual": {"greeting": top(greets, lambda x: x in CASUAL_GREETINGS, "Hey"),
                               "signoff": top(signs, lambda x: x in CASUAL_SIGNOFFS or x.startswith("thanks"), "Thanks,")},
                    "everyday": {"greeting": top(greets, lambda x: x not in CASUAL_GREETINGS and x not in FORMAL_GREETINGS, "Hi"),
@@ -271,8 +277,40 @@ def build(now=None, con=None, save=True, extra_rows=()):
     if not save:
         return learned
     saved = common.read_json(FILE, {}) or {}
-    common.write_json(FILE, dict(saved, learned=learned, owner=saved.get("owner") or {}))     # his corrections and edits stay
+    pending = common.read_json(PENDING, None)
+    edits = pending if isinstance(pending, dict) else (saved.get("edits") or {})      # what his edits taught, taken in now
+    common.write_json(FILE, dict(saved, learned=learned, owner=saved.get("owner") or {}, edits=edits))   # his corrections stay
+    if pending is not None:
+        try:
+            os.remove(PENDING)
+        except OSError:
+            pass
     return profile()
+
+
+SKILL_LIST = re.compile(r'## Master list of overused words \("words to watch"\)\s*\n(.*?)\n\s*\n(?:Also commonly cited elsewhere and worth '
+                        r'watching:\s*(.*?)\n)?', re.S)
+
+
+def skill_words():
+    """The words and phrases the humanize-text skill flags as written-for-you (its master list and the ones also cited), in
+    the skill's own order, from prompts/humanize.md (the skill as is). [] when it cannot be read."""
+    try:
+        with open(HUMANIZE, encoding="utf-8") as f:
+            m = SKILL_LIST.search(f.read())
+    except OSError:
+        return []
+    if not m:
+        return []
+    out = []
+    for part in (m.group(1), m.group(2) or ""):
+        for w in part.strip().rstrip(".").split(","):
+            w = re.sub(r"\(.*?\)", "", w).replace('"', "").strip()
+            for one in w.split("/"):
+                one = one.strip()
+                if one and not one.lower().startswith("additionally") and one not in out:
+                    out.append(one)
+    return out
 
 
 NO_GREETING = "(no greeting)"   # how "he does not open with a greeting" is kept, learned or his own choice
@@ -531,14 +569,16 @@ def compare(drafted, sent):
 
 
 def learn_edit(drafted, sent, channel, to="", name=""):
-    """What one sent draft teaches the profile, kept in voice.json's "edits" (a rebuild from his sent messages keeps it): his
-    greeting, sign-off and length for this person on this channel, the channel's usual length moved toward what he sent, and
-    stock phrases he took out added to the ones drafts never use. Returns compare()'s result."""
+    """What one sent draft teaches: his greeting, sign-off and length for this person on this channel, the channel's usual
+    length moved toward what he sent, and stock phrases he took out added to the ones drafts never use. Kept aside in
+    voice_edits.json; the voice file takes it in only when he next runs the builder (build). Returns compare()'s result."""
     got = compare(drafted, sent)
     g = group_of(channel)
     addr = _addr_of(to)
     saved = common.read_json(FILE, {}) or {}
-    ed = saved.setdefault("edits", {})
+    pending = common.read_json(PENDING, None)
+    ed = json.loads(json.dumps(pending if isinstance(pending, dict) else (saved.get("edits") or {})))
+    saved = dict(saved, edits=ed)
     styles, people = _merged(saved)
     words, key = got["words"][1], f"{g}|{addr}"
     if addr and (not got["unchanged"] or key in people):      # an unchanged send to someone with no style of their own adds none
@@ -556,7 +596,7 @@ def learn_edit(drafted, sent, channel, to="", name=""):
         ed["never"] = sorted(set(ed.get("never") or []) | set(got["taken_out"]))
     ed["history"] = ((ed.get("history") or []) + [{"at": common.now().isoformat(timespec="seconds"), "channel": g, "to": addr,
                                                    "kept": got["kept"], "unchanged": got["unchanged"], "changes": got["changes"]}])[-EDITS_KEPT:]
-    common.write_json(FILE, saved)
+    common.write_json(PENDING, ed)
     return got
 
 
@@ -581,21 +621,6 @@ def write_text(text, to="", name=""):
     if st.get("end_mark") is False and t.endswith(".") and not t.endswith(".."):
         t = t[:-1]
     return t, {"channel": "text", "style": "person" if per else "channel"}
-
-
-def refresh(now=None):
-    """The profile learned again from what he sent, by a pass, at most once a day (program code only, no AI). True when it
-    learned. A replay never writes it."""
-    if os.environ.get("ASSISTANT_REPLAY") == "1":
-        return False
-    now = now or dt.datetime.now()
-    built = ((common.read_json(FILE, {}) or {}).get("learned") or {}).get("built_at")
-    try:
-        if built and now - dt.datetime.fromisoformat(built) < dt.timedelta(hours=24):
-            return False
-    except ValueError:
-        pass
-    return bool(build(now).get("messages"))
 
 
 def for_chat(text=""):

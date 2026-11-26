@@ -3,7 +3,7 @@ owner, made-up people and 20 made-up sent emails and texts; the humanize run, th
 (no Claude run, nothing sent).
 
 - His voice from what he sent: email and texts come out as distinct styles, and a person he writes to differently (Jo) has a
-  style of their own; Settings shows both, as lines he can change. The pass learns it again at most once a day.
+  style of their own; Settings shows both, as lines he can change. No pass learns it on its own: only his run of the builder.
 - Drafts use it: an email draft to Jo opens and closes the way he writes to Jo; a text draft is shaped to how he texts.
 - Learning from edits: a page Send of a draft he rewrote writes a rule book row (Reply drafts) saying what changed, and Jo's
   style and the email length move; an unchanged send is a full match; a text he rewrote counts too, from the page or his phone.
@@ -69,7 +69,7 @@ out["1. Jo has a style of her own"] = [(x["addr"], x["name"], x["level"], x["gre
 vo = {d["id"]: d for d in settings_data.defs(settings_page.for_page())["settings"] if d["group"] == "voice"}
 out["1. Settings shows them as lines to change"] = [[l.split(":")[0] for l in vo["styles"]["value"]], [l.split(",")[0] for l in vo["people"]["value"]],
                                                     vo["styles"]["control"], vo["people"]["control"]]
-out["1. the pass learns it at most once a day"] = [voice.refresh(now), voice.refresh(now + dt.timedelta(hours=25))]
+out["1. no pass learns it on its own"] = [hasattr(voice, "refresh"), "voice" in open(os.path.join(sys.argv[1], "pass.py"), encoding="utf-8").read()]
 
 voice._claude = lambda prompt: ("The parts are in at the counter. Pick them up when you can.", "", 0.1, {})
 def draft(to, n_, subject):
@@ -96,6 +96,9 @@ def press(item, body):
 before = [l for l in voice.people_lines() if "jo@yard" in l] + [l for l in voice.style_lines() if l.startswith("Email")]
 r = press(jo, "Jo - parts are in, grab them whenever.\n\nSam")
 row = next((x for x in rule_book.rows(section="replies") if x.get("message") == f"draft:{jo['id']}"), {})
+waits = [l for l in voice.people_lines() if "jo@yard" in l] + [l for l in voice.style_lines() if l.startswith("Email")]
+out["3. the voice file waits for his next run of the builder"] = [waits == before, os.path.isfile(voice.PENDING)]
+voice.build(now)
 after = [l for l in voice.people_lines() if "jo@yard" in l] + [l for l in voice.style_lines() if l.startswith("Email")]
 out["3. the edited send went (stood in) and wrote a row with the change"] = [
     r.get("sent"), row.get("section"), (row.get("draft_edit") or {}).get("outcome"), (row.get("draft_edit") or {}).get("changes", [])[:2],
@@ -130,11 +133,12 @@ WANT = {
                                              "lowercase": True, "end_mark": False}],
     "1. Jo has a style of her own": [["jo@yard.example", "Jo Park", "casual", "Hey", "Cheers,"]],
     "1. Settings shows them as lines to change": [["Email", "Texts"], ["Jo Park <jo@yard.example>"], "list", "list"],
-    "1. the pass learns it at most once a day": [False, True],
+    "1. no pass learns it on its own": [False, False],
     "2. an email draft to Jo is in how he writes to Jo": ["Hey Jo,", ["Cheers,", "Sam"], "person"],
     "2. a text draft is shaped to how he texts": ["can you bring the ladder tomorrow"],
     "3. the edited send went (stood in) and wrote a row with the change": [
         True, "replies", "rewritten", ['You took out the greeting "Hey".', 'You took out the sign-off "Cheers,".'], "differed"],
+    "3. the voice file waits for his next run of the builder": [True, True],
     "3. the profile moved": [True, True, True, True],
     "3. an unchanged send is a full match": [True, "unchanged", 1.0, "matched"],
     "3. a text sent from the page against my draft counts": [True, 1],

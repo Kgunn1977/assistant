@@ -2,7 +2,8 @@ r"""Learning from his edits to my drafts (the judgment rebuild, phase 3, "Writin
 
 Program code only, never Claude. When he sends a draft I wrote (an email from Drafts, a text from the Texts part), what I
 drafted is compared with what went out (voice.compare): an unchanged send is a full match; a rewrite says what changed. Either
-way it is one rule book row (kind of work: replies) and the voice profile learns from it (voice.learn_edit). A replay writes
+way it is one rule book row (kind of work: replies), and its lesson for the voice is kept aside until he next runs the voice
+builder (voice.learn_edit). A replay writes
 nothing (rule_book._append).
 
     on_sent(drafted, sent, channel, to, ...)   the row and the profile's lesson for one sent draft; never raises
