@@ -130,5 +130,5 @@ A project's roadmap shows on your assistant's page after its first change, withi
 
 ## What it can and cannot do
 
-- It reads. It never deletes, moves or marks your mail, never posts anywhere, never texts, never changes your calendar.
-- The one thing it can send is an email you write on your page and send yourself.
+- It does what you tell it to in Talk to your assistant: it adds, moves and takes off calendar entries, writes emails and texts and sends them when you tell it to, organizes your mail (moves it between folders, marks it read or unread), closes cards and changes your settings.
+- On its own, without your words, it only reads: nothing is sent and nothing on your calendar or in your mail changes unless you press it on your page or tell it to.

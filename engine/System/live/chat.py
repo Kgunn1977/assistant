@@ -298,6 +298,10 @@ def about_me():
         out["done_for_them_today_by_standing_approval"] = feed.get("today") or 0
     except Exception:  # noqa: BLE001
         pass
+    try:        # his settings as they stand: the box can change any of them on his words (the setting ACTION)
+        out["settings_you_can_change"] = settings_now()
+    except Exception:  # noqa: BLE001
+        pass
     try:        # where the page can be opened (never its password or a key)
         import settings_page
         out["the_page_can_be_opened_at"] = settings_page.for_page()["pc_only"]["lives"]
@@ -448,6 +452,8 @@ def _do(action, text, when, n=0):
         return [], _signature(action)
     if kind == "roadmap":      # a mark, an answer or a note on a project's roadmap shown on the page (roadmap_press.handle)
         return [], _roadmap(action, when) if text else "A roadmap press goes only on your own words, so nothing was sent to it."
+    if kind == "setting":      # one of his settings (or approvals) changed, saved by Settings' own Save code (settings_page.save)
+        return [], _setting(action, text)
     if kind == "project_tool":  # Settings, Tools: turn a project's roadmap or questions file on or off (project_tools.handle)
         return [], _project_tool(action, when) if text else "That goes only on your own words, so nothing was changed."
     import mods
@@ -497,6 +503,36 @@ def _calendar(action, text):
         out = calendar_view.delete(body)
     _sent_now.append({"what": "calendar", "ok": bool(out.get("ok")), "do": do, "id": (out.get("event") or {}).get("id")})
     return calendar_view.said(out, do)
+
+
+SETTING_WORDS = r"\b(set|change|turn|switch|make|use|put|pause|stop|start|resume|add|remove|drop|raise|lower|move|rename|call|show|hide|keep|let|allow|give)\b"
+
+
+def _setting(action, text):
+    """{"type": "setting", "group": "<a Settings group>", "values": {field: value}}: saved by Settings' own Save code on his words,
+    as if he pressed Save there. The box is a full way in to his assistant (spec 1.1)."""
+    import settings_page
+    group, values = str(action.get("group") or ""), action.get("values")
+    if not group or not isinstance(values, dict) or not values:
+        return "I could not tell which setting to change, so nothing was changed."
+    why = _his_words_refuse(text, SETTING_WORDS, CAL_NOT)
+    if why:
+        return f"Nothing was changed in your settings: {why}. Tell me plainly to do it."
+    saved, said = settings_page.save({"settings": {"group": group, "values": values}})
+    _sent_now.append({"what": "setting", "ok": bool(saved), "group": group})
+    return said
+
+
+def settings_now():
+    """His settings as they stand, by group, in the shape a setting ACTION carries (for the box's facts)."""
+    import settings_page
+    out = {}
+    for g in settings_page.GROUPS:
+        try:
+            out[g] = settings_page._present(g)
+        except Exception:  # noqa: BLE001  a group that cannot be read now is left out
+            pass
+    return out
 
 
 def _ready_card(iid):
@@ -1289,7 +1325,7 @@ def handle(text, at=None, card=None, own_step=None, queue=True, rules=True, open
             elif claims_draft(said) and not made:
                 # it says it put an email on the page, but no draft ACTION put one there: never claim what was not done
                 said, false_claim = "", True
-            if any((a or {}).get("type") in ("send", "text_send", "calendar") for a in rest) or any(s["what"] == "mail" for s in _sent_now[k_sent:]):
+            if any((a or {}).get("type") in ("send", "text_send", "calendar", "setting") for a in rest) or any(s["what"] == "mail" for s in _sent_now[k_sent:]):
                 said = ""       # what was sent or changed, to whom and from where, is said by the program's own lines alone
             elif claims_done(said) and not any(s["ok"] for s in _sent_now) and not got and not made:
                 said, false_done = "", True     # it says it sent or changed something no ACTION line did
