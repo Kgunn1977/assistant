@@ -291,16 +291,29 @@ def lines_for_sorting():
                    "noise or ignore.")
     live = rules(only_on=True)
     if live:
-        out.append(f"{owner}'s own rules, in their words, kept in one rule book per message source (each message's \"channel\" "
-                   "says its source: email is the Email book, sms and other texts the Texts book, any other source its own). Obey "
-                   "each rule only for messages from its own book's source, never for another source's. When a rule is the "
-                   "reason for a verdict of noise or ignore, start the reason with `owner rule <its number>:` exactly.")
-        for b, name in books():
-            mine = [r for r in live if r["book"] == b]
-            if mine:
-                out.append(f"  {name} rule book (only for {name.lower()} messages):")
-            for r in mine:
-                out.append(f"  owner rule {r['id']} ({WAY_WORDS[r['way']]}): {r['text']}{because(r)}")
+        out.append(f"{owner}'s own rules, in their words. {BOOKS_SAID} Obey each one, only for messages from its own book's "
+                   "source. When a rule is the reason for a verdict of noise or ignore, start the reason with `owner rule <its "
+                   "number>:` exactly.")
+        out += rule_lines(live)
+    return out
+
+
+BOOKS_SAID = ("They are kept in one rule book per message source (each message's \"channel\" says its source: email is the "
+              "Email book, sms and other texts the Texts book, any other source its own), and a rule never applies to another "
+              "source's messages.")
+
+
+def rule_lines(rows):
+    """His rules as the sorting step is told them, book by book: a line naming each book, then its rules. Every line starts
+    "  owner rule " (the grader swaps a draft's rules in by that)."""
+    out = []
+    names = dict(books())
+    for b in list(names) + sorted({book_of(r.get("book")) for r in rows} - set(names)):
+        mine = [r for r in rows if book_of(r.get("book")) == b]
+        if mine:
+            out.append(f"  owner rule book {names.get(b, b)}: the rules below are only for {names.get(b, b).lower()} messages")
+        for r in mine:
+            out.append(f"  owner rule {r.get('id')} ({WAY_WORDS[r['way']]}): {r['text']}{because(r)}")
     return out
 
 

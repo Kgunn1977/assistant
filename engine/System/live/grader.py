@@ -99,7 +99,7 @@ def owner_filter(rules_file=None):
     if draft:
         lines.append(said or (f"{head} Obey each one. When a rule is the reason for a verdict of noise or ignore, start the "
                               "reason with `owner rule <its number>:` exactly."))
-        lines += [f"  owner rule {r.get('id')} ({filters.WAY_WORDS[r['way']]}): {r['text']}{filters.because(r)}" for r in draft]
+        lines += filters.rule_lines(draft)          # book by book, as the live rules are told
     return think._owner_filter(lines)
 
 
