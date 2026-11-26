@@ -361,10 +361,6 @@ def fields(item, press, when, legacy):
         return refusal(press.get("said") or "press", when, "I do not know that button, so nothing was changed.")
     if name == "got_it_all":
         return refusal(name, when, "That button marks several cards Done at once and was sent to one card. Nothing was changed.")
-    if str(item.get("source_key") or "").startswith("live:rsi-") and item.get("state") != "done"             and name in ("done", "got_it", "later", "drop", "not_needed"):
-        # a rule change or setting card closes only by its own Promote, Apply or Reject, so no proposal is left holding its section
-        return refusal(name, when, "This card closes only with Approve, Apply or Reject (Reject leaves everything as it is). "
-                                   "Nothing was changed.")
     if name == "drop":         # he doesn't want this card considered: closed, not a task done and not a hide (that is Not needed);
         if item.get("state") == "done":     # a new message on the matter reopens it, as for any closed card
             return {"last_press": _mark(name, when, "It was already closed.")}
