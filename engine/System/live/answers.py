@@ -337,6 +337,21 @@ def _decides_for_someone(item, rec, press):
     return kind_of(item, rec) == "button"
 
 
+def _go_ahead_acts(item, press):
+    """True for Go ahead (approve) pressed on a card's own yes-or-no question with a recommendation: his yes to it, so it is
+    acted on like his words (spec 4.8: "There's no point in asking me a question if you're not going to do anything useful
+    with it."), not only recorded. Not a rule, an update, a draft (Check and send), a standing offer, a project write or a
+    rule change card, which have their own approve."""
+    if not item or not press or press.get("name") != "approve":
+        return False
+    key = str(item.get("source_key") or "")
+    if key.startswith(("rule:", "live:standing-", "live:projwrite-", "live:project-", "live:rsi-", "live:update-", "live:test-")):
+        return False
+    if item.get("draft") or item.get("rule") or (isinstance(item.get("update"), dict) and item["update"].get("version")):
+        return False
+    return bool(str(item.get("recommended") or item.get("rec_front") or "").strip() or _open_asks(item))
+
+
 def _question_no(item, rec):
     """The number of the question this answer is for (1 for the first), when the page said and the card has it. A choice
     button whose number did not come with it (a page or site that dropped it) is found by its words among the card's
@@ -931,12 +946,13 @@ def _set(iid, did=None, **fields):
 STATES = ("in_motion", "yours", "question", "done", "handled")
 
 
-def think_on(item, text, model=None, at=None, rules=True, lead=None):
+def think_on(item, text, model=None, at=None, rules=True, lead=None, pressed=None):
     """Words the owner typed on one card. They go to the same chat as the box at the top (chat.handle, with the card
     attached): the same Claude, instructions, saved rules, actions and conversation. Returns (record to land, plain
-    result, timing dict); the record is None when no run could be made."""
+    result, timing dict); the record is None when no run could be made. pressed: the answer he gave by a button on the
+    card's question, which is his authority for the action that answer leads to (a calendar entry)."""
     import chat
-    out = chat.handle(text, at=at, card=item, rules=rules, own_step=lead)
+    out = chat.handle(text, at=at, card=item, rules=rules, own_step=lead, pressed=pressed)
     timing = {"think": float((out.get("secs") or {}).get("think") or 0), "api": 0.0, "tries": int((out.get("secs") or {}).get("runs") or 0),
               "rule_offer": out.get("rule_offer") or ""}       # a rule the answer gave or asked about: proposed under the box
     said = str(out.get("result") or "")
@@ -2174,6 +2190,9 @@ def act_on_answer(answer, on_update=None):
                 _asked_told(item, asked, "Cancelled", result)
         # a choice pressed on a card from someone's request is his decision on it: read like his words, so it is acted on
         chosen = kind == "button" and _decides_for_someone(before, rec, press) and not settings_page.at_limit()
+        go_ahead = kind == "button" and ok_press and _go_ahead_acts(before, press) and not teach.is_card(item) \
+            and not settings_page.at_limit()
+        chosen = chosen or go_ahead
         if kind == "typed" or chosen:
             if on_update:
                 try:
@@ -2195,6 +2214,11 @@ def act_on_answer(answer, on_update=None):
             elif chosen and n and several(before or item):      # the press names its own question; only his own words carry authority
                 words = (f'My answer to the question "{asked[n - 1]}", pressed on the card: "{words}". Act on it for that '
                          "question only" + ("; the card's other questions are still open." if others else "."))
+            elif go_ahead:  # Go ahead on the card's question: his yes to what it recommends, acted on now
+                rq = str((before or item).get("recommended") or (before or item).get("rec_front") or "").strip()
+                ask = asked[0] if asked else ""
+                words = (f'My answer to the question "{ask}", pressed on the card: "Yes, go ahead"'
+                         + (f' (you recommended: {rq})' if rq else "") + ". Act on it now.")
             elif chosen:    # the press and its question are in the card's history; only his own words carry authority
                 words = f'My answer, pressed on the card (its history has the question): "{words}". Act on it.'
             elif n:         # Other on one question: his words are that question's answer
@@ -2211,7 +2235,8 @@ def act_on_answer(answer, on_update=None):
                 follow = _set(item["id"], did=f"It reads like a rule to keep, so I offered it: \"{got['rule']}\"", **fields)
                 secs["think"] = round(time.time() - t0 - secs["own"], 2)
             else:
-                follow, result, timing = think_on(item, words, at=rec.get("at"))
+                follow, result, timing = think_on(item, words, at=rec.get("at"),
+                                                  pressed=("Yes" if go_ahead else (rec.get("text") or "")) if chosen else None)
                 secs["think"] = round(timing["think"], 2)
                 secs["think_api"] = round(timing["api"], 2)
                 if follow:      # what the run decided, and that a run was made, stay on the card
