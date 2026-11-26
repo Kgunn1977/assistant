@@ -5850,10 +5850,6 @@ window.RM_RUN = function (document, localStorage, claude) {
       return;
     }
     if (a === 'rd-open') { RDO.open = !RDO.open; render(); if (RDO.open && $('sec-ready')) $('sec-ready').scrollIntoView({block: 'nearest'}); return; }
-    if (a === 'cal-set') {       /* the Choose calendars / Settings links: Settings at its Calendar part, by the breadcrumb */
-      if (!S.panel.settings) { S.panel.settings = 'open'; SET.backTo = window.pageYOffset; setsShut(); }
-      keepDrafts(); acting = 'compose'; render(); setGo('calendar'); render(); window.scrollTo(0, 0); return;
-    }
     if (a === 'set-nav') { var to = b.getAttribute('data-to') || ''; SET.nav = to ? to.split('/') : []; render(); window.scrollTo(0, 0); return; }
     if (a === 'cmd-show') { SET.cmd = b.getAttribute('data-c') || ''; render(); var cb = document.querySelector('.cmd-box [data-s="cmd-copy"]'); if (cb) cb.focus(); return; }
     if (a === 'cmd-close') { if (b.classList.contains('cmd-pop') && e.target !== b) return; SET.cmd = ''; render(); return; }
