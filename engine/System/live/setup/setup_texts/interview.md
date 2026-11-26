@@ -102,7 +102,7 @@ For each account:
 |---|---|
 | Gmail, and more Gmail or Google work accounts | `guides/google.md` (one registration, then each mailbox is one sign-in) |
 | Google Calendar | `guides/google.md`, "Calendar" part |
-| Microsoft work or school mail | `guides/microsoft.md` |
+| Microsoft mail: work, school, or personal Outlook.com and Hotmail | `guides/microsoft.md` |
 | Texts including RCS, straight from Google Messages (signed in from the Texts section of the page) | `guides/google-messages.md` |
 | Any kind marked `ready_made` | `guides/ready-made.md` |
 | Something not on the list | `guides/ready-made.md`, "Not on the list" |

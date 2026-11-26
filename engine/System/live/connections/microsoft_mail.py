@@ -1,4 +1,4 @@
-r"""Microsoft work or school mail (Microsoft 365, Outlook at work), read through Microsoft Graph."""
+r"""Microsoft mail, read through Microsoft Graph: work or school (Microsoft 365) and personal (outlook.com, hotmail.com, live.com)."""
 import base64
 import datetime as dt
 import json
@@ -12,7 +12,7 @@ from connections import _http, _oauth, _store
 import connections
 
 TYPE = "microsoft_mail"
-NAME = "Microsoft work or school mail (Microsoft 365)"
+NAME = "Microsoft mail (work, school, or personal Outlook.com and Hotmail)"
 KIND = "email"
 CAN_SEND = True
 CAN_ACT = ("archive", "trash", "label", "read")     # needs Mail.ReadWrite
@@ -20,16 +20,16 @@ ACT_SCOPE = "Mail.ReadWrite"
 APP = "microsoft"           # every Microsoft mailbox of one owner signs in through the same registration
 APP_ASKS = [
     {"key": "client_id", "label": "Application (client) ID", "help": "From the Overview page of the app you registered (step 6)."},
-    {"key": "tenant", "label": "Directory (tenant) ID", "help": "From the same Overview page, the line below it."},
+    {"key": "tenant", "label": "Directory (tenant) ID", "help": "From the same Overview page, the line below it. Type common instead if you chose the choice that includes personal Microsoft accounts (step 3)."},
 ]
 ASKS = []                   # nothing else is typed: the address comes from the sign-in
 
 SETUP = """\
 WHAT THIS CONNECTS
-A mailbox at work or school that runs on Microsoft 365. I read new mail and its
+A Microsoft mailbox: at work or school (Microsoft 365), or a personal outlook.com, hotmail.com
+or live.com one. I read new mail and its
 attachments. I can also send an email you write and send yourself from your page, and archive,
 delete (to Deleted Items), label (categories) or mark read an email when you press that on your page.
-(A personal outlook.com or hotmail.com mailbox is a different thing and is not covered here.)
 
 WHAT YOU NEED
 - Your work email address and the ability to sign in to it in a browser.
@@ -43,14 +43,17 @@ is free, and nobody else can use it.
 1. Open https://entra.microsoft.com and sign in with your work email.
 2. In the left menu click "Entra ID", then "App registrations", then "New registration" at the top.
    If you see "You do not have access", your company blocks this; see WHAT YOU NEED above.
-3. Name: type "My assistant". Under "Supported account types" leave the first choice
-   ("Accounts in this organizational directory only").
+3. Name: type "My assistant". Under "Supported account types" choose "Accounts in any
+   organizational directory and personal Microsoft accounts", so work and personal mailboxes
+   (outlook.com, hotmail.com, live.com) both sign in through it. (If your company only allows
+   the first choice, leave it: work mailboxes still connect.)
 4. Under "Redirect URI": in the first box choose "Public client/native (mobile & desktop)".
    In the second box type exactly:  http://localhost
 5. Click "Register".
 6. You are now on the app's Overview page. Two lines matter: "Application (client) ID" and
    "Directory (tenant) ID". Each has a copy button at its right. Copy each into the matching
-   box in the setup window. (These two are not passwords.)
+   box in the setup window. (These two are not passwords.) If you chose personal Microsoft
+   accounts in step 3, type common in the tenant box instead of the Directory (tenant) ID.
 7. In the left menu click "API permissions", then "Add a permission", then "Microsoft Graph",
    then "Delegated permissions". In the search box type Mail and tick "Mail.ReadWrite" and
    "Mail.Send". Search User and tick "User.Read" if it is not already there. Search offline and

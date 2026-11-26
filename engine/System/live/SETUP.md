@@ -23,7 +23,7 @@ The window has nine steps. "Back" and "Next" move between them, and what you ent
 1. **Start.** Shows whether Python's extra parts and Claude are present. If parts are missing, press "Install the missing parts" and wait for "Installed."
 2. **You.** Your first name, whole name, a sentence or two about what you do and who matters to you, and the areas of your life (Work, Family, and so on).
 3. **Accounts.** Click a kind of account on the left; its full steps appear on the right. Follow them, fill in any boxes that appear on the left, and press "Sign in" or "Connect". Repeat for each account. The kinds are:
-   - Microsoft work or school mail
+   - Microsoft mail (work, school, or personal Outlook.com and Hotmail)
    - Gmail or Google Workspace mail
    - Google Calendar
    - Text messages from an Android phone
