@@ -2734,7 +2734,7 @@ window.RM_RUN = function (document, localStorage, claude) {
     setHtml(el, o ? '<div class="host" data-key="compose">' + o + '</div>' : '');
   }
   /* the Settings button sits on the title line, left of the date and time (the time is kept current each minute) */
-  var TITLE_ID = {about: 'ab-h', held: 'hd-h', decide: 'dec-h', small: 'sm-h', tracked: 'tr-h', fyi: 'fy-h', someday: 'sd-h', today: 'td-h', handled: 'hf-h', saidso: 'ss-h', changes: 'ch-h', mail: 'ml-h', texts: 'tx-h', calendar: 'cl-h', chat: 'tk-h', feed: 'fd-h'};
+  var TITLE_ID = {about: 'ab-h', held: 'hd-h', decide: 'dec-h', small: 'sm-h', tracked: 'tr-h', fyi: 'fy-h', someday: 'sd-h', today: 'td-h', handled: 'hf-h', saidso: 'ss-h', changes: 'ch-h', mail: 'ml-h', texts: 'tx-h', calendar: 'cl-h', contacts: 'ct-h', chat: 'tk-h', feed: 'fd-h'};
   function applyTitles() { Object.keys(TITLE_ID).forEach(function (nm) { var e = $(TITLE_ID[nm]); if (e) e.textContent = secName(nm); }); }
   function renderTop() {
     var b = $('set-btn'), w = $('who'), m = S.meta, d = new Date();
@@ -4481,7 +4481,7 @@ window.RM_RUN = function (document, localStorage, claude) {
     return sPart('rulebook', 'Rule book', '<p class="say">Your answers on cards, beside what I did. Open a group to review it.</p>' + o +
       (d.more ? '<p class="say">' + (d.more === 1 ? '1 older entry' : d.more + ' older entries') + ' not shown here.</p>' : '') + freshLine(), d.explain);
   }
-  /* Settings, Contacts (contacts_book.py): everyone he wrote to or heard from, one-time senders included, and his address books;
+  /* Contacts, a section of the page (contacts_book.py): everyone he wrote to or heard from, one-time senders included, and his address books;
      each folded, with last in touch and how often, open matters both ways, history, his notes (Save sends them at once) and
      what the assistant learned. A search narrows the list; the newest contacts show first. */
   var CT = {q: '', notes: {}, did: {}, rows: [], total: 0, loaded: false, loading: false, err: '', seq: 0, hosted: false};
@@ -4518,16 +4518,20 @@ window.RM_RUN = function (document, localStorage, claude) {
     return '<details class="more" data-d="' + h(k) + '"' + (S.open[k] ? ' open' : '') + '><summary>' + h(p.name) +
       ' <span class="cnt">' + (p.last_in_touch ? h(fmtD(D(p.last_in_touch))) : '') + '</span></summary><div class="inside">' + (S.open[k] ? o : '') + '</div></details>';
   }
-  function ctBlock() {
-    var d = sAll().contacts;
-    if (!d) return '';
-    if (!CT.loaded && !CT.loading && !CT.err && (SET.nav || [])[0] === 'people') setTimeout(function () { ctLoad(false); }, 0);
-    var body = CT.hosted ? '<p class="say">Contacts open on your page at your own computer.</p>' :
-      CT.err ? '<p class="say">' + h(CT.err) + '</p>' : !CT.loaded ? '<p class="say">Loading your contacts.</p>' :
+  function renderContacts() {
+    var el = $('sec-contacts'), box = $('contacts');
+    if (!el || !box) return;
+    el.hidden = hiddenSec('contacts', {});
+    if (el.hidden) return;
+    if (!CT.loaded && !CT.loading && !CT.err) setTimeout(function () { ctLoad(false); }, 0);
+    var nt = $('ct-note'); if (nt) nt.textContent = CT.loaded && !CT.hosted ? plural(CT.total || 0, 'contact') : '';
+    var body = CT.hosted ? '<div class="none">Contacts open on your page at your own computer.</div>' :
+      CT.err ? '<div class="none">' + h(CT.err) + '</div>' : !CT.loaded ? '<div class="none">Loading your contacts.</div>' :
+      !CT.rows.length ? '<div class="none">' + (CT.q ? 'No contact matches that.' : 'No contacts yet. Everyone you write with shows here.') + '</div>' :
       CT.rows.map(ctItem).join('') + (CT.rows.length < CT.total ? '<div class="acts"><button class="btn" type="button" data-s="ct-more"' + (CT.loading ? ' disabled' : '') + '>Show more (' + (CT.total - CT.rows.length) + ' left)</button></div>' : '');
-    return sPart('contacts', 'Contacts', '<p class="say">' + plural(d.count || 0, 'contact') + '. Open one to see its history and your notes.</p>' +
-      '<div class="set-line"><input type="search" class="nm" autocomplete="off" aria-label="Find a contact" placeholder="Find a contact" data-ctq="1" value="' + h(CT.q) + '"></div>' +
-      body, d.explain);
+    var q = $('ct-q');
+    if (!q) { box.innerHTML = '<div class="set-line"><input type="search" id="ct-q" class="nm" autocomplete="off" aria-label="Find a contact" placeholder="Find a contact" data-ctq="1" value="' + h(CT.q) + '"></div><div id="ct-list"></div>'; }
+    setHtml($('ct-list'), body);
   }
   function ctClick(a, b) {
     if (a === 'ct-more') { ctLoad(true); render(); return; }
@@ -4863,7 +4867,7 @@ window.RM_RUN = function (document, localStorage, claude) {
      Each connected roadmap is its own module, rm:<key>. With no saved arrangement the page is as it always was. */
   var AREAS = ['top', 'left', 'right', 'bottom'];
   var AREA_NAME = {top: 'Top (full width)', left: 'Left (the wide column)', right: 'Right (the narrow column)', bottom: 'Bottom (full width)'};
-  var DEF_AREA = {top: ['chat', 'about'], left: ['feed', 'roadmaps'], right: ['today'], bottom: ['mail', 'texts', 'calendar']};
+  var DEF_AREA = {top: ['chat', 'about'], left: ['feed', 'roadmaps'], right: ['today'], bottom: ['mail', 'texts', 'calendar', 'contacts']};
   /* the card kinds the Cards feed holds (once each a section of its own); a saved arrangement that names one places Cards there */
   var FEED_KINDS = ['decide', 'small', 'tracked', 'fyi', 'someday', 'handled', 'saidso', 'held'], NOT_PARTS = ['ready', 'changes'];
   function rmKeys() { return ((S.meta && S.meta.roadmaps) || []).map(function (r) { return 'rm:' + r.key; }); }
@@ -4897,7 +4901,7 @@ window.RM_RUN = function (document, localStorage, claude) {
     var L = (S.meta && S.meta.labels) || {};
     if (modTitle(nm)) return modTitle(nm);
     if (/^rm:/.test(nm)) { var r = ((S.meta && S.meta.roadmaps) || []).filter(function (x) { return 'rm:' + x.key === nm; })[0]; return 'Roadmap: ' + (r ? r.name : 'not connected now'); }
-    return {feed: 'Cards', decide: 'Needs you', small: 'Needs you, quick answers', tracked: 'Waiting on others', fyi: 'FYI', someday: 'Someday', roadmaps: 'Roadmaps', ready: 'Drafts', mail: 'Email', texts: 'Texts', calendar: 'Calendar', about: L.about || 'Errors', held: 'Hidden', today: 'Today', handled: 'Done', saidso: 'Done under your approvals', changes: 'Change history', chat: 'Talk to your assistant'}[nm] || nm;
+    return {feed: 'Cards', decide: 'Needs you', small: 'Needs you, quick answers', tracked: 'Waiting on others', fyi: 'FYI', someday: 'Someday', roadmaps: 'Roadmaps', ready: 'Drafts', mail: 'Email', texts: 'Texts', calendar: 'Calendar', contacts: 'Contacts', about: L.about || 'Errors', held: 'Hidden', today: 'Today', handled: 'Done', saidso: 'Done under your approvals', changes: 'Change history', chat: 'Talk to your assistant'}[nm] || nm;
   }
   /* A section the owner hid stays hidden unless it holds something marked important. */
   function hiddenSec(nm, impIn) {      /* a card kind is shown by the feed's filter, never switched off as a part */
@@ -5277,7 +5281,6 @@ window.RM_RUN = function (document, localStorage, claude) {
   function sGroup(g, title, inside) { SET.parts[g] = {title: title, inner: inside}; return ''; }
   var SET_TREE = [
     {id: 'me', label: 'General', say: 'Profile, appearance, calendar and sign-in.', parts: ['you', 'page', 'calendar', 'signin']},
-    {id: 'people', label: 'Contacts', say: 'Everyone you write with, your address books, and what the assistant learned about them.', parts: ['contacts']},
     {id: 'in', label: 'Inbox', say: 'Sources, filters, notifications and mail.', parts: ['watch', 'filter', 'alerts', 'maildevice', 'mailrules']},
     {id: 'do', label: 'Automation', say: 'Approvals, writing style, the weekly review, the rule book and learning levels.', parts: ['acting', 'voice', 'review', 'rulebook', 'learning']},
     {id: 'cost', label: 'AI and usage', say: 'AI model and daily limit.', parts: ['thinking']},
@@ -5636,7 +5639,7 @@ window.RM_RUN = function (document, localStorage, claude) {
     if (!S.panel.settings) { el.hidden = true; return; }
     el.hidden = false;
     SET.parts = {};
-    var top = '<div class="set-top"><h2>Settings' + (st && st.version ? ' <small class="set-ver">Version ' + h(st.version) + '</small>' : '') + '</h2><div class="set-acts"><button class="btn primary" type="button" data-s="save-all"' + (SET.pending ? ' disabled' : '') + '>Save</button><button class="btn" type="button" data-s="discard-all">Back</button>' + manualLink() + '</div></div>' + (SET.top ? sSaid(SET.top) : '') + toolsBlock() + mailDeviceBlock() + mailRulesBlock() + rbBlock() + ctBlock() + sPart('changes', 'Change history', ($('changes') && $('changes').innerHTML) || '<p class="say">No changes to your assistant yet.</p>');
+    var top = '<div class="set-top"><h2>Settings' + (st && st.version ? ' <small class="set-ver">Version ' + h(st.version) + '</small>' : '') + '</h2><div class="set-acts"><button class="btn primary" type="button" data-s="save-all"' + (SET.pending ? ' disabled' : '') + '>Save</button><button class="btn" type="button" data-s="discard-all">Back</button>' + manualLink() + '</div></div>' + (SET.top ? sSaid(SET.top) : '') + toolsBlock() + mailDeviceBlock() + mailRulesBlock() + rbBlock() + sPart('changes', 'Change history', ($('changes') && $('changes').innerHTML) || '<p class="say">No changes to your assistant yet.</p>');
     if (!st) { setHtml(el, top + '<div class="none">' + (S.meta ? 'Settings reach this page with my next update, within a few minutes.' : 'Settings show here once my data has reached this page.') + '</div>' + sNav() + infoPop()); return; }
     var a = S.ans && S.ans.settings, p = SET.pending;
     if (p && a && a.at === p.at && (a.status === 'done' || a.status === 'failed')) {
@@ -6100,7 +6103,7 @@ window.RM_RUN = function (document, localStorage, claude) {
     setHtml($('handled'), hf || '<div class="none">' + (emptyWord || (m ? 'Nothing is done yet.' : 'What you answered and what is done will show here.')) + '</div>');
     $('n-handled').textContent = !m ? '' : shut('handled') ? howMany(by.answered.length + by.closed.length + by.done.length) : String(by.answered.length);
 
-    renderToday(); renderRoadmaps(); renderHeld(); renderSaidSo(); renderChanges(); renderReady(); renderMail(); renderTexts(); renderCal(); renderFeed(); modLoad(); modEach(function (p) { if (p.render) p.render(); }); renderFoot(); fillBy(); renderSettings();
+    renderToday(); renderRoadmaps(); renderHeld(); renderSaidSo(); renderChanges(); renderReady(); renderMail(); renderTexts(); renderCal(); renderContacts(); renderFeed(); modLoad(); modEach(function (p) { if (p.render) p.render(); }); renderFoot(); fillBy(); renderSettings();
     checkThink();
     rmSync();
     acting = null;
