@@ -2113,9 +2113,9 @@ window.RM_RUN = function (document, localStorage, claude) {
     }
     return o;
   }
-  /* Below the questions: the box, open on every open card, then any error */
+  /* Below the questions: the box with Save beside it, on every card (spec 3.4, 4.5), then any error */
   function boxEnd(it, s) {
-    return (s !== 'done' && s !== 'someday' ? boxHtml(it) : '') + (S.err[it.key] ? '<div class="err" role="alert">' + h(S.err[it.key]) + '</div>' : '');
+    return boxHtml(it) + (S.err[it.key] ? '<div class="err" role="alert">' + h(S.err[it.key]) + '</div>' : '');
   }
   /* My pick (picks.py): what I predict he will do with this card, its first button; one press does it. What he did instead
      on the last card like it sits beside it, so the choices grow from his habits. Not on a closed card or a rule change card. */
