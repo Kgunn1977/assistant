@@ -6036,6 +6036,9 @@ window.RM_RUN = function (document, localStorage, claude) {
       if (it.old_cards && s !== 'done' && !oldRows(it).length && Object.keys(S.oldDone[it.key] || {}).length) return;      /* every row answered: the asking card is finished */
       var gone = s !== 'done' && s !== 'someday' && away(it, a), open = isOpenSect(s) && (!a || back);
       if (s === 'done' && a && ((a.action === 'done' && a.label === 'Put away') || isLater(a))) return;      /* put away: off the page at once */
+      /* Drop is not Done (spec 4.9): a dropped card is out of consideration, off the page and never counted as done, until
+         something new on the matter brings it back */
+      if ((s === 'done' && it.status === 'Dropped') || (a && !back && a.status !== 'failed' && pressName(a) === 'drop')) return;
       total++;
       if (isNew(it)) newN++;
       if (open) { ages[bucket(it)]++; if (!isR) openN[s] = (openN[s] || 0) + 1; if (it.importance) imp++; if (it.due_date && it.due_date <= today()) due++; }
