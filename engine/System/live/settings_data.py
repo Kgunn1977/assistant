@@ -304,12 +304,15 @@ def rule_book():
     return dict(got, label="Rule book", explain=RULE_BOOK_EXPLAIN)
 
 
-LEVEL_WORDS = ((1, "1 - I suggest, you press"), (2, "2 - I do it and tell you"), (3, "3 - I do it quietly"))
+LEVEL_WORDS = ((1, "1 - You teach me on the cards"), (2, "2 - I propose, you promote or reject"), (3, "3 - Automatic, up to 10 tries"))
 NO_SCORE = "Not enough of your answers yet"
-LEARNING_EXPLAIN = ("How much I do on my own in each kind of work. Level 1 (where everything starts): I show my pick on each "
-                    "card and you press. Level 2: what I'm good at, I do myself and tell you, with Undo. Level 3: I do it "
-                    "quietly and list it in one summary card each morning. Under each one I say exactly what that level does "
-                    "before you save it, sending included. The line under it is how often my picks matched what you did, "
+LEARNING_EXPLAIN = ("How I learn in each kind of work. Every kind learns at once and starts at Level 1: I learn from what you "
+                    "do and you teach me on the cards. Level 2: when I miss, I write one change in a draft beside your "
+                    "live rules and show it to you on a card with both scores, the change, and one choice: Promote or "
+                    "Reject. I never promote one on my own. Level 3 is automatic: I try one change at a time and promote "
+                    "it only when it scores higher and breaks nothing that passed before, and I stop after 10 tries. No "
+                    "level does anything on a card or sends anything on its own. Under each one I say exactly what that "
+                    "level does before you save it. The line under it is how often my picks matched what you did, "
                     "and how often my show or hide calls did. Under Reply drafts it also says how much of my drafts you kept, once you have sent one: each sent draft is compared with what went out and kept in the rule book.")
 
 

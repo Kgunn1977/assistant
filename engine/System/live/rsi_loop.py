@@ -6,15 +6,16 @@ owner (the RSI plan, "Running and cost", "The four parts" 4, "Cards and buttons"
   No job is queued for a section that already has one waiting, or while its rule change card is open.
 - Run by the listener after the press is handled, in a worker of its own (never the chat's one-job-at-a-time queue), one
   section at a time, until the queue is empty or the RSI daily cap is reached (then the jobs wait for the next run).
-  Level 1 (the default): the job does nothing more; teaching on cards is the Level 1 flow. Level 2: coach.coach(section).
+  Level 1 (the default): the job does nothing more; teaching on cards is the Level 1 flow. Level 2: coach.coach(section),
+  shown on a card; it is never promoted on its own.
   Level 3 (guardrail A15 as amended, only in a section the owner set to Level 3): rounds of grade, coach and grade-draft
   (coach.coach), each draft promoted on its own only by coach.self_promote (it scores higher than his live rules and breaks
   no answer they matched) and recorded in Change history with Undo; any other draft is closed as rejected with why. It stops
   when every answer matches, after ROUNDS rounds, or at the RSI daily cap (the job then waits). A setting or list change
-  is never made on its own: it gets its Apply card as at Level 2.
+  is never made on its own: it gets its Promote card as at Level 2.
 - A proposal that is fully scored (a rule change) or names its one setting or list exactly (a setting change) becomes a rule
   change card, written here (guardrail A4): the one change and its reason, "Fixes N of your past corrections, breaks M"
-  and both scores, with Promote and Reject (a rule) or Apply and Reject (a setting or list). Scores outside Settings are
+  and both scores, with Promote and Reject (a setting or list change is made by rsi_apply under the same Promote). Scores outside Settings are
   shown only on these cards. Any other proposal is set aside as "not shown", with why, so it never holds the section.
 - The card's presses (rsi_promote, rsi_apply, rsi_reject; presses.NAMES) call coach.promote, coach.apply_setting or
   coach.reject before the card closes (answers._lists_first, decide()).
@@ -57,7 +58,7 @@ def _now():
 
 
 def is_card(item):
-    """True for a rule change card (or a setting card): only its own Promote, Apply or Reject changes or closes it."""
+    """True for a rule change card (or a setting card): only its own Promote or Reject changes or closes it."""
     return str((item or {}).get("source_key") or "").startswith(PREFIX)
 
 
@@ -199,18 +200,18 @@ def card_fields(p):
         lines += [f"My picks get {p.get('fixes')} more of your past answers right and {p.get('breaks')} wrong.",
                   f"My picks get {_score_words(p.get('score_live'))} of your past answers right now. With this change: "
                   f"{_score_words(p.get('score_draft'))}."]
-        ask, act = "Approve this change to my picks?", "Approve"
+        ask, act = "Promote this change to my picks?", "Promote"
     elif p.get("kind") == "rule":
         lines += [f"It gets {p.get('fixes')} more of your past answers right and {p.get('breaks')} wrong.",
                   f"I get {_score_words(p.get('score_live'))} of your past answers right now. With this change: "
                   f"{_score_words(p.get('score_draft'))}."]
-        ask, act = "Approve this rule change?", "Approve"
+        ask, act = "Promote this rule change?", "Promote"
     else:
         live = common.read_json(p.get("live_grade") or "", {}) or {}
         now = ((live.get("sections") or {}).get(p.get("section")) or {}).get("line")
         lines += [f"I get {_score_words(now) or 'an unknown share'} of your past answers right now. I can't try a setting "
                   "on your past answers before you apply it, so there's no score with this change yet."]
-        ask, act = "Apply this setting change?", "Apply"
+        ask, act = "Promote this setting change?", "Promote"
     lines.append(f"Nothing changes until you press {act}. Reject leaves everything as it is, and I keep anything you "
                  "type in the box first as your reason.")
     title = {"rule": "Rule change: ", "work": "Pick change: "}.get(p.get("kind"), "Setting change: ") + change.rstrip(".")
@@ -252,7 +253,7 @@ def _show(p, made):
     if p.get("kind") == "rule" and not p.get("complete"):
         return _set_aside(p, "not fully scored: " + "; ".join(p.get("incomplete_why") or []))
     if p.get("kind") == "setting" and coach.check_set((p.get("change") or {}).get("set"))[1]:
-        return _set_aside(p, "the setting or list change was said in words only, so Apply could not make it")
+        return _set_aside(p, "the setting or list change was said in words only, so Promote could not make it")
     return _make_card(p, made)
 
 
@@ -266,6 +267,9 @@ def _job(job, runner, ask, made):
     level = settings_page.learning_levels().get(sec, settings_page.LEARN_DEFAULT)
     if level == 3:
         return _improve(job, runner, ask, made)
+    if level != 2:
+        _log(f"{sec}: level 1: no change proposed; he teaches on the cards")
+        return "done"
     if open_card(sec):
         _log(f"{sec}: a rule change card is already open")
         return "done"
@@ -323,9 +327,9 @@ def _improve(job, runner, ask, made):
                 return "again"
             continue                            # refused or failed: nothing was saved; the round counts
         p = dict(got)
-        if p.get("kind") == "setting":          # never made on its own: its Apply card, as at Level 2
+        if p.get("kind") == "setting":          # never made on its own: its Promote card, as at Level 2
             _show(p, made)
-            _log(f"{sec}: level 3 round {n}: a setting change waits for Apply")
+            _log(f"{sec}: level 3 round {n}: a setting change waits for Promote")
             return "done"
         if not p.get("complete") and grader.CAP_REACHED in " ".join(p.get("incomplete_why") or []):
             _set_aside(p, "the RSI daily cap was reached while it was scored")

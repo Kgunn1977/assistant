@@ -122,8 +122,8 @@ def main():
               [got["group"], got["labels"], got["shape"]],
               [[{"id": "learning", "label": "Learning levels", "can_save": True}],
                ["Mailings and unsubscribe", "Bills and receipts", "What reaches the page", "Calendar", "Reply drafts", "Follow-ups and clearing"],
-               ["Mailings and unsubscribe", "choice", [{"value": 1, "label": "1 - I suggest, you press"}, {"value": 2, "label": "2 - I do it and tell you"},
-                                                       {"value": 3, "label": "3 - I do it quietly"}], True]])
+               ["Mailings and unsubscribe", "choice", [{"value": 1, "label": "1 - You teach me on the cards"}, {"value": 2, "label": "2 - I propose, you promote or reject"},
+                                                       {"value": 3, "label": "3 - Automatic, up to 10 tries"}], True]])
         check("2. every section's level saves and reads back; the RSI daily cap beside it is kept",
               got["save_all_2"][0:1] + [got["save_all_2"][1].startswith("the learning level for mailings and unsubscribe, ")] + got["save_all_2"][2:],
               [True, True, {s: 2 for s in secs}, 12])
@@ -152,19 +152,19 @@ def main():
         d = pg["drawn"]
         check("5. the page draws a choice per section, each with its name, its (i) and the three levels",
               [d.count("<select"), [f for f in fields if 'data-set="learning.' + f + '"' in d], d.count('<button class="info">i</button>'),
-               d.count(">1 - I suggest, you press</option>"), d.count(">2 - I do it and tell you</option>"), "What reaches the page</label>" in d],
+               d.count(">1 - You teach me on the cards</option>"), d.count(">2 - I propose, you promote or reject</option>"), "What reaches the page</label>" in d],
               [6, fields, 6, 6, 6, True])
         check("5. Level 3 is shown and can be chosen",
-              [d.count('>3 - I do it quietly</option>'), d.count(' disabled>'), "Not available yet" in d], [6, 0, False])
+              [d.count('>3 - Automatic, up to 10 tries</option>'), d.count(' disabled>'), "Not available yet" in d], [6, 0, False])
         check("5. each level shows as saved, and its score line beside it",
               [d.count('<option value="2" selected'), d.count('<option value="1" selected'),
                hide("I got 91% right, over 34 answers of yours") + '</div>' in d, d.count(none + '</div>'),
-               d.count('<div class="wnote"><b>Level 2: I do my pick myself'), d.count('<div class="wnote"><b>Level 1: I show my pick'),
-               d.count('I also send the reply I drafted')],
-              [4, 2, True, 4, 4, 2, 0])
-        check("5. the words of the level picked show under it before Save, sending named for Reply drafts",
-              [w.count('Press Save to make it take effect.') for w in [pg["drawn_draft"]]] + ["I also send the reply I drafted" in pg["drawn_draft"],
-                                                                                        "standing approval to send" in pg["drawn_draft"]],
+               d.count('<div class="wnote"><b>Level 2: when I miss'), d.count('<div class="wnote"><b>Level 1: I learn from everything'),
+               d.count('I never promote one on my own')],
+              [4, 2, True, 4, 4, 2, 4])
+        check("5. the words of the level picked show under it before Save; Reply drafts never send on their own",
+              [w.count('Press Save to make it take effect.') for w in [pg["drawn_draft"]]] + ["I never send a reply on my own at any level" in pg["drawn_draft"],
+                                                                                        "standing approval to send" not in pg["drawn_draft"]],
               [6, True, True])
         check("5. a Save sends each level as a number, as picked",
               pg["values"], {"learn_mailings": 2, "learn_bills": 2, "learn_page": 1, "learn_calendar": 2, "learn_replies": 2, "learn_followups": 2})

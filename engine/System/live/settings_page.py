@@ -24,10 +24,9 @@ import common
 import filters
 import rule_book
 
-# Learning levels, one per kind of work (the rule book's sections; the judgment rebuild, "Kinds of work and levels"): 1 I suggest
-# and he presses, 2 I do what I'm good at and tell him, with Undo, 3 I do it quietly and list it in a morning summary (levels.py;
-# guardrails A15, A19, B12). In Reply drafts, 2 or 3 is his standing approval to send those replies. Kept in settings.json under "rsi": {"levels": {section: level}}; a home with none, or a value not
-# taken, reads 1.
+# Learning levels, one per kind of work (the rule book's sections): 1 he teaches on the cards, 2 the loop proposes one change
+# with both scores for Promote or Reject, 3 the loop promotes on its own, at most 10 tries (levels.py, rsi_loop.py). Kept in
+# settings.json under "rsi": {"levels": {section: level}}; a home with none, or a value not taken, reads 1.
 LEARN = {"learn_" + s: s for s in rule_book.SECTIONS}
 LEARN_LEVELS = (1, 2, 3)
 LEARN_DEFAULT = 1

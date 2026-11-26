@@ -2050,7 +2050,7 @@ window.RM_RUN = function (document, localStorage, claude) {
   function leadOf(it, s, qs) {
     var lead = [], cal = it.calendar && typeof it.calendar === 'object' && s !== 'done' && s !== 'fyi' && s !== 'someday' ? it.calendar : null;
     if (s === 'done' || s === 'someday') return lead;
-    if (it.rsi && it.rsi.id) return [['rsi-go', it.rsi.kind === 'setting' ? 'Apply' : 'Approve', 'primary'], ['rsi-no', 'Reject', '']];     /* a rule change card: its two buttons only */
+    if (it.rsi && it.rsi.id) return [['rsi-go', 'Promote', 'primary'], ['rsi-no', 'Reject', '']];     /* a rule change card: Promote or Reject only */
     if (cal) { lead.push(['cal-add', 'Add to calendar', 'primary']); lead.push(['cal-open', 'Pick another time', '']); }
     else if (it.update && it.update.version) lead.push(['upd-go', 'Update', 'primary']);
     else if (it.rule && (s === 'decide' || s === 'words' || s === 'small')) lead.push(['approve', 'Save this rule', 'primary']);
@@ -2073,7 +2073,7 @@ window.RM_RUN = function (document, localStorage, claude) {
     var openCard = s !== 'done' && s !== 'someday';
     if (s === 'done') lead.push(['back', 'Bring it back', 'primary']);
     else if (s === 'someday') { lead.push(['back', 'Bring it back', 'primary']); lead.push(['done', 'Done', '']); }
-    else if (it.rsi && it.rsi.id) { if (!qs.length) lead = leadOf(it, s, qs); }      /* a rule change card: Approve or Apply, and Reject; no Snooze or Done */
+    else if (it.rsi && it.rsi.id) { if (!qs.length) lead = leadOf(it, s, qs); }      /* a rule change card: Promote and Reject; no Snooze or Done */
     else {
       if (!qs.length) lead = leadOf(it, s, qs);         /* with a question, its buttons are under it (questionsHtml) */
       if (sendCfg() && replyOf(it) && !it.draft && !cal && !it.rule && !(it.update && it.update.version) && !(it.roadmap && it.roadmap.key)) tail.push(['write', 'Reply', '']);
@@ -7072,7 +7072,7 @@ window.RM_RUN = function (document, localStorage, claude) {
     }
     if (a === 'upd-go') { save(it, pressRec('update_start', {version: it.update && it.update.version}, 'Update started')); return; }
     if (a === 'upd-no') { save(it, pressRec('update_not_now', {version: it.update && it.update.version}, 'Not now')); return; }
-    if (a === 'rsi-go' && it.rsi) { save(it, pressRec(it.rsi.kind === 'setting' ? 'rsi_apply' : 'rsi_promote', {proposal: it.rsi.id}, it.rsi.kind === 'setting' ? 'Applying' : 'Approving')); return; }
+    if (a === 'rsi-go' && it.rsi) { save(it, pressRec(it.rsi.kind === 'setting' ? 'rsi_apply' : 'rsi_promote', {proposal: it.rsi.id}, 'Promoting')); return; }
     if (a === 'rsi-no' && it.rsi) {     /* Reject: words typed in the card's box first are its reason */
       var rw = (S.drafts[key] || '').trim(), rx = {proposal: it.rsi.id};
       if (rw) rx.words = rw;

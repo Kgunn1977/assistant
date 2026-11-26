@@ -261,10 +261,8 @@ def main():
                 parts.append(f"{n8} project note(s) made into cards")
             n5, n6, n7 = standing.offers(pass_id), standing.apply(pass_id), review.make(pass_id)
             import levels
-            n9, n10 = levels.act(pass_id), levels.summary(pass_id)
+            n10 = levels.summary(pass_id)
             standing.write_feed()
-            if n9:
-                parts.append(f"{n9} thing(s) done on my own at learning levels 2 and 3")
             if n10:
                 parts.append("morning summary of level 3 made")
             if n5:

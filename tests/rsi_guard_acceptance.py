@@ -410,7 +410,7 @@ WANT = {
                "or change your rules in Settings. Nothing was changed.",
         True, "Undone: your rules are back as they were before this change.", True, "undone",
         False, "Not undone: it was already undone. Nothing was changed.", True],
-    "D. Level 2 makes a rule change card and changes nothing until Promote": [1, ["Approve this rule change?"], True, 1],
+    "D. Level 2 makes a rule change card and changes nothing until Promote": [1, ["Promote this rule change?"], True, 1],
     "E. the cap stops it mid-way; the next run goes on to 10 rounds in all": [True, True, [], True],
 }
 
