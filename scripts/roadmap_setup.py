@@ -392,39 +392,9 @@ def full_patch(project, cfg, source):
     return 0
 
 
-SAVED_NAME = "roadmap-saved"
-
-
-def save_records(project):
-    """Copy the project's roadmap records (.claude/roadmap: config, ids, logbook) to .claude/roadmap-saved/<date and time>
-    before they are taken away. Returns the copy's folder."""
-    live = os.path.join(project, ".claude", "roadmap")
-    dest = os.path.join(project, ".claude", SAVED_NAME, datetime.datetime.now().strftime("%Y-%m-%d %H%M%S"))
-    shutil.copytree(live, dest)
-    print("The roadmap records are saved in " + dest)
-    return dest
-
-
-def newest_saved(project):
-    """The newest saved copy of the roadmap records, or None."""
-    base = os.path.join(project, ".claude", SAVED_NAME)
-    names = sorted(n for n in os.listdir(base) if os.path.isdir(os.path.join(base, n))) if os.path.isdir(base) else []
-    return os.path.join(base, names[-1]) if names else None
-
-
 def switch(project, off):
-    """Put the project's .claude/roadmap folder to one side, or bring it back. With it aside every hook stands down.
-    Switching off saves the records first; switching on takes them from the saved copy when nothing was put aside."""
+    """Put the project's .claude/roadmap folder to one side, or bring it back. With it aside every hook stands down."""
     live, aside = os.path.join(project, ".claude", "roadmap"), os.path.join(project, ".claude", OFF_NAME)
-    if off and os.path.isdir(live) and not os.path.exists(aside):
-        save_records(project)
-    if not off and not os.path.isdir(aside) and not os.path.exists(live):
-        saved = newest_saved(project)
-        if saved:
-            shutil.copytree(saved, live)
-            print("The roadmap records are back from " + saved)
-            print("The roadmap arrangement is switched on in " + project)
-            return 0
     src, dst = (live, aside) if off else (aside, live)
     if not os.path.isdir(src):
         print("Nothing to do: the roadmap arrangement is " + ("not on" if off else "not switched off") + " in " + project)
@@ -443,7 +413,6 @@ def roadmap_off(project, root=None):
         print("Nothing to do: there is no roadmap set up in " + project + ". Nothing was changed.")
         return 0
     page = str(rb.load_json(rb.config_path(project), {}).get("page_url") or "") if os.path.isfile(rb.config_path(project)) else ""
-    save_records(project)
     shutil.rmtree(live)
     print("Deleted " + live + ".")
     root = os.path.abspath(root or os.path.join(os.path.expanduser("~"), "Documents", "Assistant"))

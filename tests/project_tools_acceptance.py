@@ -310,11 +310,8 @@ def main():
         check("Remove roadmap, Alpha: it is off; the roadmap's own folder is deleted; the page's record stays",
               [rr.get("now"), rr.get("gone"), "Roadmap page/roadmap.json" in (rr.get("gone") or [])],
               [False, ["Work/Alpha/.claude/roadmap/config.json"], False])
-        # since 0.1.11 switching off first saves the records in the project's .claude/roadmap-saved folder
-        new = rr.get("new") or []
-        check("Remove roadmap: only the saved records are made (no To Delete folder), and the assistant's own list loses only that project",
-              [[p for p in new if "/.claude/roadmap-saved/" not in p], any("/.claude/roadmap-saved/" in p for p in new),
-               rr.get("listed") == [os.path.join(base, "Echo")]], [[], True, True])
+        check("Remove roadmap: deleted outright, nothing new is made (no saved copy, no To Delete folder), and the assistant's own list loses only that project",
+              [rr.get("new"), rr.get("listed") == [os.path.join(base, "Echo")]], [[], True])
         check("Remove roadmap changes nothing else: only the settings file changed, no other project was touched, no message was sent",
               [rr.get("changed"), rr.get("sent")], [["Assistant/Live/personal/settings.json"], 0])
         rq = o.get("remove_questions") or {}
