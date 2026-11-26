@@ -5,12 +5,9 @@ THE BOX AT THE TOP
 
 JUST UNDER THE BOX
 - "A newer version of this page is ready", with Load it now. It also loads by itself as soon as they are not typing. Shown only when there is one.
-- Settings (or Close settings): always there. It opens the Settings screen, described below.
-- Write an email (or Continue your email): only when sending from the page is switched on. When sending is off, a line says how to turn it on: type /assistant:change sending in Claude on their computer.
 
-THE LINE AT THE TOP
-- Under the page title and today's date is one plain line saying what is left. With work for the owner it reads "3 things need you.", then, when any are late or due, "1 is due today or late.", then "Next: " and the first card under Needs you, with its due day when it has one. With nothing left it reads "Nothing needs you.", and "2 things wait on others." when some do. When standing approvals did something today at the level "do it and notify me", it ends with "1 thing was done for you today."
-- "Show it" (only when something needs the owner) goes to that first card: it opens the folds around it and flashes it. The line follows each press at once.
+THE TITLE LINE
+- The page title, then Settings (or Close settings) just left of today's date and the time, kept current each minute. Settings is always there and opens the Settings screen, described below. There is no line counting what needs the owner and no email button on this line.
 - A card that is new since the owner last looked on this device carries a New tag; that is kept on each device separately.
 
 SEARCH
