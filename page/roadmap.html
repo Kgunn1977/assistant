@@ -168,10 +168,12 @@ footer { font-size: .78rem; color: var(--muted); }
 .checkbar span { font-weight: 600; }
 .checkbar small { color: var(--muted); font-size: .85rem; flex-basis: 100%; }
 .checkbar small.bad { color: var(--s-fault); font-weight: 600; }
-/* Checks still to try: the bar and the filter button pulse slowly amber (red is kept for questions); reduced motion gets a steady amber outline */
-.cpulse .checkbar, .cpulse .filters button[data-key="totry"]:not([aria-pressed="true"]) { box-shadow: 0 0 0 0 transparent; animation: cpulse 2.6s ease-in-out infinite; }
-@keyframes cpulse { 0%, 100% { box-shadow: 0 0 0 0 transparent; background-color: var(--panel); } 50% { box-shadow: 0 0 12px 3px var(--s-look); background-color: var(--s-look-bg); } }
-@media (prefers-reduced-motion: reduce) { .cpulse .checkbar, .cpulse .filters button[data-key="totry"]:not([aria-pressed="true"]) { animation: none; outline: 2px solid var(--s-look); outline-offset: -2px; } }
+/* Checks still to try: the bar and the filter button pulse slowly red, the same as questions; reduced motion gets a steady red outline instead */
+.cpulse .checkbar, .cpulse .filters button[data-key="totry"]:not([aria-pressed="true"]) { --pulse: rgba(200, 40, 30, .30); box-shadow: 0 0 0 0 transparent; animation: cpulse 2.6s ease-in-out infinite; }
+@keyframes cpulse { 0%, 100% { box-shadow: 0 0 0 0 transparent; background-color: var(--panel); } 50% { box-shadow: 0 0 12px 3px var(--pulse); background-color: var(--s-now-bg); } }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .cpulse .checkbar, :root:not([data-theme="light"]) .cpulse .filters button[data-key="totry"]:not([aria-pressed="true"]) { --pulse: rgba(255, 107, 92, .45); } }
+:root[data-theme="dark"] .cpulse .checkbar, :root[data-theme="dark"] .cpulse .filters button[data-key="totry"]:not([aria-pressed="true"]) { --pulse: rgba(255, 107, 92, .45); }
+@media (prefers-reduced-motion: reduce) { .cpulse .checkbar, .cpulse .filters button[data-key="totry"]:not([aria-pressed="true"]) { animation: none; outline: 2px solid var(--accent); outline-offset: -2px; } }
 .ccount { grid-column: 2 / -1; font-size: .78rem; color: var(--muted); font-variant-numeric: tabular-nums; }
 .ccount .bad { color: var(--s-fault); font-weight: 600; }
 .ccount .all { color: var(--s-done); font-weight: 600; }
