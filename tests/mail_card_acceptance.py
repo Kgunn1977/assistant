@@ -4,7 +4,7 @@ card writer is stood in for, and shown exactly what the real one is shown):
 - Card on two old emails about the same topic (no card yet, judged as needing nothing) makes one card holding both, at once,
   through the press the page sends; the writer is told the owner asked for them, and may not pass them over;
 - Card on an email already on a card makes no new card, and the result names that card;
-- no rule book row is written;
+- a rule book row is written for it ("needed"), so the judgment learns from it;
 - the page shows Card beside Archive, Delete and Junk on selected emails and inside an opened email.
 
     python tests\mail_card_acceptance.py
@@ -101,7 +101,7 @@ def main():
     check("an email already on a card: no new card, and that card comes back to be opened",
           [count() - n, len(seen), out.get("result"), [i.get("id") for i in out.get("items") or []]],
           [0, 1, "That email is already on a card.", [cards[0]["id"]] if cards else None])
-    check("no rule book row is written", [os.path.exists(book) and os.path.getsize(book) > 0], [False])
+    check("a rule book row is written for the Card press", [os.path.exists(book) and os.path.getsize(book) > 0], [True])
     check("the pass lock is let go", os.path.exists(common.LOCK), False)
     page_checks()
 

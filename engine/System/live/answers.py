@@ -1938,7 +1938,7 @@ def act_on_answer(answer, on_update=None):
                 out = {"ok": True, "items": [], "result": "Not done: your mail is being updated this moment. Press it again in a minute."}
             _record(rec, t0, {"id": rec["id"], "title": "Email"}, "mail_unsub", out.get("result") or out.get("error"), out.get("ok"), False)
             return out
-        if str(rec.get("id") or "").startswith("mail-card:"):      # Card on picked emails in the Mail part (mail_card.py): teaches nothing
+        if str(rec.get("id") or "").startswith("mail-card:"):      # Card on picked emails in the Mail part (mail_card.py): it teaches too
             if rec.get("action") != "answer":
                 return {"ok": True, "items": [], "result": "", "thought": False, "secs": {}}
             import mail_card
