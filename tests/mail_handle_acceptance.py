@@ -128,7 +128,7 @@ def main():
     inbox_ids = lambda: [r[0] for r in db.query("SELECT m.provider_id FROM messages m JOIN mail_state s ON s.message_id = m.id WHERE s.inbox AND regexp_matches(m.provider_id, '^n[0-9]$') ORDER BY 1")]
     t0 = common.now()
     plan = {"type": "mail_plan", "op": "archive", "find": {"from": "news@shop.example", "older_than_days": 30}}
-    line = mh.chat_action(plan, t0, "archive the old shop emails")
+    line = mh.chat_action(plan, t0, "should I archive the old shop emails?")
     check("the plan says what it would do, with a count and a sample, and changes nothing",
           ["I would archive 5 emails from news@shop.example older than 30 days in inbox" in line, "Weekly deals 0" in line, "tell me yes" in line,
            acts(), len(inbox_ids())], [True, True, True, [], 5])
@@ -155,7 +155,12 @@ def main():
           [line.startswith("Marked unread:"), "Deals today" in line, "yes" in line, acts()[-1], unread_new1, chat._sent_now],
           [True, True, False, ["new1", "unread"], True, [{"what": "mail", "ok": True}]])
     check("a find for several still only shows the plan", "tell me yes" in mh.chat_action(
-        {"type": "mail_plan", "op": "read", "find": {"from": "news@shop.example", "folder": "all", "newest": 2}}, common.now(), "x"), True)
+        {"type": "mail_plan", "op": "read", "find": {"from": "news@shop.example", "folder": "all", "newest": 2}}, common.now(), "should I mark those read?"), True)
+    n0 = len(acts())
+    line = mh.chat_action({"type": "mail_plan", "op": "unread", "find": {"from": "news@shop.example", "folder": "all", "newest": 2}}, common.now(),
+                          "mark the last two shop emails unread")
+    check("organizing several emails on his plain words is done at once, with no second yes (spec 1.2)",
+          [line.startswith("Marked unread 2 of 2"), [x[1] for x in acts()[n0:]]], [True, ["unread", "unread"]])
 
     # --- a search in one account covers what that account sent (the TEST mails of 11/24 sat in Sent mail) ---
     from connections import _store as st
