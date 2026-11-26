@@ -11,11 +11,14 @@ the owner makes to his calendars, from the part's New event form or by telling h
     delete(body)  one event taken off its calendar, named the same way
 """
 import datetime as dt
+import json
 import re
 import time
 
 import db
 
+# Kevin's rule for anything added to the calendar: a reminder one day ahead and one 2 hours ahead (spec 1.4)
+REMINDERS = {"useDefault": False, "overrides": [{"method": "popup", "minutes": 24 * 60}, {"method": "popup", "minutes": 120}]}
 WRITABLE_SECONDS = 600          # which calendars he can add to is asked of Google again after this long
 _W = {"at": 0.0, "list": []}
 
@@ -129,7 +132,7 @@ def add(body):
         d0 = dt.date.fromisoformat(day)
     except ValueError:
         return {"ok": False, "error": "Choose the day."}
-    event = dict(_when(d0, all_day, start, end), summary=title)
+    event = dict(_when(d0, all_day, start, end), summary=title, reminders=json.loads(json.dumps(REMINDERS)))
     if str(b.get("place") or "").strip():
         event["location"] = str(b["place"]).strip()[:300]
     if str(b.get("notes") or "").strip():
