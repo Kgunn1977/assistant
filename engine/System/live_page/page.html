@@ -2317,43 +2317,42 @@ html.apv-doc .apv-say{margin:12px 0 0;color:var(--fg-2)}
     if (qs.length && !lead.some(function (x) { return x[0] === 'other'; })) lead.push(['other', 'Other', '', null, qs.length > 1 ? {q: 1} : {}]);
     return lead;
   }
-  /* One row of buttons, one meaning each, in this order: the recommended action, the other choices, Other, Reply, Later, Done,
-     Not needed (B1-B9). A card shows only the ones that apply; a card that asks nothing leads with Done. No More. */
+  /* One row of buttons on the card's front, one meaning each, the same on every card: Done first and always at the top, then the
+     recommended action and the other choices, Reply, No or Drop, Snooze, each Not needed choice, Other. No More, no menus. */
   function buttons(it, s) {
     var lead = [], tail = [], ch = [], qs = questionsOf(it, s), cal = it.calendar && typeof it.calendar === 'object' && s !== 'done' && s !== 'fyi' && s !== 'someday' ? it.calendar : null;
     var p = S.panel[it.key], k = h(it.key), o = '', key = String(it.source_key || '');
     var teach = teachOf(it, s), nn = teach.filter(function (t) { return /^not_needed/.test(t); }), fromSender = !!(it.sender || (it.messages || []).length || it.source_text);
     var openCard = s !== 'done' && s !== 'someday';
     if (s === 'done') lead.push(['back', 'Bring it back', 'primary']);
-    else if (s === 'someday') { lead.push(['back', 'Bring it back', 'primary']); lead.push(['done', 'Done', '']); }
-    else if (it.rsi && it.rsi.id) { if (!qs.length) lead = leadOf(it, s, qs); tail.push(['done', 'Done', '']); }      /* a rule change card: Approve or Apply, and Reject, then Done like every card */
+    else if (s === 'someday') { lead.push(['done', 'Done', '']); lead.push(['back', 'Bring it back', 'primary']); }
     else {
+      /* Done is the first button on every open card and always means the task is done (spec 4.1, 3.4) */
+      var yesNo = !!(it.rule || /^(rule:|live:standing-|live:projwrite-)/.test(key));
       if (!qs.length) lead = leadOf(it, s, qs);         /* with a question, its buttons are under it (questionsHtml) */
-      if (sendCfg() && replyOf(it) && !it.draft && !cal && !it.rule && !(it.update && it.update.version) && !(it.roadmap && it.roadmap.key)) tail.push(['write', 'Reply', '']);
-      /* a card that asks yes or no (a proposed rule, a standing approval offer, a project write) has its own No in Done's place, and no Drop */
-      var yesNo = !!(it.rule || /^(rule:|live:standing-|live:projwrite-)/.test(key)), done = yesNo ? ['no', 'No', ''] : ['done', 'Done', ''];
-      /* on every open card: Done (a task finished), Drop (not to be considered), Snooze, Other; Got it only where nothing is asked */
-      if (!lead.length && !qs.length) {
-        if (!yesNo && it.needs === 'nothing') lead.push(['got-it', 'Got it', 'primary']); else done[2] = 'primary';
-        lead.push(done);
-      } else tail.push(done);
-      if (!yesNo) tail.push(['drop', 'Drop', '']);
-      tail.push(['later', 'Snooze', '']);
-      if (nn.length && fromSender) tail.push(['not-needed', 'Not needed', '']);
-      if (!qs.length && !lead.some(function (x) { return x[0] === 'other'; })) tail.push(['other', 'Other', '', null, {noq: '1'}]);
-      /* the switchable buttons the engine chose for this card (card.switches): each is its own press, its meaning the engine's */
-      (Array.isArray(it.switches) ? it.switches : []).forEach(function (w) { if (w && w.id && w.label) tail.push(['switch', h(w.label), '', null, {p: w.id}]); });
+      lead.unshift(['done', 'Done', lead.length || qs.length ? '' : 'primary']);
+      if (!(it.rsi && it.rsi.id)) {
+        if (sendCfg() && replyOf(it) && !it.draft && !cal && !it.rule && !(it.update && it.update.version) && !(it.roadmap && it.roadmap.key)) tail.push(['write', 'Reply', '']);
+        if (!yesNo && it.needs === 'nothing' && lead.length === 1) lead.push(['got-it', 'Got it', '']);
+        /* a card that asks yes or no (a proposed rule, a standing approval offer, a project write) has its own No beside Done */
+        if (yesNo) tail.push(['no', 'No', '']);
+        else tail.push(['drop', 'Drop', '']);
+        tail.push(['later', 'Snooze', '']);
+        /* Not needed: each of its choices is its own button on the front, no menu */
+        if (nn.length && fromSender) {
+          if (nn.indexOf('not_needed_this') >= 0) tail.push(['nn-go', 'Not needed', '', null, {t: 'this'}]);
+          if (nn.indexOf('not_needed_sender') >= 0) tail.push(['nn-go', 'Not needed: this sender', '', null, {t: 'sender'}]);
+          if (nn.indexOf('not_needed_kind') >= 0) tail.push(['nn-other', 'Not needed: other', '']);
+        }
+        if (!qs.length && !lead.some(function (x) { return x[0] === 'other'; })) tail.push(['other', 'Other', '', null, {noq: '1'}]);
+        /* the switchable buttons the engine chose for this card (card.switches): each is its own press, its meaning the engine's */
+        (Array.isArray(it.switches) ? it.switches : []).forEach(function (w) { if (w && w.id && w.label) tail.push(['switch', h(w.label), '', null, {p: w.id}]); });
+      }
     }
     var dup = pickShown(it, s) ? pickAct(it.pick) : '';      /* the pick's own button is first already: not twice */
-    var row = lead.concat(tail).filter(function (x) { return !dup || x[0] !== dup; }), tall = row.some(function (x) { return x[0] === 'choice' && x[1].length > 30; });
+    var row = lead.concat(tail).filter(function (x) { return !dup || x[0] !== dup || x[0] === 'done'; }), tall = row.some(function (x) { return x[0] === 'choice' && x[1].length > 30; });
     o += '<div class="acts row-main' + (tall ? ' tall' : '') + '">' + row.map(btnHtml).join('') + '</div>';
-    if (p === 'nn') {
-      o += '<div class="panel-box"><label>What did you not need?</label><div class="acts">' +
-        (nn.indexOf('not_needed_this') >= 0 ? btnHtml(['nn-go', 'Just this one', '', null, {t: 'this'}]) : '') +
-        (nn.indexOf('not_needed_sender') >= 0 ? btnHtml(['nn-go', 'Everything from this sender', '', null, {t: 'sender'}]) : '') +
-        (nn.indexOf('not_needed_kind') >= 0 ? btnHtml(['nn-other', 'Other', '']) : '') +
-        btnHtml(['cancel', 'Cancel', '']) + '</div></div>';
-    } else if (p === 'later') {
+    if (p === 'later') {
       var offers = laterOffers();
       o += '<div class="panel-box"><label>Bring this back</label><div class="acts">' +
         LATER.filter(function (w) { return offers.indexOf(w[0]) >= 0; }).map(function (w) { return '<button class="btn" data-a="later-go" data-when="' + w[0] + '">' + w[1] + '</button>'; }).join('') + '</div>' +
@@ -2365,9 +2364,11 @@ html.apv-doc .apv-say{margin:12px 0 0;color:var(--fg-2)}
     } else if ((p === 'write' || p === 'review') && (it.draft || replyOf(it))) {
       o += writerHtml(it);
     }
-    if (openCard) o += boxHtml(it);
-    if (S.err[it.key]) o += '<div class="err" role="alert">' + h(S.err[it.key]) + '</div>';
     return o;
+  }
+  /* Below the questions: the box, open on every open card, then any error */
+  function boxEnd(it, s) {
+    return (s !== 'done' && s !== 'someday' ? boxHtml(it) : '') + (S.err[it.key] ? '<div class="err" role="alert">' + h(S.err[it.key]) + '</div>' : '');
   }
   /* My pick (picks.py): what I predict he will do with this card, its first button; one press does it. What he did instead
      on the last card like it sits beside it, so the choices grow from his habits. Not on a closed card or a rule change card. */
@@ -2470,14 +2471,14 @@ html.apv-doc .apv-say{margin:12px 0 0;color:var(--fg-2)}
     var rows = oldRows(it), k = h(it.key);
     return '<ul class="rows">' + rows.map(function (r) {
       return '<li><span class="t">' + hc(r.header || r.id) + '</span><span class="src">' + (r.days != null ? 'Has sat ' + plural(+r.days, 'day') : '') + '</span>' +
-        '<div class="acts">' + [['keep', 'Keep'], ['later', 'Snooze'], ['done', 'Done']].map(function (b) { return '<button class="btn" data-a="old-go" data-card="' + h(r.id) + '" data-do="' + b[0] + '">' + b[1] + '</button>'; }).join('') + '</div>' +
+        '<div class="acts">' + [['done', 'Done'], ['keep', 'Keep'], ['later', 'Snooze']].map(function (b) { return '<button class="btn" data-a="old-go" data-card="' + h(r.id) + '" data-do="' + b[0] + '">' + b[1] + '</button>'; }).join('') + '</div>' +
         (S.open['ol:' + it.key + ':' + r.id] ? '<div class="acts">' + LATER.map(function (w) { return '<button class="btn" data-a="old-later" data-card="' + h(r.id) + '" data-when="' + w[0] + '">' + w[1] + '</button>'; }).join('') + '</div>' : '') + '</li>';
     }).join('') + '</ul>' + (S.err[it.key] ? '<div class="err" role="alert">' + h(S.err[it.key]) + '</div>' : '');
   }
   /* The weekly review (ITEMS.md "Design round 3"): parts in three groups. A row is one of the owner's own cards; its buttons are
      the ordinary presses on that card, so each leaves the review at once and has the usual Undo. */
   var REV_GROUPS = {clear: 'Get clear', current: 'Get current', creative: 'Get creative'};
-  var REV_LABEL = {done: 'Done', later: 'Snooze', bring_back: 'Bring it back', wait_longer: 'Keep waiting', drop: 'Done', keep: 'Keep', old_keep: 'Keep'};
+  var REV_LABEL = {done: 'Done', later: 'Snooze', bring_back: 'Bring it back', wait_longer: 'Keep waiting', drop: 'Drop', keep: 'Keep', old_keep: 'Keep'};
   function revRowGone(rv, r) {
     var c = r.id ? find(r.id) : null, mark = (S.revDone[rv.key] || {})[r.id];
     if (mark && S.ans[r.id] && S.ans[r.id].at === mark) return true;
@@ -2578,7 +2579,7 @@ html.apv-doc .apv-say{margin:12px 0 0;color:var(--fg-2)}
       (it.rec_front && s !== 'done' ? '<div class="rec-front">Recommended: ' + hc(it.rec_front) + '</div>' : '') +
       (why ? '<div class="why">' + hc(why) + '</div>' : '') + (s === 'done' && (closedOnly(it) || lastDid(it)) ? '<div class="why">' + hc(closedOnly(it) ? closedWhy(it) : lastDid(it)) + '</div>' : '') +
       (it.tip && s !== 'done' ? '<div class="why tip">' + hc(it.tip) + '</div>' : '');      /* a one-time tip, the first time this thing appears (onboard.py) */
-    var rest = scanHtml(it.rule_scan) + '<div class="hide-on-answer stack">' + (old ? oldHtml(it) + boxHtml(it) : (it.review && s !== 'done' ? reviewHtml(it) : '') + (it.rsi && s !== 'done' ? rsiHtml(it) : '') + pickHtml(it, s) + answeredHtml(it, s) + questionsHtml(it, s) + buttons(it, s)) + '</div>' + answered(a) +
+    var rest = scanHtml(it.rule_scan) + '<div class="hide-on-answer stack">' + (old ? oldHtml(it) + boxHtml(it) : (it.review && s !== 'done' ? reviewHtml(it) : '') + (it.rsi && s !== 'done' ? rsiHtml(it) : '') + buttons(it, s) + pickHtml(it, s) + answeredHtml(it, s) + questionsHtml(it, s) + boxEnd(it, s)) + '</div>' + answered(a) +
       (isOpen ? '<div class="card-in">' + inside(it, s) + '</div>' : '');
     return '<article class="card host' + (it.importance && !a ? ' urgent' : '') + '" data-key="' + h(it.key) + '"' + stateAttr(a) + '>' + bn + head + rest + '</article>';
   }
