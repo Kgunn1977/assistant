@@ -8,7 +8,9 @@ Each picked email stands for its conversation (as the Email part's rows do). An 
 finished one still on the page) makes no new card: the result names that card, and the page opens it. The rest are judged
 first when they carry no verdict yet, then placed by the card writer in one run, grouped by topic as gathered mail is: several
 emails on one matter make one card, and one that belongs to an open card goes onto it. The writer may not pass a picked
-email over. A Card press teaches nothing: no rule book row and no rule is written.
+email over. A Card press teaches like every other press (the judgment learns from everything he does): each card it made or
+added to gets a rule book row per email behind it, meaning he needed it, so a call that kept it off the page counts as a
+miss and the learning loop takes it up. No rule is written.
 """
 import datetime as dt
 import json
@@ -63,6 +65,21 @@ def _result(words, card_ids):
     return {"ok": True, "items": shown, "result": words, "thought": bool(card_ids)}
 
 
+def _teach(card_ids, picked):
+    """The press's rule book rows: one per email behind each card it made or added to, "needed" (rule_book.on_press). Never
+    raises."""
+    try:
+        import items
+        import rule_book
+        want = {str(i) for i in picked}
+        for cid in card_ids:
+            it = items.card_for(cid, wait=True)
+            if it and want & {str(m) for m in it.get("source_messages") or []}:
+                rule_book.on_press(it, "mail_card", "needed", button="Card")
+    except Exception as e:  # noqa: BLE001  the cards are made; a row that cannot be written is logged
+        common.log_line(common.PASS_LOG, f"Card press rule book rows not written: {type(e).__name__}: {e}")
+
+
 def make(rec):
     try:
         got = json.loads(rec.get("text") or "")["mail_card"]
@@ -102,6 +119,7 @@ def make(rec):
             return {"ok": True, "items": [], "result": "Not done: I couldn't write the card just now. Press Card again in a minute."}
         made = _cards_for(fresh)
         common.log_line(common.PASS_LOG, f"{pass_id}: Card press on {len(fresh)} email(s): card(s) {', '.join(made) or 'none'}")
+        _teach(made, fresh)
         items.export(pass_id)
         new, old = [c for c in made if c not in before], [c for c in made if c in before]
         one = len(fresh) == 1

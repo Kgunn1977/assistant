@@ -435,7 +435,7 @@ PRESS_WORDS = {"got_it": "Got it", "got_it_all": "Got it all", "done": "Done", "
                "bring_back": "Bring back", "junk": "Junk", "never_junk": "Never junk", "approve": "Approve", "undo": "Undo",
                "not_needed": "Not needed", "always_show": "Always show", "no": "No", "wait_longer": "Wait longer",
                "write_them": "Write to them", "drop": "Drop", "old_card": "Old card", "old_keep": "Keep",
-               "should_have_seen": "I should have seen this", "read": "Read", "rule_offer": "Rule"}
+               "should_have_seen": "I should have seen this", "read": "Read", "rule_offer": "Rule", "mail_card": "Card"}
 LAYER_WORDS = {"setting": "One of your settings hid it.", "junk_list": "The sender is on your junk list.",
                "ignore_list": "The sender is on your list of senders to always ignore.", "rule": "One of your rules hid it.",
                "first_sort": "My fast first look saw nothing you need to do.",
