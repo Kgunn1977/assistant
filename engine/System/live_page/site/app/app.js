@@ -4286,7 +4286,7 @@ window.RM_RUN = function (document, localStorage, claude) {
   }
   /* Put new content in a section. Nothing is touched when nothing changed. A card in use is left
      exactly as it is; the cards around it are brought up to date one by one. */
-  /* "How your page works": the manual the page server serves at /manual (only when the data says it is there) */
+  /* Assistant Manual: the manual the page server serves at /manual (only when the data says it is there) */
   /* "Add to your phone's home screen": the browser's own install prompt where it offers one, else the steps for that phone */
   var HOME = {prompt: null, shown: false};
   window.addEventListener('beforeinstallprompt', function (ev) { ev.preventDefault(); HOME.prompt = ev; if (S.panel && S.panel.settings) render(); });

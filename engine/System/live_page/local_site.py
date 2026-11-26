@@ -711,7 +711,7 @@ class Door(BaseHTTPRequestHandler):
                                       (("Cache-Control", "public, max-age=86400"),))
             except OSError:
                 return self._send(404, b"", "text/plain")
-        if route == "manual" and method in ("GET", "HEAD"):        # "How your page works": behind the same sign-in as everything else
+        if route == "manual" and method in ("GET", "HEAD"):        # Assistant Manual: behind the same sign-in as everything else
             try:
                 with open(MANUAL, "rb") as f:
                     return self._send(200, f.read(), "text/html; charset=utf-8", csp=MANUAL_CSP)

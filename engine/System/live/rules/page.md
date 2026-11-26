@@ -1,4 +1,4 @@
-The page, from top to bottom, as it is now. Parts of the page can be renamed for one owner's setup, so the page may show other words in those places; what each place holds stays the same. The owner's manual is on the page itself: the link "How your page works" is at the top of Settings and in the footer.
+The page, from top to bottom, as it is now. Parts of the page can be renamed for one owner's setup, so the page may show other words in those places; what each place holds stays the same. The owner's manual opens from the Assistant Manual button at the top of Settings.
 
 THE BOX AT THE TOP
 - "Ask or tell your assistant anything", with a Send button. Enter sends; Shift and Enter starts a new line. One message goes at a time: Send waits until the reply is back. The conversation shows in the box; older talk folds under Earlier talk, and Clear the talk hides what was said so far on this device (nothing is deleted, and Undo brings it back). A reply that rests on their data has a Source line under it. Typed words go to Claude at once. Words typed on a card join this same conversation, marked with the card. If their computer is not listening, the words are kept and answered when it is back. The box can do what the page's own buttons do, by their words: add, change or remove calendar events, write emails and texts and send them when told to, press a card's buttons, clean up mail, refresh mail, keep tasks; each reply says exactly what was done. The box cannot change a setting.
@@ -44,7 +44,7 @@ HELD BACK
 - Earlier days (with a count) is a fold holding the days before, each with its own rows.
 
 THE FOOTER
-- One quiet line: "All is well" with when accounts were last read, or a pointer to Errors. A link, How your page works, opens the manual. Sign out is at the owner's own site when there is one.
+- One quiet line: "All is well" with when accounts were last read, or a pointer to Errors. Sign out is at the owner's own site when there is one.
 
 A CARD, closed
 - Tags: Returned (it came back after a press, with the reason), New, Important (an important item also sent one phone notification, when notifications are on), "Your yes is recorded, not sent", Due today, Due on a day or Was due. Days are written as Today, Tomorrow, Yesterday or a date, and the page updates them as the days pass.
@@ -88,7 +88,7 @@ THE WEEKLY REVIEW
 - Each part folds with its count. A row is one of their cards with the same buttons as elsewhere (Done, Snooze, Bring it back, Wait longer, Drop it, Keep). Done on the card marks the whole review Done.
 
 THE SETTINGS SCREEN (opened by the Settings button)
-It covers the whole page. Back to your page and the link "How your page works" are at its top. Groups fold until their heading is pressed; each has its own Save, and nothing is saved until Save is pressed. Under the button the page says what was saved and when it takes effect, or why not. "Put back what was saved" drops what was typed. The assistant in the box cannot change a setting; only the owner can, here.
+It covers the whole page. Its heading line shows the version number and, side by side, Save (saves everything changed and returns to the page), Back (returns to the page without saving) and Assistant Manual (opens the manual). Groups fold until their heading is pressed; nothing is saved until Save is pressed. The page says what was saved and when it takes effect, or why not. "Add to your phone's home screen" is under Tools. "Put back what was saved" drops what was typed. The assistant in the box cannot change a setting; only the owner can, here.
 - Profile: first name, full name, the sentence about what they do and who matters, the page's heading and the line under it, and their areas.
 - Filters: filter strength; Rules (their own plain sentences, each Show less or Always show, each editable, On or Paused, with Remove and an Add a rule box; two rules that pull against each other are saved with a warning); priority senders; mail needing no action; first-time senders; newsletters and promotions; mailings kept by one of their words; automated notices; mail they are only copied on; texts from numbers not in their contacts; the "Here because" line; when a waiting card comes back; when it asks about a card that has sat.
 - Sources: the important topics list, their own mail domains, senders to always ignore, words that keep a mailing in front of them, Sync (On or Off), how often it checks (15, 30 or 60 minutes).

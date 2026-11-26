@@ -1605,12 +1605,10 @@ html :is(.find input[type=search],.find select,.talk-form textarea,.ask-box text
   .link{padding-block:10px;margin-block:-10px}
   .cp-pin{opacity:.55}
 }
-/* Settings: its bar stays pinned while you scroll, Back on the left and Save on the right */
+/* Settings: its heading line stays pinned while you scroll, with Save, Back and Assistant Manual side by side */
 .settings .set-top{position:sticky;top:0;z-index:6;background:var(--surface);margin:-12px -14px 10px;padding:12px 14px 10px;border-bottom:1px solid var(--line)}
 html[data-look] .settings .set-top{border-radius:var(--r) var(--r) 0 0}
 .set-top .set-acts{gap:8px;align-items:center}
-.set-top .set-acts [data-s="discard-all"]{order:-1}
-.set-top .set-acts [data-s="save-all"]{order:2;margin-left:10px}
 .settings details.fold > summary{font-size:1rem;font-weight:600;color:var(--fg);padding:12px 16px}
 /* the toolbars of Mail and Texts: search first and full width on a phone */
 @media (max-width:700px){
@@ -4539,7 +4537,7 @@ html.apv-doc .apv-say{margin:12px 0 0;color:var(--fg-2)}
   }
   /* Put new content in a section. Nothing is touched when nothing changed. A card in use is left
      exactly as it is; the cards around it are brought up to date one by one. */
-  /* "How your page works": the manual the page server serves at /manual (only when the data says it is there) */
+  /* Assistant Manual: the manual the page server serves at /manual (only when the data says it is there) */
   /* "Add to your phone's home screen": the browser's own install prompt where it offers one, else the steps for that phone */
   var HOME = {prompt: null, shown: false};
   window.addEventListener('beforeinstallprompt', function (ev) { ev.preventDefault(); HOME.prompt = ev; if (S.panel && S.panel.settings) render(); });
