@@ -10,7 +10,8 @@ can read.
 
 The shape of a connection type, and how to add one, is in CONNECTIONS.md here.
 An add-on made for one owner goes in <home>\taught\connections\ instead and
-is found the same way.
+is found the same way. The owner's own changes supersede the core but never
+change it: a taught type with the same name as one here is used in its place.
 
     types()                 {type name: module} for every connection type
     module(type)            one type's module
@@ -43,11 +44,12 @@ ID = re.compile(r"^c[0-9]{1,4}$")
 
 
 def _folders():
-    return [HERE, os.path.join(paths.TAUGHT, "connections")]
+    """The owner's taught types first: his own changes take the place of the core's, which stays as it is (spec 8.1)."""
+    return [os.path.join(paths.TAUGHT, "connections"), HERE]
 
 
 def types():
-    """Every connection type there is: this folder's, then the owner's taught ones."""
+    """Every connection type there is: the owner's taught ones, then this folder's (his own wins on a shared name)."""
     out = {}
     for folder in _folders():
         if not os.path.isdir(folder):
