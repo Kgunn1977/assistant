@@ -75,18 +75,40 @@ def _put_off(it):
         return False
 
 
+STALE_DAYS = 30          # a card from longer ago than this, with nothing due ahead, is old news
+STALE_LATE_DAYS = 14     # a due date further back than this is old news, not "late"
+
+
+def stale(it, today=None):
+    """Old news (spec 3.8: "the most urgent thing is something from months ago that's already been done"): a card whose
+    due date passed more than two weeks ago, or one from more than a month ago with nothing due ahead. Never urgent, never
+    first: it ranks after every fresh card of its kind and its due date and importance do not count."""
+    today = today or dt.date.today()
+    due = _due(it)
+    if due is not None and (today - due).days > STALE_LATE_DAYS:
+        return True
+    if due is not None and due >= today:
+        return False
+    try:
+        frm = dt.datetime.fromtimestamp(_from(it)).date() if _from(it) else None
+    except (ValueError, OverflowError, OSError):
+        frm = None
+    return frm is not None and (today - frm).days > STALE_DAYS
+
+
 def _closed(it):
     return it.get("state") == "done" or bool(it.get("shelf")) or _put_off(it)
 
 
 def key_for(it, sort, today):
     closed = _closed(it)
-    due = _due(it)
+    old = stale(it, today)
+    due = None if old else _due(it)
     import card as card_mod
-    # what asks something of him comes before what only waits on others, which comes before what needs nothing
-    need = {"waiting": 1, "nothing": 2}.get(it.get("needs") or card_mod.needs(it), 0)
+    # what asks something of him comes before what only waits on others, which comes before what needs nothing; old news last
+    need = ({"waiting": 1, "nothing": 2}.get(it.get("needs") or card_mod.needs(it), 0), old)
     strength = -int(((it.get("contact") or {}) if isinstance(it.get("contact"), dict) else {}).get("level") or 0)
-    importance = -(it.get("importance") or 0)
+    importance = 0 if old else -(it.get("importance") or 0)
     # Due date: the soonest due date first (late ones are the soonest), then important, then how often he is in touch, then age
     due_first = (need, 0 if due else 1, due or dt.date.max, importance, strength, _when(it))
     # whatever the order, what asks something of him comes before what only waits or only informs: the line names the first
@@ -129,6 +151,10 @@ def annotate(cards, today=None):
     ordered = sorted(cards, key=lambda it: key_for(it, sort, today))
     for n, it in enumerate(ordered, 1):
         it["rank"] = n
+        if stale(it, today) and not _closed(it):
+            it["stale"] = True          # old news: the page never shows it as urgent
+        else:
+            it.pop("stale", None)
         if by != "nothing":
             it["group"] = group_of(it, by)
         else:
@@ -145,7 +171,7 @@ def top(cards, done_for_you=0, today=None):
     need = [it for it in open_ if (it.get("needs") or card_mod.needs(it)) in NEED_YOU]
     waiting = [it for it in open_ if (it.get("needs") or card_mod.needs(it)) == "waiting"]
     need.sort(key=lambda it: it.get("rank") or 10 ** 6)
-    late = [it for it in need if _due(it) is not None and _due(it) <= today]
+    late = [it for it in need if _due(it) is not None and _due(it) <= today and not stale(it, today)]
     n = len(need)
     if n == 0:
         line = "Nothing needs you." + (f" {len(waiting)} {'waits' if len(waiting) == 1 else 'wait'} on others." if waiting else "")

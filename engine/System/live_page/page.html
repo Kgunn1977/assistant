@@ -1952,8 +1952,8 @@ html.apv-doc .apv-say{margin:12px 0 0;color:var(--fg-2)}
     if (mode === 'waiting') return [T(it.state_changed_at) || fromT(it)];
     if (mode === 'important') return [-(+it.importance || 0), -fromT(it)];
     if (mode === 'recent') return [-lastT(it)];
-    var due = it.due_date ? T(String(it.due_date).slice(0, 10)) : 0;
-    return [due ? 0 : 1, due, -(+it.importance || 0), -(+((it.contact || {}).level) || 0), T(it.source_when) || T(it.created_at) || T(it.updated_at)];
+    var due = it.due_date && !it.stale ? T(String(it.due_date).slice(0, 10)) : 0;
+    return [it.stale ? 1 : 0, due ? 0 : 1, due, it.stale ? 0 : -(+it.importance || 0), -(+((it.contact || {}).level) || 0), T(it.source_when) || T(it.created_at) || T(it.updated_at)];
   }
   function keyCmp(a, b) { for (var i = 0; i < a.length; i++) if (a[i] !== b[i]) return a[i] < b[i] ? -1 : 1; return 0; }
   /* Within a kind: the sort alone; an answered card takes its place by its date like any other. The engine's rank is its own
@@ -2232,8 +2232,8 @@ html.apv-doc .apv-say{margin:12px 0 0;color:var(--fg-2)}
   /* The marks beside the title: Due, Important and New only. */
   function tagsHtml(it) {
     var o = '';
-    if (it.due_date) { var late = it.due_date < today(); o += '<span class="tag ' + (it.due_date <= today() ? 'crit' : 'warn') + '">' + (late ? 'Was due ' : it.due_date === today() ? 'Due today' : 'Due ') + (it.due_date === today() ? '' : h(fmtD(D(it.due_date)))) + '</span>'; }
-    if (it.importance) o += '<span class="tag crit">Important</span>';
+    if (it.due_date) { var late = it.due_date < today(); o += '<span class="tag ' + (it.stale ? 'old' : it.due_date <= today() ? 'crit' : 'warn') + '">' + (late ? 'Was due ' : it.due_date === today() ? 'Due today' : 'Due ') + (it.due_date === today() ? '' : h(fmtD(D(it.due_date)))) + '</span>'; }
+    if (it.importance && !it.stale) o += '<span class="tag crit">Important</span>';      /* old news is never shown as urgent (spec 3.8) */
     if (isNew(it)) o += '<span class="tag new">New</span>';
     return o;
   }
@@ -2580,7 +2580,7 @@ html.apv-doc .apv-say{margin:12px 0 0;color:var(--fg-2)}
       (it.tip && s !== 'done' ? '<div class="why tip">' + hc(it.tip) + '</div>' : '');      /* a one-time tip, the first time this thing appears (onboard.py) */
     var rest = scanHtml(it.rule_scan) + '<div class="hide-on-answer stack">' + (old ? oldHtml(it) + boxHtml(it) : (it.review && s !== 'done' ? reviewHtml(it) : '') + (it.rsi && s !== 'done' ? rsiHtml(it) : '') + pickHtml(it, s) + answeredHtml(it, s) + questionsHtml(it, s) + buttons(it, s)) + '</div>' + answered(a) +
       (isOpen ? '<div class="card-in">' + inside(it, s) + '</div>' : '');
-    return '<article class="card host' + (it.importance && !a ? ' urgent' : '') + '" data-key="' + h(it.key) + '"' + stateAttr(a) + '>' + bn + head + rest + '</article>';
+    return '<article class="card host' + (it.importance && !a && !it.stale ? ' urgent' : '') + '" data-key="' + h(it.key) + '"' + stateAttr(a) + '>' + bn + head + rest + '</article>';
   }
   function cards(list, s) { return '<div class="cards">' + list.map(function (it) { return card(it, s); }).join('') + '</div>'; }
   /* Done: what he answered (each card drawn from its own place), what the assistant closed with nothing done (named so), what is finished */
@@ -6291,8 +6291,8 @@ html.apv-doc .apv-say{margin:12px 0 0;color:var(--fg-2)}
       if (s === 'done' && a && ((a.action === 'done' && a.label === 'Put away') || isLater(a))) return;      /* put away: off the page at once */
       total++;
       if (isNew(it)) newN++;
-      if (open) { ages[bucket(it)]++; if (!isR) openN[s] = (openN[s] || 0) + 1; if (it.importance) imp++; if (it.due_date && it.due_date <= today()) due++; }
-      if (it.importance && (open || s === 'fyi')) impIn[SEC_OF[s] || 'decide'] = 1;
+      if (open) { ages[bucket(it)]++; if (!isR) openN[s] = (openN[s] || 0) + 1; if (it.importance && !it.stale) imp++; if (it.due_date && it.due_date <= today() && !it.stale) due++; }
+      if (it.importance && !it.stale && (open || s === 'fyi')) impIn[SEC_OF[s] || 'decide'] = 1;
       if (isR) return;                                                 /* in "Ready to send" */
       if (match(it)) { if (gone && isLater(a)) by.someday.push(it); else if (gone) by.answered.push(it); else if (s === 'done' && closedOnly(it)) by.closed.push(it); else by[s].push(it); shown++; }
     });

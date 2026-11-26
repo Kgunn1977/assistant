@@ -68,7 +68,7 @@ KEEP = ("id", "kind", "area", "title", "detail", "state", "importance", "importa
         "header", "needs", "wants", "why", "shelf", "later_until",      # the card's own (ITEMS.md, "Design round 1")
         "teach", "rule", "came_back", "old_cards",                      # "Design round 2"
         "rule_offer", "rule_scan",      # a rule proposed from his words on a card, and what an approved rule did to other cards
-        "rank", "group", "offer", "review", "update", "ready",          # "Design round 3"; the weekly update card; Ready to send
+        "rank", "stale", "group", "offer", "review", "update", "ready",          # "Design round 3"; the weekly update card; Ready to send
         "facts", "table", "tags",      # plain extras a card may carry: label and value pairs, one small table, short tags
         "choices", "best_guess", "waiting_on", "age_days", "days",
         "questions", "rec_front", "messages", "contact",      # contact: how often he is in touch with its sender     # each question with its own buttons; the recommendation; the messages Context links
