@@ -4943,10 +4943,10 @@ window.RM_RUN = function (document, localStorage, claude) {
   };
   function applyLook() {
     var st = setts(), p = st && st.page, th = p ? p.theme : keepGet('theme'), sz = p ? p.text_size : keepGet('size'), root = document.documentElement;
+    var lk = p ? p.look : keepGet('look');
+    if (!LOOK_FONTS[lk]) { lk = 'glass'; th = 'dark'; }      /* no style chosen yet: the default is Glass, dark */
     if (th === 'light' || th === 'dark') root.setAttribute('data-theme', th); else root.removeAttribute('data-theme');
     if (sz === 'small' || sz === 'large') root.setAttribute('data-size', sz); else root.removeAttribute('data-size');
-    var lk = p ? p.look : keepGet('look');
-    if (!LOOK_FONTS[lk]) { lk = 'glass'; th = 'dark'; }
     {
       root.setAttribute('data-look', lk);
       if (!document.querySelector('link[data-look-fonts="' + lk + '"]')) {
