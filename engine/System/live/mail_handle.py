@@ -20,6 +20,8 @@ THE CHAT. The assistant's reply carries ACTION lines (chat.py). A plan is made f
                   unread, newest (only the newest this many), account, folder (inbox, all, junk, archive, trash; default inbox)
     A plan that finds exactly one email (any op but unsubscribe and rule) is done at once, as that email's own button does it,
     with no yes asked: one email is never a bulk change. done_now[0] says so to the chat for that call.
+    A find with "one": true is one email he described ("the email from Pat about the shed"): when more than one matches,
+    nothing is picked and nothing is planned; the line lists them and asks which one he means (never the newest by itself).
 """
 import datetime as dt
 import email.message
@@ -431,6 +433,7 @@ def _folder_target(account, wanted):
 
 
 done_now = [False]      # the last plan() was done at once (one email): the chat then says only the program's line
+ASK_MOST = 5            # the matches listed when he described one email and several match
 
 
 def plan(action, when):
@@ -445,6 +448,9 @@ def plan(action, when):
     if op == "rule":
         return _plan_rule(action, base)
     spec = action.get("find") or {}
+    one = spec.get("one") in (True, "true", "yes", 1)
+    if one:                     # one email he described: every match is looked at, so none is picked for him
+        spec = {k: v for k, v in spec.items() if k not in ("one", "newest")}
     try:
         got = find(spec)
     except Exception as e:  # noqa: BLE001
@@ -453,6 +459,11 @@ def plan(action, when):
         return got["error"]
     if not got["count"]:
         return "I found no mail like that, so there is nothing to do."
+    if one and got["count"] > 1:
+        shown = got["rows"][:ASK_MOST]
+        listed = "; ".join(f"{n}. {r['when']}, {r['from_name'] or r['from']}: \"{r['subject'][:70]}\"" for n, r in enumerate(shown, 1))
+        return (f"More than one email matches that ({got['count']}), so I haven't touched any. Which one do you mean? {listed}"
+                + (f"; and {got['count'] - len(shown)} more." if got["count"] > len(shown) else "."))
     base.update({"spec": spec, "ids": got["ids"], "count": got["count"]})
     what = _said_find(spec)
     more = f" (this is the first {len(got['ids'])} of {got['count']}; ask again for the rest)" if got["count"] > len(got["ids"]) else ""

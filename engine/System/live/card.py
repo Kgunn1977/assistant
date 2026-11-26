@@ -8,8 +8,8 @@ whatever wrote it.
     needs    what kind of thing the card needs: answer, approval, do, waiting, nothing
     wants    the one thing wanted from the owner, one line (None when it waits or needs nothing)
     why      why it is here, one line (Claude's words when the card has them, else a plain line); when the judge said
-             no rule decides a message behind it ("uncovered", its best guess, put there by items.read), the line
-             starts "My rules don't cover this; my best guess: ..."
+             no rule decides a message behind it ("uncovered", put there by items.read), the card asks him how to
+             handle it (ASK_HOW, in its questions) and the line says it is asking instead of guessing
     pick     what I predict the owner will do, drawn as the card's first button (picks.shown); None on a closed card
     last_time what he did instead of the pick on the last card like this one, offered as a button (picks.last_time)
 """
@@ -24,8 +24,10 @@ WHY_MAX = 120
 NEEDS = ("answer", "approval", "do", "waiting", "nothing")
 NEXT_STEP = "Your next step: "
 WHY_SENTENCES = 2                   # the why on the front: a summary of two sentences at most, with no label
-UNCOVERED = "You haven't told me how to handle this kind yet. My guess: "
-UNCOVERED_WAS = "My rules don't cover this; my best guess: "      # the same line as saved on older cards
+UNCOVERED = "You haven't told me how to handle this kind yet, so I'm asking instead of guessing. "
+UNCOVERED_OLD = ("You haven't told me how to handle this kind yet. My guess: ",     # the lines older cards saved, with a guess
+                 "My rules don't cover this; my best guess: ")
+ASK_HOW = "How do you want me to handle this, and messages like it?"     # the question an uncovered card asks him
 
 
 DOTS = re.compile(r"\s*(?:\.{2,}|\u2026)+\s*$")
@@ -110,8 +112,11 @@ def why(it):
     said = " ".join(str(it.get("why") or "").split())
     if said.lower().startswith("here because"):
         said = said.split(":", 1)[-1].strip() if ":" in said[:16] else said[12:].strip()
-    if said.startswith(UNCOVERED_WAS):
-        said = UNCOVERED + said[len(UNCOVERED_WAS):]
+    for old in UNCOVERED_OLD:
+        if said.startswith(old):             # an older card's guess: not shown; the card asks instead (fill)
+            rest = said[len(old):].split(". ", 1)
+            said = rest[1].strip() if len(rest) > 1 else ""
+            break
     if said.startswith(UNCOVERED):
         return said             # already worded by fill() for an uncovered verdict: kept whole
     if said:
@@ -157,9 +162,16 @@ def fill(it):
     it["needs"] = need
     it["wants"] = wants(it, need)
     it["why"] = why(it)
-    guess = whole(it.get("uncovered")).rstrip(".!? ")
-    if guess and not it["why"].startswith(UNCOVERED):       # the judge's own best guess, said as one: never silent
-        it["why"] = f"{UNCOVERED}{guess}. {it['why']}"
+    if whole(it.get("uncovered")) and it.get("state") != "done" and not it.get("shelf"):
+        # no rule of his decides a message behind it: the card asks him how to handle it rather than show a guess
+        if not it["why"].startswith(UNCOVERED):
+            it["why"] = f"{UNCOVERED}{it['why']}"
+        asks = [a for a in (it.get("asks") or []) if " ".join(str(a or "").split())]
+        if ASK_HOW not in asks:
+            it["asks"] = asks + [ASK_HOW]
+        if it["needs"] == "nothing":
+            it["needs"] = "answer"
+        it["wants"] = wants(it, it["needs"])
     if it.get("shelf") not in ("later", "someday"):
         it["shelf"] = None
     if it["shelf"] != "later":
