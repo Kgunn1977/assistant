@@ -380,7 +380,7 @@ def _do(action, text, when, n=0):
         if not iid:
             return [], said
         _made_now.append(iid)
-        item = items_mod().card_for(iid)
+        item = items_mod().card_for(iid, wait=True)     # on the page's copy now, so a send in this same reply closes it
         if item is None:
             return [], ""
         answers._patch_snapshot([item])
@@ -503,7 +503,7 @@ def _ready_card(iid):
     snap = (common.read_json(common.ITEMS_JSON, {}) or {}).get("items") or []
     card = next((i for i in snap if i.get("id") == iid), None)
     if card is None:
-        card = items_mod().card_for(iid)
+        card = items_mod().card_for(iid, wait=True)
     return card
 
 
@@ -520,7 +520,7 @@ def _send(action, text, when):
     if why:
         return [], f"Nothing was sent: {why}. Say \"send it\" when you want it to go."
     changed, lines = [], []
-    for one in ids[:8]:
+    for one in ids:            # every email he said to send goes: none is left in Drafts
         card = _ready_card(one)
         d = (card or {}).get("draft") if isinstance((card or {}).get("draft"), dict) else None
         if not card or not str(card.get("source_key") or "").startswith(ready.KEY) or not d or card.get("state") == "done":
@@ -537,6 +537,10 @@ def _send(action, text, when):
         rec = {"id": one, "action": "answer", "origin": "chat", "label": "Talk to your assistant", "at": when.isoformat(timespec="seconds"),
                "said": {"words": text, "at": _typed[0] or when.isoformat(timespec="seconds")}, "text": json.dumps({"send_email": p})}
         out = answers._owner_send(rec)
+        for _ in range(3):         # the store busy with a check: wait for it and send, rather than leave the email unsent
+            if out.get("sent") or not out.get("busy"):
+                break
+            out = answers._owner_send(rec)
         changed += out.get("items") or []
         _sent_now.append({"what": "email", "ok": bool(out.get("sent")), "id": one})
         lines.append(str(out.get("result") or ""))
