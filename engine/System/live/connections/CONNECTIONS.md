@@ -98,7 +98,7 @@ A type fetches; the shared writers store, so every source obeys the same rules (
 - `MailWriter(address)`: `.add(provider_id, when, "in" or "out", from, to, subject, body, folder=, thread_id=, attachments=[(file name, bytes)])` for each message, then `.commit()`. Filter attachments with `is_decoration` first.
 - `chat_messages(channel, account, rows, watermark_name)` for chat-style sources.
 - `calendar_events(rows, prune)` is called for you; calendar types only append to `ctx.events`.
-- `text_messages(rows)` for texts (from the Messages extension) and their pictures.
+- `text_messages(rows)` for texts (from the Google Messages link) and their pictures.
 
 ## Web calls and sign-in
 
