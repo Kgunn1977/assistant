@@ -196,8 +196,9 @@ def _fields(step, st):
                     detail="This is fast and fairly cheap. I don't read or process your past messages now: I only catalog the "
                            "envelopes (who it was from, the subject, the date) so I know where to look later. When something new "
                            "comes in, I look back through that catalog for the same sender or subject and read just that history "
-                           "for context. One year is a good default. Until the catalog is built, no new messages come in, so the "
-                           "first ones are judged with context from the start.",
+                           "for context. This step also builds your voice guide: I read a few of your sent emails to learn how you "
+                           "write, so my drafts sound like you. One year is a good default. Until the catalog is built, no new "
+                           "messages come in, so the first ones are judged with context from the start.",
                     asks=["How far back should I catalog?"], why="Setup, step 5 of 8: how far back.")
     if step == "about":
         a = st.get("about") or {}
