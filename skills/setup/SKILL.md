@@ -1,6 +1,6 @@
 ---
 name: setup
-description: Set up the assistant for a person, as a friendly interview of about 30 minutes - who they are, which accounts it reads (connecting each one and checking it works), other projects that should feed it, who and what matters and what is junk, how far back to read, where their page lives, and what it may send. Picks up where it stopped if run again. Use when the person types /assistant:setup or asks to set up their assistant.
+description: Set up the assistant for a person. Setup is a series of cards on their page that walk them through it (connecting accounts, how far back to look, an open interview about them); this starts it in Claude and does the few steps only the computer can do - where the assistant lives, where their page lives, what it may send, and switching it on. Picks up where it stopped if run again. Use when the person types /assistant:setup or asks to set up their assistant.
 disable-model-invocation: true
 ---
 
