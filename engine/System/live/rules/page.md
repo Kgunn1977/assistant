@@ -51,7 +51,7 @@ A CARD, closed
 - A short header (never cut off), then the one thing wanted from the owner, then a "Here because:" line saying why it is on the page. Pressing the header opens the card. A card that needs nothing has only Got it.
 
 A CARD, opened
-- Folds, when they exist: Everything it asks, What the assistant recommends (or The best guess), The story, The facts, The draft, a table of lines, Source message, Attached papers, Evidence, and History (everything the assistant has done on it, one line each). A last line gives its tags, area, status and age.
+- Context: the story as one narrative, in which every message and paper it rests on is a link that opens it (there is no Evidence section); the draft, when there is one; and Conversation (everything said and done on it, oldest first). A last line gives its status and age.
 
 THE BUTTONS ON A CARD, and what each does
 - Got it: on a card that needs nothing; marks it Done.
