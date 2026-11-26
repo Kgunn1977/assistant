@@ -31,7 +31,7 @@ LAST = os.path.join(HOME, "page_state", "roadmaps_last.json")     # each roadmap
 NEXT_MAX, ROWS_MAX, TEXT_MAX = 12, 400, 400
 AGREEMENT = 1                 # the agreement number this reader follows
 NOT_YET = ("Nothing to show yet. If this project has no roadmap, open its folder in the Claude desktop app's Code tab "
-           "and send /assistant:roadmap-setup (Claude needs the Roadmap plugin). If it has one, it shows here after its Roadmap "
+           "and send /assistant:roadmap-setup (the roadmap comes with this assistant plugin). If it has one, it shows here after its Roadmap "
            "writer's next change.")
 WAITING = ("Waiting for this roadmap's first summary. Its Roadmap writer has been asked to write it; it shows here a few "
            "minutes after that.")

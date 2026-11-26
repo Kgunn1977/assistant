@@ -90,11 +90,11 @@ The one-time address works once and for 7 days. If you lose it, press "Make my p
 - in the Claude desktop app, that project's own roadmap page (from the plugin), where you mark finished work as Works or Doesn't work and answer Claude's questions;
 - on your assistant's page, a "Roadmaps" part that lists every such project: its name, its "What's next" lines, every row with its status, how many checks wait to be tried, how many questions are open, when it last changed, and a link that opens the roadmap's own page. This part is for reading. It shows wherever your page lives, on this computer and on your own website.
 
-**What it needs.** The Roadmap plugin added to Claude (its own README says what the plugin needs and how to add it). If the plugin's folder came alongside this assistant, as a folder named `Roadmap` beside `System`, the setup window can add it to Claude for you.
+**What it needs.** Nothing more: the roadmap is part of the assistant plugin, a planning tool of its own with its own settings that also connects to your assistant.
 
 **How to apply it.**
 1. In the setup window go to the "Roadmaps" step.
-2. If it says Claude does not have the Roadmap plugin yet: press "Add the Roadmap plugin to Claude" when that button is offered and wait for "Added", or add the plugin the way its README says. Then close the Claude desktop app completely and open it again. You do this once.
+2. If it says Claude does not have the roadmap yet, the assistant plugin is not added to Claude on this computer: add it (the README says how), then close the Claude desktop app completely and open it again. You do this once.
 3. Press "Apply to a project folder" and choose the project's folder. Do this for each project you want.
 4. The window then says the one thing left for that project, if any: in the Claude desktop app's Code tab, open a session in that folder and send `/assistant:roadmap-setup`. Claude asks what to call the roadmap, makes its page and gives you the link.
 
