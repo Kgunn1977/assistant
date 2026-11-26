@@ -4,14 +4,12 @@ made-up rule book rows, cards and people; the coach's Claude run and the mail se
 1. Every kind of work gets a score in Settings data, from the rule book's rows with a pick: decisions, wording, timing and
    urgency where they apply.
 2. The coach proposes one change to my picks (not show or hide) for a kind of work, scored on the past rows: fixes and
-   breaks, both scores; queued by a missed pick and shown as a Pick change card with Approve at level 1; Approve makes it
-   the pick on the next card like it.
-3. Level 2: a routine pick (Got it) I'm good at is done on its own with a note and Undo; Undo puts it back, never redoes
-   it, and counts as a miss. Level 1 does nothing on its own.
-4. Level 3: the same done quietly, and it lands in the one morning summary card.
-5. Sending: the level words for Reply drafts name sending (and level 1 says it never sends); at level 1 nothing is sent; at
-   level 2 the drafted reply goes once, recorded with its level; no other kind of work sends (guardrail B12); the
-   guardrails' text says so (B1, B6, B12, A19).
+   breaks, both scores; queued by a missed pick and shown at level 2 as a Pick change card with Promote and Reject;
+   Promote makes it the pick on the next card like it. At level 1 no change is proposed.
+3. No learning level does a pick on a card on its own: at levels 1, 2 and 3 the card stays as it was.
+4. Level 3: the morning summary card lists only changes made on its own; with none, no card.
+5. Sending: no level sends: the level words for Reply drafts say so at every level, and at level 2 nothing is sent; a
+   level send is refused by guardrail B12; the guardrails' text is as before (B1, B6, B12, A19).
 
     python tests\rebuild_levels_acceptance.py
 """
@@ -60,7 +58,7 @@ d = settings_data.defs()
 learn = {x["id"]: x for x in d["settings"] if x["group"] == "learning"}
 out["1"] = {f: x["help"].split(". Show or hide")[0] for f, x in learn.items()}
 
-# --- 2. the coach: one pick change, fixes and breaks, as a card at level 1, Approve ---
+# --- 2. the coach: one pick change, fixes and breaks; no card at level 1, a card at level 2, Promote ---
 def ask(prompt, model):
     out["2 told"] = ["Acme Deals" in prompt, "decisions" in prompt, "show or hide" not in prompt.lower().split("kind of work:")[0][-60:]]
     return ai_steps.Result(True, json.dumps({"change": "add", "match": {"sender": "Acme Deals"},
@@ -68,76 +66,40 @@ def ask(prompt, model):
 fresh = rows[0]
 rsi_loop.on_rows([fresh])
 out["2 queued"] = [(j["section"], j.get("kind")) for j in rsi_loop.jobs()]
+out["2 level 1"] = [len(rsi_loop.run(ask=ask)), rsi_loop.jobs()]
+settings_page.save({"settings": {"group": "learning", "values": {"learn_bills": 2}}})
+rsi_loop.on_rows([fresh])
 made = rsi_loop.run(ask=ask)
 c = made[0] if made else {}
 r = ((c.get("extra") or {}).get("rsi") or {})
 out["2 card"] = [c.get("title"), r.get("kind"), r.get("act"), r.get("fixes"), r.get("breaks"), r.get("score_live"), r.get("score_draft"),
                  [l for l in r.get("lines") or [] if l.startswith("My picks get")]]
+f = presses.fields(items.card_for(c["id"], wait=True), {"name": "rsi_promote", "proposal": r.get("id")}, common.now(), lambda x: {}) if c else {}
+out["2 promote fits"] = [f.get("status"), f.get("answer")]
 coach.promote(r.get("id"))
 iid, _ = items.upsert("live:test-acme", "t", kind="fyi", area="Bills", title="Acme Deals: weekend sale", state="new",
                       source_who="Acme Deals")
 out["2 pick after promote"] = picks.of(items.card_for(iid, wait=True))
 
-# --- 3. level 2: a routine pick done with a note and Undo; level 1 does nothing ---
+# --- 3. no level does a pick on its own ---
 iid2, _ = items.upsert("live:test-lee", "t", kind="fyi", area="Personal", title="Lee Park: the paint is in", state="new",
                        source_who="Lee Park")
-n1 = levels.act("t")
-lvl1 = items.card_for(iid2, wait=True)
-out["3 level 1"] = [n1, lvl1["state"]]
-settings_page.save({"settings": {"group": "learning", "values": {"learn_page": 2}}})
-n2 = levels.act("t")
-c2 = items.card_for(iid2, wait=True)
-out["3 level 2"] = [n2, c2["state"], c2["status"], c2["last_press"]["press"], c2["last_press"]["happened"],
-                    isinstance(c2["last_press"].get("was"), dict)]
-f = presses.fields(c2, {"name": "undo"}, common.now(), lambda r: {})
-items.update(iid2, "t", **{k: v for k, v in f.items()})
-levels.undone(c2)
-c3 = items.card_for(iid2, wait=True)
-out["3 undo"] = [c3["state"], c3["last_press"]["happened"], (c3.get("extra") or {}).get("standing_skip"), levels.act("t"),
-                 [a["undone"] for a in levels.actions()], rule_book.rows("page")[0].get("pick_outcome")]
+got3 = []
+for n in (1, 2, 3):
+    settings_page.save({"settings": {"group": "learning", "values": {"learn_page": n}}})
+    got3.append([levels.act("t"), items.card_for(iid2, wait=True)["state"]])
+out["3 levels"] = got3
 
-# --- 4. level 3: done quietly, in the morning summary card ---
-settings_page.save({"settings": {"group": "learning", "values": {"learn_page": 3}}})
-iid4, _ = items.upsert("live:test-lee2", "t", kind="fyi", area="Personal", title="Lee Park: the van is back", state="new",
-                       source_who="Lee Park")
-n4 = levels.act("t")
-c4 = items.card_for(iid4, wait=True)
-made = levels.summary("t", now=now.replace(hour=7))
-summ = [x for x in items.rows("source_key LIKE 'live:level-summary-%'")]
-out["4 level 3"] = [n4, c4["state"], c4["status"], made, len(summ), "the van is back" in (summ[0]["detail"] if summ else ""),
-                    levels.summary("t", now=now.replace(hour=8))]
+# --- 4. level 3: the morning summary lists only changes made on its own ---
+out["4 level 3"] = [levels.summary("t", now=now.replace(hour=7)), len(items.rows("source_key LIKE 'live:level-summary-%'"))]
 
 # --- 5. sending ---
-out["5 words"] = [levels.says("replies", 1), "send" in levels.says("replies", 2).lower(), "standing approval to send" in levels.says("replies", 2),
-                  "send" in levels.says("replies", 3).lower(), "send the reply" in levels.says("page", 2)]
-p = common.read_json(common.paths.PERSONAL_JSON, {}) or {}
-p["send_accounts"] = ["me@example.test"]
-common.write_json(common.paths.PERSONAL_JSON, p)
-send.switched_on = lambda: True
-send.accounts = lambda: ["me@example.test"]
-con = db.connect()
-con.execute("INSERT INTO messages (id, channel, account, thread_id, ts, direction, from_key, to_keys, subject, body, ingested_at)"
-            " VALUES (30001, 'email', 'me@example.test', 't-pat', ?, 'in', 'email:pat@example.test', '[]', 'Shed day', 'Which day works?', ?)", (now, now))
-con.close()
-iid5, _ = items.upsert("live:test-pat", "t", kind="question", area="Personal", title="Pat asks which day works", state="question",
-                       source_who="Pat Doe", source_messages=["30001"],
-                       draft={"to": ["pat@example.test"], "subject": "Re: Shed day", "body": "Thursday works for the shed.",
-                              "account": "me@example.test"})
+out["5 words"] = [all("I never send a reply on my own at any level." in levels.says("replies", n) for n in (1, 2, 3)),
+                  any("send" in levels.says("page", n).lower() for n in (1, 2, 3))]
 handed = []
 hand = lambda m: handed.append(m) or "ok"
-out["5 level 1"] = [levels.act("t", handoff=hand), len(handed)]
 settings_page.save({"settings": {"group": "learning", "values": {"learn_replies": 2}}})
-n5 = levels.act("t", handoff=hand)
-c5 = items.card_for(iid5, wait=True)
-try:
-    with open(send.SENT_LOG, encoding="utf-8") as fh:
-        sent = [json.loads(x) for x in fh.read().splitlines() if x.strip()]
-except OSError:
-    sent = []
-    out["5 why not sent"] = [levels.good_at("replies", picks.of(c5)), picks.of(c5), rule_book.section(c5),
-                             send.level_fit(c5, 2)[1], c5.get("reply")]
-out["5 level 2"] = [n5, len(handed), (handed[0]["to"] if handed else None), c5["status"], [x.get("level") for x in sent],
-                    levels.act("t", handoff=hand), len(handed)]
+out["5 level 2"] = [levels.act("t", handoff=hand), len(handed)]
 v = common.rulebook().check_send({"account": "me@example.test", "to": ["pat@example.test"], "cc": [], "bcc": [], "subject": "Re: x",
                                   "body": "ok", "attach": []},
                                  {"kind": "level", "switched_on": True, "accounts": ["me@example.test"], "level": 2, "section": "page",
@@ -182,29 +144,18 @@ def main():
                "My picks: I got 50% right, over 2 answers of yours (decisions 0%, wording 100%)",
                "My picks: I got 0% right, over 3 answers of yours (decisions 0%, timing 0%, urgency 0%)"])
         check("2. a missed pick queues the coach for that kind of work", o["2 queued"], [["bills", "work"]])
+        check("2. at level 1 no change is proposed and the job is taken off the queue", o["2 level 1"], [0, []])
         check("2. the coach was told the misses", o["2 told"][:2], [True, True])
-        check("2. a Pick change card at level 1: Approve, fixes 3, breaks 0, both scores",
-              o["2 card"], ["Pick change: For cards from Acme Deals: my pick is \"Drop\"", "work", "Approve", 3, 0, "4 of 8 matched",
+        check("2. a Pick change card at level 2: Promote, fixes 3, breaks 0, both scores",
+              o["2 card"], ["Pick change: For cards from Acme Deals: my pick is \"Drop\"", "work", "Promote", 3, 0, "4 of 8 matched",
                             "7 of 8 matched", ["My picks get 3 more of your past answers right and 0 wrong.", "My picks get 4 of 8 of your past answers right now. With this change: 7 of 8."]])
-        check("2. after Approve, my pick on the next Acme Deals card is Drop",
+        check("2. Promote is taken on a Pick change card", o["2 promote fits"], ["Promoted", "Promote"])
+        check("2. after Promote, my pick on the next Acme Deals card is Drop",
               {k: v for k, v in (o["2 pick after promote"] or {}).items() if k in ("do", "press", "by")}, {"do": "press", "press": "drop", "by": "rule"})
-        check("3. level 1 does nothing on its own", o["3 level 1"], [0, "new"])
-        lp = o["3 level 2"]
-        check("3. level 2: Got it done on its own, with a note and Undo",
-              [lp[0], lp[1], lp[2], lp[3], lp[4].startswith("I marked it Got it for you at level 2") and "Undo" in lp[4], lp[5]],
-              [1, "done", "Done for you", "level_got_it", True, True])
-        check("3. Undo puts it back, it is never redone, and it counts as a miss",
-              o["3 undo"], ["new", "Taken back.", True, 0, [True], "differed"])
-        check("4. level 3: done quietly, one morning summary card listing it, once a day",
-              o["4 level 3"], [1, "done", "Done quietly", 1, 1, True, 0])
-        w = o["5 words"]
-        check("5. the level words for replies name sending; level 1 never sends; other kinds don't send",
-              [w[0], w[1], w[2], w[3], w[4]],
-              ["Level 1: I show my pick as the first button on each card in reply drafts and do nothing until you press it. "
-               "I never send a reply on my own.", True, True, True, False])
-        check("5. at level 1 nothing is sent", o["5 level 1"], [0, 0])
-        check("5. at level 2 the drafted reply goes once, to the person who wrote, recorded with its level",
-              o["5 level 2"], [1, 1, ["pat@example.test"], "Sent for you", [2], 0, 1])
+        check("3. no level does a pick on a card on its own", o["3 levels"], [[0, "new"], [0, "new"], [0, "new"]])
+        check("4. level 3: no morning summary card with no change made on its own", o["4 level 3"], [0, 0])
+        check("5. the level words for replies say no level sends; other kinds don't speak of sending", o["5 words"], [True, False])
+        check("5. at level 2 nothing is sent", o["5 level 2"], [0, 0])
         check("5. a level send for another kind of work, or at level 1, is refused (B12)", o["5 B12"], [False, ["B12"], False, ["B12"]])
         check("5. the guardrails say it (B1, B6, B12, A19)", o["5 guardrails"], [True, True, True, True])
     finally:

@@ -504,7 +504,7 @@ def fields(item, press, when, legacy):
     if name in ("rsi_promote", "rsi_apply", "rsi_reject"):
         # a rule change card (rsi_loop.py): the coach's promote, apply or reject is done by answers.py before this lands
         r = extra.get("rsi") if isinstance(extra.get("rsi"), dict) else None
-        fits = r and (name == "rsi_reject" or (name == "rsi_promote") == (r.get("kind") == "rule"))
+        fits = r and (name == "rsi_reject" or (name == "rsi_apply") == (r.get("kind") == "setting"))
         if not key.startswith("live:rsi-") or not fits or item.get("state") == "done" or press.get("proposal") != r.get("id"):
             return refusal(name, when, "That answer is for another rule change card. Nothing was changed.")
         if press.get("undecided"):
@@ -515,11 +515,13 @@ def fields(item, press, when, legacy):
                                                + (f": \"{press['words']}\"." if press.get("words") else ". Nothing was changed.")),
                     "last_press": _mark(name, when, "Rejected. Nothing was changed, and the reason is kept.")}
         if name == "rsi_promote":
-            return {"state": "done", "status": "Rule changed", "answer": "Approve", "answered_at": when,
-                    "assistant_did": _add(did, f"You approved this rule change {_stamp(when)}. It is in your rules in Settings."),
-                    "last_press": _mark(name, when, "Done. I changed the rule. It starts the next time I check for messages.")}
-        return {"state": "done", "status": "Setting changed", "answer": "Apply", "answered_at": when,
-                "assistant_did": _add(did, f"You applied this change {_stamp(when)}. It is in Settings."),
+            work = r.get("kind") == "work"
+            return {"state": "done", "status": "Promoted", "answer": "Promote", "answered_at": when,
+                    "assistant_did": _add(did, f"You promoted this change {_stamp(when)}. "
+                                               + ("My picks use it now." if work else "It is in your rules in Settings.")),
+                    "last_press": _mark(name, when, "Done. I promoted the change. It starts the next time I check for messages.")}
+        return {"state": "done", "status": "Promoted", "answer": "Promote", "answered_at": when,
+                "assistant_did": _add(did, f"You promoted this change {_stamp(when)}. It is in Settings."),
                 "last_press": _mark(name, when, "Done. I changed it in Settings. It starts the next time I check for messages.")}
     if name == "standing":
         # the only way a standing approval is made from a card: the owner's answer to the offer that earned it

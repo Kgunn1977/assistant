@@ -104,10 +104,9 @@ out["1. a neutral press queues none, a contradicting one queues one job, a secon
 out["1. the press itself ran no Claude and coached nothing"] = [
     claude, r1["thought"], r2["thought"], len(asked), os.path.exists(coach.PROPOSALS)]
 
-# 2. Level 1 (the default): the coach runs at every level (the judgment rebuild); its change waits on a card for Promote.
-# Rejected here, so the section is free for the rest.
+# 2. Level 1 (the default): no change is proposed (he teaches on the cards); the job is taken off the queue.
 made = rsi_loop.run(runner=stub, ask=answer(ADD_ONE))
-out["2. a level 1 job: a rule change card waiting for Approve, the queue emptied"] = [
+out["2. a level 1 job: no rule change card, the queue emptied"] = [
     len(made), ((made[0] if made else {}).get("rsi") or {}).get("act"), rsi_loop.jobs()]
 if made:
     coach.reject(proposal_of(made[0])["id"], "Made-up test: cleared")
@@ -200,7 +199,7 @@ changed = sorted(f"{g}.{k}" for g in set(settings_before) | set(settings_after)
                  | set((settings_after.get(g) or {}) if isinstance(settings_after.get(g), dict) else {"": 0})
                  if ((settings_before.get(g) or {}).get(k) if isinstance(settings_before.get(g), dict) else settings_before.get(g))
                  != ((settings_after.get(g) or {}).get(k) if isinstance(settings_after.get(g), dict) else settings_after.get(g)))
-out["8. a setting card: Apply and Reject, the change in plain words"] = [
+out["8. a setting card: Promote and Reject, the change in plain words"] = [
     c4.get("title"), (c4.get("rsi") or {}).get("act"), (c4.get("rsi") or {}).get("lines")]
 out["8. apply: only that setting changed, the card closed"] = [
     got["result"], got["items"][0]["state"], changed, filters.get()["newsletters"],
@@ -325,18 +324,18 @@ WANT = {
     "1. a neutral press queues none, a contradicting one queues one job, a second miss adds none": [
         True, [], True, [["page", ["22"]]], [["page", ["22"]]]],
     "1. the press itself ran no Claude and coached nothing": [[], False, False, 0, False],
-    "2. a level 1 job: a rule change card waiting for Approve, the queue emptied": [1, "Approve", []],
+    "2. a level 1 job: no rule change card, the queue emptied": [0, None, []],
     "3. a level 2 job: one rule change card": [
-        True, ["page"], 1, 1, True, "question", "Rule change: " + ADD_WORDS, ["Approve this rule change?"], [], []],
+        True, ["page"], 1, 1, True, "question", "Rule change: " + ADD_WORDS, ["Promote this rule change?"], [], []],
     "3. the card says the change, its reason, fixes and breaks, and both scores": [
         "The change: " + ADD_WORDS, "Why: He pressed should have seen on shed mail",
         "It gets 3 more of your past answers right and 0 wrong.", "I get 2 of 5 of your past answers right now. With this change: 5 of 5.",
-        "Nothing changes until you press Approve. Reject leaves everything as it is, and I keep anything you " + KEEP],
+        "Nothing changes until you press Promote. Reject leaves everything as it is, and I keep anything you " + KEEP],
     "3. its numbers are the proposal's": [True] * 6,
     "4. a miss in a section with an open card queues nothing": [[], False],
     "5. promote: live rules changed, the card closed, the proposal promoted": [
         "That answer is for another rule change card. Nothing was changed.",
-        "Done. I changed the rule. It starts the next time I check for messages.", "done", "Rule changed",
+        "Done. I promoted the change. It starts the next time I check for messages.", "done", "Promoted",
         [[3, "Hide mail from the paint shop", "show_less"], [4, "Show every message about the shed paint", "always_show"]],
         "promoted", None, []],
     "5. Undo after Promote takes nothing back": [
@@ -353,11 +352,11 @@ WANT = {
         1, "Rejected. Nothing was changed, and the reason is kept.", "done", "Rejected", "rejected", "rejected",
         "The shop sends more than paint news", True, None, "Rejected by you", "Rejected by you"],
     "7. a setting said in words only: no card, set aside": [[], "setting", "not shown", None],
-    "8. a setting card: Apply and Reject, the change in plain words": [
-        "Setting change: Change newsletters and promotions to \"show\"", "Apply",
+    "8. a setting card: Promote and Reject, the change in plain words": [
+        "Setting change: Change newsletters and promotions to \"show\"", "Promote",
         ["The change: Change newsletters and promotions to \"show\".", "Why: He wanted the sale mail",
          "I get 1 of 2 of your past answers right now. I can't try a setting on your past answers before you apply it, so there's "
-         "no score with this change yet.", "Nothing changes until you press Apply. Reject leaves everything as it is, and I keep anything you " + KEEP]],
+         "no score with this change yet.", "Nothing changes until you press Promote. Reject leaves everything as it is, and I keep anything you " + KEEP]],
     "8. apply: only that setting changed, the card closed": [
         "Done. I changed it in Settings. It starts the next time I check for messages.", "done", ["filter.newsletters"], "show",
         True, True, "applied", ["version"]],
