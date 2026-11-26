@@ -459,6 +459,7 @@ footer .health .dot{align-self:center}
 .feed article.card::before{display:block;width:max-content;align-self:flex-start;font-size:.7rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;padding:1px 7px;border-radius:4px;margin:0 0 6px;background:var(--sunk);color:var(--fg-2)}
 #sec-decide article.card::before,#sec-small article.card::before{content:"Needs you";background:var(--accent);color:#fff}
 #sec-tracked article.card::before{content:"Waiting on others"}
+#sec-waiting article.card::before{content:"Waiting"}
 #sec-someday article.card::before{content:"Someday"}
 #sec-fyi article.card::before{content:"FYI"}
 #sec-handled article.card::before,#sec-saidso article.card::before{content:"Done"}
