@@ -4,7 +4,7 @@ A connection type is one Python file that knows how to reach one kind of account
 
 | File | What it reaches | Kind |
 |---|---|---|
-| microsoft_mail.py | Microsoft 365 work or school mail | email |
+| microsoft_mail.py | Microsoft mail: Microsoft 365 work or school, and personal Outlook.com and Hotmail | email |
 | google_mail.py | Gmail and Google Workspace mail | email |
 | google_calendar.py | Google Calendar | calendar |
 
