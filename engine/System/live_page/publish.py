@@ -494,7 +494,7 @@ def build(items_path, changed=None):
         pass
     meta["about"] = about(health, gathered, problems, meta.get("settings") or {}, job_off)
     if hosting() in ("own_pc", "both") and os.path.exists(os.path.join(os.path.dirname(os.path.dirname(HERE)), "docs", "Assistant manual.html")):
-        meta["manual"] = {"url": "/manual", "label": "How your page works"}      # the page links to it at the top of Settings and in its footer
+        meta["manual"] = {"url": "/manual", "label": "Assistant Manual"}      # the Assistant Manual button at the top of Settings
     try:        # the optional roadmap piece: one entry per project it is applied to; no key at all when it is not applied
         import roadmaps
         applied = roadmaps.for_page()
