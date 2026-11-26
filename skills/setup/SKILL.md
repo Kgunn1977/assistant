@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # Set up the assistant
 
-Talk to the person in plain words, one thing at a time, numbered choices. No program words (no "path", "command", "PATH", "terminal output").
+Talk to the person in plain words, one thing at a time. Questions about them are open, never yes or no or multiple choice: they answer in their own words. Number choices only for a pick between set options. No program words (no "path", "command", "PATH", "terminal output").
 
 ## First: is Python on this computer?
 

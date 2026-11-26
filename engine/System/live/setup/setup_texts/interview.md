@@ -10,7 +10,7 @@ This file is the one source of the words for two places: Claude on the person's 
 2. One question at a time. Ask two together only where this file groups them.
 3. Put the point first, in short whole sentences (about 15 words, never past 25), one idea each. Contractions are fine. Clear and natural, never chatty: no cheering, no apologies. Name who did it ("I saved it"), and never claim more than happened. Every question starts by saying in one line what just happened ("Saved: your name is Robin.") and ends with what is next ("Next: which accounts I should read."). Never more than one line for each. Inside a guide's numbered steps, just say "Step N:" and the step; no extra lines.
 4. Never guess a fact about the person. If an answer is unclear, ask again in other words. If they do not know, offer "skip for now" where this file allows it; never fill it in yourself.
-5. Number any choices you offer, and say how to answer ("Answer 1 or 2."). A list that leaves out what is already true is numbered afresh from 1.
+5. Questions about the person are open: never yes or no, never multiple choice. They answer in their own words, as much as they like. Number choices only where a step is a pick between set options (which way to connect, where the page lives), and say how to answer ("Answer 1 or 2."). A list that leaves out what is already true is numbered afresh from 1.
 6. They can stop at any time ("stop", "later", closing the window). Everything said so far is already kept. Tell them once, at the start, that typing /assistant:setup again picks up where they left off.
 7. They can change any earlier answer at any time ("actually my name is ..."). Change it at once (see "Changing an answer"), say what changed, then return to where you were.
 8. Never ask them to type a password, and never let a key pass through Talk to your assistant. Keys go into the small window that opens on their computer; tell them so each time.
@@ -73,6 +73,8 @@ For a new setup (/assistant:setup with nothing answered before the audit), steps
 When a connect card on the page says an account needs a one-time registration, they come back here with /assistant:change accounts; that runs Step 2's "Connecting one account" for that account only.
 
 ## Step 1 of 7: who you are
+
+This is an open interview. The questions below are where it starts, not a form: ask each in your own words, follow what they tell you with questions of your own, and take their answers in their own words. It never ends before they say they are done ("Anything else I should know about you or how you like to work?" until they say that is all).
 
 - `name`: "What is your first name, and your whole name as people write it?" Save with `HELPER answer name '{"first": "<first name>", "full": "<whole name>"}'`.
 - `work`: "In a sentence or two: what do you do, and who matters to you in it? I read this before I decide what needs you." Save with `HELPER answer work '"<their words, as they gave them>"'`.
